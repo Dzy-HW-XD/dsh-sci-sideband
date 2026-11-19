@@ -1,6 +1,6 @@
 # 发布清单 · Publishing
 
-本仓库已经准备好：插件源码、`market/index.json`（format 1）、`v0.2.0` tag 和远端 `origin` 都已就位。只差把提交推到 GitHub，并把仓库暴露给市场索引。
+本仓库已经准备好：插件源码、`market/index.json`（format 1）、`v0.2.1` tag 和远端 `origin` 都已就位。只差把提交推到 GitHub，并把仓库暴露给市场索引。
 
 ## 1. 创建 GitHub 仓库并推送
 
@@ -15,7 +15,7 @@ https://github.com/Dzy-HW-XD/dsh-sci-sideband
 ```powershell
 cd C:\Users\duziyu\Documents\deepseek-harness\default-workspace\dsh-sci-sideband
 git push -u origin main
-git push origin v0.2.0
+git push origin v0.2.1
 ```
 
 第一次 push 时 Git Credential Manager 会要求登录 GitHub；登录后本机即可继续推送后续版本。
@@ -43,7 +43,7 @@ https://raw.githubusercontent.com/Dzy-HW-XD/dsh-sci-sideband/main/market/index.j
 
 在 DSH 里：**设置 → 插件 → 发现 → 索引源 → 添加**，粘贴上面的 URL。之后即可在「发现」里安装/升级 `dsh-sci-sideband`。
 
-索引里的版本源固定到 `v0.2.0` 对应的 commit；发布新版本时：
+索引里的版本源固定到 `v0.2.1` 对应的 commit；发布新版本时：
 
 ```powershell
 # 1) 改 package.json 版本并提交
@@ -88,6 +88,6 @@ npm publish --access public
 
 ## 6. 发布后验证
 
-- 在 DSH 里添加索引 URL，确认「发现」出现 **科研探索边带**，版本 `0.2.0`，可安装。
+- 在 DSH 里添加索引 URL，确认「发现」出现 **科研探索边带**，版本 `0.2.1`，可安装。
 - 安装后左侧栏出现 **科研探索边带**；新建项目、加一条内容、跑后台探索、生成实验建议，确认全链路。
-- 确认仓库 README、`market/index.json`、`v0.2.0` tag 指向同一个版本。
+- 确认仓库 README、`market/index.json`、`v0.2.1` tag 指向同一个版本。

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 — 2026-11-19
+
+- Chinese research interests are expanded into a concise English academic query with the configured model before provider search; discovery falls back to the original query when no model is available.
+- Discovery still accepts English objectives unchanged.
+
 ## 0.2.0 — 2026-11-19
 
 - Topics are no longer required. A project needs one research interest/objective; analysis and evidence extraction run from it directly.
