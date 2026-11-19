@@ -137,6 +137,12 @@ window.__ModuleLoader__.load({
       'sources.channels': '默认检索源',
       'sources.discoverySummary': '发现 {added} 条，跳过 {skipped} 条重复；{errors} 个源失败。',
       'sources.discoveryEmpty': '没有发现新的可加入内容；可以换关键词、勾选更多源，或手动添加 URL/DOI。',
+      'sources.allFailed': '所有源都失败：{detail}',
+      'sources.partialEmpty': '没有新增内容；{n} 个源失败：{detail}',
+      'sources.query': '检索式：{query}',
+      'sources.queryExpanded': '已扩写',
+      'sources.autoAnalyze': '加入后立即分析',
+      'sources.perProvider': '每源条数',
       'sources.autoDiscover': '创建后自动从默认源发现并分析',
       'sources.access.open': '开放全文',
       'sources.access.meta': '元数据/摘要',
@@ -243,6 +249,7 @@ window.__ModuleLoader__.load({
       'form.status': '状态',
       'form.hint': '研究兴趣写得越具体，后台提取与实验建议越有针对性。',
       'form.required': '此项必填',
+      'form.objectiveRequired': '请填写研究兴趣/目的（至少 8 个字符）。',
       'errors.connection': '面板无法连接宿主：连接服务尚未就绪。请稍后刷新，或重启 Harness。',
       'errors.load': '读取科研库失败',
       'errors.loadHint': '请确认 Harness 仍在运行，然后重试；已保存的数据不会被清空。',
@@ -363,6 +370,12 @@ window.__ModuleLoader__.load({
       'sources.channels': 'Discovery channels',
       'sources.discoverySummary': 'Found {added}, skipped {skipped} duplicates; {errors} sources failed.',
       'sources.discoveryEmpty': 'No new records were found. Try different keywords, more channels, or add a URL/DOI manually.',
+      'sources.allFailed': 'All sources failed: {detail}',
+      'sources.partialEmpty': 'No new records; {n} sources failed: {detail}',
+      'sources.query': 'Query: {query}',
+      'sources.queryExpanded': 'expanded',
+      'sources.autoAnalyze': 'Analyze immediately after adding',
+      'sources.perProvider': 'Records per source',
       'sources.autoDiscover': 'Discover and analyze after creating the project',
       'sources.access.open': 'Open full text',
       'sources.access.meta': 'Metadata / abstract',
@@ -469,6 +482,7 @@ window.__ModuleLoader__.load({
       'form.status': 'Status',
       'form.hint': 'The more concrete the interest, the more targeted the extraction and experiment suggestions.',
       'form.required': 'Required',
+      'form.objectiveRequired': 'Please enter the research interest/objective (at least 8 characters).',
       'errors.connection': 'The panel cannot reach the host: the connection service is not ready. Refresh later or restart Harness.',
       'errors.load': 'Failed to read the research library',
       'errors.loadHint': 'Make sure Harness is still running, then retry. Saved data is not cleared.',
@@ -969,6 +983,10 @@ window.__ModuleLoader__.load({
           setError(t('form.required'));
           return;
         }
+        if (objective.trim().length < 8) {
+          setError(t('form.objectiveRequired'));
+          return;
+        }
         setSaving(true);
         setError('');
         try {
@@ -1155,8 +1173,11 @@ window.__ModuleLoader__.load({
               status: fields.status,
             }),
           );
-          if (created && fields.autoDiscover) {
-            void run(t('sources.discovering'), () => call('source.discover', { taskId: created.id }));
+          if (created) {
+            setTaskId(created.id);
+            if (fields.autoDiscover) {
+              void run(t('sources.discovering'), () => call('source.discover', { taskId: created.id }));
+            }
           }
           return created;
         },
@@ -1436,6 +1457,8 @@ window.__ModuleLoader__.load({
     function Overview({ task, snap, job, t, onTab }) {
       const sources = snap.sources.filter((row) => row.taskId === task.id);
       const analyzedCount = task.counts.withAnalysis ?? task.counts.analyzed;
+      const activeChannels =
+        Array.isArray(task.channels) && task.channels.length ? task.channels : DEFAULT_CHANNEL_IDS;
       const next = !sources.length
         ? 'overview.nextDiscover'
         : analyzedCount < sources.length
@@ -1490,7 +1513,9 @@ window.__ModuleLoader__.load({
             h(
               'div',
               { className: 'rw-kv', style: { marginBottom: 8 } },
-              DISCOVERY_CHANNELS.map((channel) => h(Chip, { key: channel.id, tone: channel.access === 'open' ? 'brand' : '' }, channel.label)),
+              DISCOVERY_CHANNELS.filter((channel) => activeChannels.includes(channel.id)).map((channel) =>
+                h(Chip, { key: channel.id, tone: channel.access === 'open' ? 'brand' : '' }, channel.label),
+              ),
             ),
             task.discovery
               ? h('div', { className: 'rw-sub' }, t('sources.discoverySummary', {
@@ -1822,6 +1847,8 @@ window.__ModuleLoader__.load({
         Array.isArray(task.channels) && task.channels.length ? task.channels : DEFAULT_CHANNEL_IDS,
       );
       const [discovering, setDiscovering] = useState(false);
+      const [perProvider, setPerProvider] = useState(2);
+      const [autoAnalyze, setAutoAnalyze] = useState(true);
       const [discoveryNote, setDiscoveryNote] = useState(() =>
         task.discovery
           ? t('sources.discoverySummary', {
@@ -1858,18 +1885,26 @@ window.__ModuleLoader__.load({
         setDiscoveryNote('');
         try {
           const result = await run(t('sources.discovering'), () =>
-            call('source.discover', { taskId: task.id, channels, perProvider: 2 }),
+            call('source.discover', { taskId: task.id, channels, perProvider, autoAnalyze }),
           );
           if (result) {
-            setDiscoveryNote(
-              result.added
-                ? t('sources.discoverySummary', {
-                    added: result.added,
-                    skipped: result.skipped || 0,
-                    errors: (result.errors || []).length,
-                  })
-                : t('sources.discoveryEmpty'),
-            );
+            const errors = result.errors || [];
+            const detail = errors.map((row) => `${row.channel}: ${row.message}`).join('；');
+            if (result.added) {
+              setDiscoveryNote(
+                t('sources.discoverySummary', {
+                  added: result.added,
+                  skipped: result.skipped || 0,
+                  errors: errors.length,
+                }),
+              );
+            } else if (errors.length && errors.length >= (result.channels || channels).length) {
+              setDiscoveryNote(t('sources.allFailed', { detail }));
+            } else if (errors.length) {
+              setDiscoveryNote(t('sources.partialEmpty', { n: errors.length, detail }));
+            } else {
+              setDiscoveryNote(t('sources.discoveryEmpty'));
+            }
             if (Array.isArray(result.channels) && result.channels.length) setChannels(result.channels);
           }
         } finally {
@@ -1898,6 +1933,26 @@ window.__ModuleLoader__.load({
           h('p', { className: 'rw-sub', style: { margin: '0 0 8px' } }, t('sources.discoverHint')),
           h(
             'div',
+            { className: 'rw-row', style: { marginBottom: 8 } },
+            h(
+              'label',
+              { className: 'rw-row', style: { gap: 6 } },
+              h('span', { className: 'rw-sub' }, t('sources.perProvider')),
+              h(
+                'select',
+                { className: 'rw-select', style: { width: 68 }, value: perProvider, onChange: (e) => setPerProvider(Number(e.target.value)) },
+                [1, 2, 3, 4].map((value) => h('option', { key: value, value }, value)),
+              ),
+            ),
+            h(
+              'label',
+              { className: 'rw-row', style: { gap: 6, cursor: 'pointer' } },
+              h('input', { type: 'checkbox', checked: autoAnalyze, onChange: (e) => setAutoAnalyze(e.target.checked) }),
+              h('span', { className: 'rw-sub' }, t('sources.autoAnalyze')),
+            ),
+          ),
+          h(
+            'div',
             { className: 'rw-kv' },
             DISCOVERY_CHANNELS.map((channel) =>
               h(
@@ -1909,7 +1964,14 @@ window.__ModuleLoader__.load({
               ),
             ),
           ),
-          discoveryNote ? h('div', { className: 'rw-sub', style: { marginTop: 8 } }, discoveryNote) : null,
+          h(
+            'div',
+            { className: 'rw-sub', style: { marginTop: 8 } },
+            task.discovery && task.discovery.query
+              ? `${t('sources.query', { query: task.discovery.query })}${task.discovery.queryExpanded ? ` · ${t('sources.queryExpanded')}` : ''}`
+              : '',
+          ),
+          discoveryNote ? h('div', { className: 'rw-sub', style: { marginTop: 4 } }, discoveryNote) : null,
           task.discovery && task.discovery.errors && task.discovery.errors.length
             ? h(
                 'div',

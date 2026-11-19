@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2 — 2026-11-19
+
+- Discovery precision: model extracts 2–4 English phrases; arXiv uses quoted AND phrases; candidates must match at least two phrases when available.
+- Discovery UX: per-provider count (1–4), “analyze immediately” toggle, and the actual query/expanded state shown in the Sources tab.
+- 0 results, partial provider failure, and all-provider failure are distinguished; 429 is retried once with a short backoff.
+- Purpose is required for creation and discovery; per-task discovery lock prevents duplicate concurrent inserts.
+- Manual DOI is normalized and duplicate DOI/title content is rejected.
+- OpenAlex/Crossref access is marked open only with an actual PDF/open link; abstract-less crossref records are skipped.
+- Chinese/mixed interests are expanded even when a Latin token such as “SDC” appears.
+
 ## 0.2.1 — 2026-11-19
 
 - Chinese research interests are expanded into a concise English academic query with the configured model before provider search; discovery falls back to the original query when no model is available.

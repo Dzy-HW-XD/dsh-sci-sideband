@@ -81,7 +81,7 @@ const OPENALEX_JSON = {
     {
       id: 'https://openalex.org/W1',
       doi: 'https://doi.org/10.1000/openalex.example',
-      title: 'Long-cycle stability of solid electrolytes',
+      title: 'Long-cycle coating stability of solid electrolytes',
       publication_year: 2025,
       authorships: [{ author: { display_name: 'Carol Example' } }],
       primary_location: { source: { display_name: 'Journal of Mock Electrolytes' }, landing_page_url: 'https://example.org/openalex' },
@@ -202,7 +202,14 @@ function mockLlm() {
       lastPrompt = prompt;
       const isAnalysis = prompt.includes('【待分析内容');
       const isSuggestion = prompt.includes('请提出') && prompt.includes('实验建议');
-      const payload = isAnalysis ? ANALYSIS : isSuggestion ? SUGGESTIONS : REPORT;
+      const isPhrases = prompt.includes('Return 2-4 English phrases');
+      const payload = isAnalysis
+        ? ANALYSIS
+        : isSuggestion
+          ? SUGGESTIONS
+          : isPhrases
+            ? { phrases: ['coating'] }
+            : REPORT;
       const text = JSON.stringify(payload);
       return (async function* stream() {
         await new Promise((resolve) => setTimeout(resolve, 25));
@@ -393,7 +400,7 @@ async function runDiscovery() {
   assert.equal(discovery.added, 6);
   assert.equal(discovery.errors.length, 0);
   assert.ok(discovery.job);
-  assert.ok(discovery.query.includes('coating thickness'));
+  assert.ok(discovery.query.includes('coating'));
 
   const finished = await waitJob(lab, task.id);
   assert.equal(finished.status, 'done');
