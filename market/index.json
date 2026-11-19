@@ -1,0 +1,78 @@
+{
+  "format": 1,
+  "title": {
+    "en": "dsh-sci-sideband plugins",
+    "zh": "科研探索边带"
+  },
+  "description": {
+    "en": "A research-exploration sideband for DeepSeek Harness: projects, content sources, traceable evidence, experiment suggestions, and review articles.",
+    "zh": "DeepSeek Harness 的科研探索边带：项目管理、科研内容探索、可核查证据、实验建议与综述论述。"
+  },
+  "metadata": {
+    "categories": {
+      "knowledge": {
+        "title": {
+          "en": "Knowledge & research",
+          "zh": "知识与研究"
+        }
+      }
+    },
+    "labels": {
+      "plugin": {
+        "title": {
+          "en": "Plugin",
+          "zh": "插件"
+        }
+      }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-sci-sideband",
+      "title": {
+        "en": "Sci Sideband",
+        "zh": "科研探索边带"
+      },
+      "icon": "icons/sci-sideband.svg",
+      "author": "Dzy-HW-XD",
+      "homepage": "https://github.com/Dzy-HW-XD/dsh-sci-sideband#readme",
+      "repository": {
+        "url": "https://github.com/Dzy-HW-XD/dsh-sci-sideband"
+      },
+      "metadata": {
+        "category": "knowledge",
+        "labels": [
+          "plugin"
+        ],
+        "keywords": [
+          "dsh",
+          "dsh-plugin",
+          "deepseek-harness",
+          "research",
+          "literature",
+          "evidence",
+          "experiment-design",
+          "review"
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.1.0",
+          "publishTimestamp": 1795058884,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/Dzy-HW-XD/dsh-sci-sideband",
+            "commit": "88a81d1f162738af513ea345d1cd606dc1a171f5"
+          },
+          "engines": {
+            "dsh": ">=0.2.2-rc.1 <0.3.0-0"
+          }
+        }
+      ],
+      "description": {
+        "en": "Manage research interests and current results, analyze source content in the background, capture traceable evidence, suggest experiments, and compose review articles. It does not run experiments or process raw experimental data.",
+        "zh": "管理研究兴趣与已有成果，后台分析科研内容，沉淀可核查证据，生成实验建议与综述论述；不执行实验，也不处理原始实验数据。"
+      }
+    }
+  ]
+}
