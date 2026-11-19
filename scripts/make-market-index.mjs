@@ -105,8 +105,8 @@ const index = {
   format: 1,
   title: { en: 'Sci Sideband plugins', zh: '科研探索边带' },
   description: {
-    en: 'A research-exploration sideband for DeepSeek Harness: projects, content sources, traceable evidence, experiment suggestions, and review articles.',
-    zh: 'DeepSeek Harness 的科研探索边带：项目管理、科研内容探索、可核查证据、实验建议与综述论述。',
+    en: 'A research-exploration sideband for DeepSeek Harness: give one interest and objective, auto-discover papers from arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar, capture traceable evidence, suggest experiments, and compose review articles.',
+    zh: 'DeepSeek Harness 的科研探索边带：给出一个研究兴趣与目的即可，自动从 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar 发现论文，沉淀可核查证据，生成实验建议与综述论述。',
   },
   metadata: {
     categories: {
@@ -140,8 +140,8 @@ const index = {
       },
       versions,
       description: {
-        en: 'Manage research interests and current results, analyze source content in the background, capture traceable evidence, suggest experiments, and compose review articles. It does not run experiments or process raw experimental data.',
-        zh: '管理研究兴趣与已有成果，后台分析科研内容，沉淀可核查证据，生成实验建议与综述论述；不执行实验，也不处理原始实验数据。',
+        en: 'Give one research interest and objective; it auto-discovers papers from arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar, analyzes them in the background, captures traceable evidence, suggests experiments, and composes review articles. No topics required. It does not run experiments or process raw experimental data.',
+        zh: '给出研究兴趣与目的即可，自动从 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar 发现论文，后台分析，沉淀可核查证据，生成实验建议与综述论述；不需要先拆题目。不执行实验，也不处理原始实验数据。',
       },
     },
   ],

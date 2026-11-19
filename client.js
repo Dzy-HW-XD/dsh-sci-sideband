@@ -19,12 +19,21 @@ window.__ModuleLoader__.load({
     const ENDPOINT = 'sci-sideband/call';
     const CHANNEL = '/api';
     const NS = 'sci-sideband';
+    const DISCOVERY_CHANNELS = [
+      { id: 'arxiv', label: 'arXiv', access: 'open' },
+      { id: 'openalex', label: 'OpenAlex', access: 'open' },
+      { id: 'crossref', label: 'Crossref', access: 'meta' },
+      { id: 'europepmc', label: 'Europe PMC', access: 'open' },
+      { id: 'doaj', label: 'DOAJ', access: 'open' },
+      { id: 'semanticscholar', label: 'Semantic Scholar', access: 'open' },
+    ];
+    const DEFAULT_CHANNEL_IDS = DISCOVERY_CHANNELS.map((channel) => channel.id);
 
     /* ------------------------------------------------------------------ i18n */
 
     const ZH = {
       'panel.title': '科研探索边带',
-      'panel.subtitle': '管理兴趣 · 探索内容 · 沉淀证据 · 建议实验',
+      'panel.subtitle': '给出兴趣 · 自动发现源 · 沉淀证据 · 建议实验',
       'panel.refresh': '刷新',
       'panel.newTask': '新建科研项目',
       'panel.editTask': '编辑项目',
@@ -32,7 +41,7 @@ window.__ModuleLoader__.load({
       'panel.modelUnknown': '模型待解析',
       'panel.modelUnavailable': '模型不可用',
       'panel.dataDir': '数据目录',
-      'panel.noTask': '左侧还没有科研项目。新建一个项目，写下研究兴趣与已有成果，再添加题目和科研内容。',
+      'panel.noTask': '左侧还没有科研项目。新建一个项目，写下研究兴趣与已有成果；边带会从默认开放源自动发现相关论文并后台分析，不需要先拆题目。',
       'panel.loading': '正在读取科研边带…',
       'rail.tasks': '科研项目',
       'rail.new': '新建',
@@ -40,12 +49,12 @@ window.__ModuleLoader__.load({
       'task.status.active': '进行中',
       'task.status.paused': '已暂停',
       'task.status.done': '已完成',
-      'task.counts': '{topics} 题目 · {sources} 内容 · {analyzed} 已分析',
+      'task.counts': '{sources} 内容 · {analyzed} 已分析 · {suggestions} 建议',
       'task.objectiveEmpty': '还没有写研究兴趣/目的。',
       'task.currentStateEmpty': '还没有记录已有成果/当前进展。',
       'task.edit': '编辑',
       'tabs.overview': '概览',
-      'tabs.topics': '题目',
+      'tabs.topics': '题目（可选）',
       'tabs.sources': '科研内容',
       'tabs.data': '证据与结果',
       'tabs.experiments': '实验建议',
@@ -94,6 +103,7 @@ window.__ModuleLoader__.load({
       'overview.next': '下一步',
       'overview.nextTopics': '先拆题目：把研究兴趣拆成 2–5 个可回答的子问题。',
       'overview.nextSources': '添加科研内容：贴 URL、DOI，或直接粘贴原文。',
+      'overview.nextDiscover': '给出研究兴趣后，直接点「从默认源发现并分析」，让边带自动检索 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar。',
       'overview.nextExplore': '运行后台探索：逐条抓取、分析并沉淀可核查证据。',
       'overview.nextExperiments': '证据够了：生成可执行的实验建议。',
       'overview.nextReport': '把证据组合成综述：一键生成连贯的研究论述。',
@@ -120,7 +130,16 @@ window.__ModuleLoader__.load({
       'topics.status.done': '已覆盖',
       'topics.question': '待回答',
       'topics.deleteHint': '删除这个题目？',
-      'sources.hint': '每条科研内容可以是一篇论文、预印本、报告、项目页、专利或数据集。贴 URL/DOI，或直接粘贴原文；后台探索会逐条抓取和分析。',
+      'sources.hint': '无需先拆题目。给出研究兴趣/目的后，可直接从默认开放源检索相关论文并加入科研内容，随后后台分析；也可以手动贴 URL/DOI 或粘贴原文。',
+      'sources.discoverHint': '默认检索 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar。开放获取内容会抓取全文；付费墙期刊只取元数据/摘要，全文取决于是否开放。',
+      'sources.discover': '从默认源发现并分析',
+      'sources.discovering': '正在检索默认开放源…',
+      'sources.channels': '默认检索源',
+      'sources.discoverySummary': '发现 {added} 条，跳过 {skipped} 条重复；{errors} 个源失败。',
+      'sources.discoveryEmpty': '没有发现新的可加入内容；可以换关键词、勾选更多源，或手动添加 URL/DOI。',
+      'sources.autoDiscover': '创建后自动从默认源发现并分析',
+      'sources.access.open': '开放全文',
+      'sources.access.meta': '元数据/摘要',
       'sources.add': '添加科研内容',
       'sources.addTitle': '论文标题（留空则尝试从正文首行推断）',
       'sources.url': 'URL',
@@ -240,7 +259,7 @@ window.__ModuleLoader__.load({
 
     const EN = {
       'panel.title': 'Sci Sideband',
-      'panel.subtitle': 'Track interests · explore sources · capture evidence · suggest experiments',
+      'panel.subtitle': 'Give an interest · auto-discover sources · capture evidence · suggest experiments',
       'panel.refresh': 'Refresh',
       'panel.newTask': 'New research project',
       'panel.editTask': 'Edit project',
@@ -248,7 +267,7 @@ window.__ModuleLoader__.load({
       'panel.modelUnknown': 'Model resolved on demand',
       'panel.modelUnavailable': 'Model unavailable',
       'panel.dataDir': 'Data folder',
-      'panel.noTask': 'No research project yet. Create one, record the interest and current results, then add topics and content sources.',
+      'panel.noTask': 'No research project yet. Create one with the interest and current results; the sideband discovers relevant papers from open sources and analyzes them in the background. No topics are needed.',
       'panel.loading': 'Reading the sideband…',
       'rail.tasks': 'Research projects',
       'rail.new': 'New',
@@ -256,12 +275,12 @@ window.__ModuleLoader__.load({
       'task.status.active': 'Active',
       'task.status.paused': 'Paused',
       'task.status.done': 'Done',
-      'task.counts': '{topics} topics · {sources} sources · {analyzed} analyzed',
+      'task.counts': '{sources} sources · {analyzed} analyzed · {suggestions} ideas',
       'task.objectiveEmpty': 'No objective yet.',
       'task.currentStateEmpty': 'No current results recorded yet.',
       'task.edit': 'Edit',
       'tabs.overview': 'Overview',
-      'tabs.topics': 'Topics',
+      'tabs.topics': 'Topics (optional)',
       'tabs.sources': 'Content',
       'tabs.data': 'Evidence',
       'tabs.experiments': 'Experiment ideas',
@@ -310,6 +329,7 @@ window.__ModuleLoader__.load({
       'overview.next': 'Next step',
       'overview.nextTopics': 'Split the interest into 2–5 answerable sub-questions.',
       'overview.nextSources': 'Add content: URL, DOI, or paste the source text.',
+      'overview.nextDiscover': 'With the interest set, click “Discover and analyze” to search arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar automatically.',
       'overview.nextExplore': 'Run background exploration to fetch, analyze, and capture traceable evidence.',
       'overview.nextExperiments': 'Evidence is ready: generate actionable experiment suggestions.',
       'overview.nextReport': 'Synthesize the evidence into a coherent review article.',
@@ -336,7 +356,16 @@ window.__ModuleLoader__.load({
       'topics.status.done': 'Covered',
       'topics.question': 'Question',
       'topics.deleteHint': 'Delete this topic?',
-      'sources.hint': 'Each content source can be a paper, preprint, report, project page, patent, or dataset. Paste a URL/DOI or the source text; background exploration fetches and analyzes them one by one.',
+      'sources.hint': 'No topics are required. Give the research interest/objective and discover relevant papers from default open sources, or add a URL/DOI/pasted text manually.',
+      'sources.discoverHint': 'Searches arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar. Open-access records may include full text; paywalled journals contribute metadata/abstract only.',
+      'sources.discover': 'Discover and analyze',
+      'sources.discovering': 'Searching default open sources…',
+      'sources.channels': 'Discovery channels',
+      'sources.discoverySummary': 'Found {added}, skipped {skipped} duplicates; {errors} sources failed.',
+      'sources.discoveryEmpty': 'No new records were found. Try different keywords, more channels, or add a URL/DOI manually.',
+      'sources.autoDiscover': 'Discover and analyze after creating the project',
+      'sources.access.open': 'Open full text',
+      'sources.access.meta': 'Metadata / abstract',
       'sources.add': 'Add content',
       'sources.addTitle': 'Paper title (leave blank to infer from the first line)',
       'sources.url': 'URL',
@@ -556,7 +585,7 @@ window.__ModuleLoader__.load({
 .rw-grid--3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .rw-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .rw-row--end{justify-content:flex-end}
-.rw-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.rw-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
 .rw-stat{border:1px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-bg-layer-1);padding:12px}
 .rw-stat b{display:block;font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .rw-stat span{display:block;font-size:12px;color:var(--dsw-alias-label-secondary);margin-top:2px}
@@ -931,6 +960,7 @@ window.__ModuleLoader__.load({
       const [currentState, setCurrentState] = useState(task ? task.currentState : '');
       const [field, setField] = useState(task ? task.field : '');
       const [status, setStatus] = useState(task ? task.status : 'active');
+      const [autoDiscover, setAutoDiscover] = useState(mode !== 'edit');
       const [saving, setSaving] = useState(false);
       const [error, setError] = useState('');
 
@@ -942,7 +972,7 @@ window.__ModuleLoader__.load({
         setSaving(true);
         setError('');
         try {
-          const value = await onSubmit({ title, objective, currentState, field, status });
+          const value = await onSubmit({ title, objective, currentState, field, status, autoDiscover });
           if (value) onClose();
         } catch (failure) {
           setError(messageOf(failure));
@@ -985,6 +1015,14 @@ window.__ModuleLoader__.load({
             placeholder: '例如：已完成 3 组溅射厚度实验，1000 次循环保持率 82%；缺少对照与长循环数据。',
           }),
         ),
+        mode !== 'edit'
+          ? h(
+              'label',
+              { className: 'rw-row', style: { cursor: 'pointer', marginTop: 2 } },
+              h('input', { type: 'checkbox', checked: autoDiscover, onChange: (e) => setAutoDiscover(e.target.checked) }),
+              h('span', { className: 'rw-sub' }, t('sources.autoDiscover')),
+            )
+          : null,
         h(
           'div',
           { className: 'rw-grid' },
@@ -1107,8 +1145,8 @@ window.__ModuleLoader__.load({
       );
 
       const onCreateTask = useCallback(
-        (fields) =>
-          attempt(t('common.save'), () =>
+        async (fields) => {
+          const created = await attempt(t('common.save'), () =>
             call('task.create', {
               title: fields.title,
               objective: fields.objective,
@@ -1116,8 +1154,13 @@ window.__ModuleLoader__.load({
               field: fields.field,
               status: fields.status,
             }),
-          ),
-        [attempt, call, t],
+          );
+          if (created && fields.autoDiscover) {
+            void run(t('sources.discovering'), () => call('source.discover', { taskId: created.id }));
+          }
+          return created;
+        },
+        [attempt, run, call, t],
       );
 
       const onUpdateTask = useCallback(
@@ -1174,7 +1217,6 @@ window.__ModuleLoader__.load({
       const modelInfo = llmStatus || snap.llm || null;
       const tabs = [
         ['overview', 'tabs.overview', null],
-        ['topics', 'tabs.topics', task ? task.counts.topics : 0],
         ['sources', 'tabs.sources', task ? task.counts.sources : 0],
         ['data', 'tabs.data', task ? task.counts.extractions : 0],
         ['experiments', 'tabs.experiments', task ? task.counts.suggestions : 0],
@@ -1274,7 +1316,12 @@ window.__ModuleLoader__.load({
                       h(
                         'span',
                         { className: 'rw-task__meta' },
-                        t('task.counts', { topics: row.counts.topics, sources: row.counts.sources, analyzed: row.counts.analyzed }),
+                        t('task.counts', {
+                          topics: row.counts.topics,
+                          sources: row.counts.sources,
+                          analyzed: row.counts.withAnalysis ?? row.counts.analyzed,
+                          suggestions: row.counts.suggestions,
+                        }),
                       ),
                     ),
                   )
@@ -1341,15 +1388,13 @@ window.__ModuleLoader__.load({
                     { key: 'content', className: 'rw-content', id: `rw-panel-${tab}`, role: 'tabpanel', 'aria-labelledby': `rw-tab-${tab}` },
                     tab === 'overview'
                       ? h(Overview, { key: task.id, task, snap, job, t, onTab: setTab, onNewTask: () => setDialog({ type: 'create' }) })
-                      : tab === 'topics'
-                        ? h(TopicsView, { key: task.id, task, snap, call, run, t })
-                        : tab === 'sources'
-                          ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
-                          : tab === 'data'
-                            ? h(DataView, { key: task.id, task, snap, call, run, attempt, t })
-                            : tab === 'experiments'
-                              ? h(ExperimentsView, { key: task.id, task, snap, call, run, t })
-                              : h(ReportsView, { key: task.id, task, snap, call, run, t }),
+                      : tab === 'sources'
+                        ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
+                        : tab === 'data'
+                          ? h(DataView, { key: task.id, task, snap, call, run, attempt, t })
+                          : tab === 'experiments'
+                            ? h(ExperimentsView, { key: task.id, task, snap, call, run, t })
+                            : h(ReportsView, { key: task.id, task, snap, call, run, t }),
                   ),
                 ]
               : h(
@@ -1389,18 +1434,15 @@ window.__ModuleLoader__.load({
     /* ------------------------------------------------------------- overview */
 
     function Overview({ task, snap, job, t, onTab }) {
-      const topics = snap.topics.filter((row) => row.taskId === task.id);
       const sources = snap.sources.filter((row) => row.taskId === task.id);
       const analyzedCount = task.counts.withAnalysis ?? task.counts.analyzed;
-      const next = !topics.length
-        ? 'overview.nextTopics'
-        : !sources.length
-          ? 'overview.nextSources'
-          : analyzedCount < sources.length
-            ? 'overview.nextExplore'
-            : !task.counts.suggestions
-              ? 'overview.nextExperiments'
-              : 'overview.nextReport';
+      const next = !sources.length
+        ? 'overview.nextDiscover'
+        : analyzedCount < sources.length
+          ? 'overview.nextExplore'
+          : !task.counts.suggestions
+            ? 'overview.nextExperiments'
+            : 'overview.nextReport';
 
       return h(
         'div',
@@ -1409,7 +1451,6 @@ window.__ModuleLoader__.load({
           'div',
           { className: 'rw-stats' },
           [
-            ['overview.stats.topics', task.counts.topics],
             ['overview.stats.sources', task.counts.sources],
             ['overview.stats.analyzed', analyzedCount],
             ['overview.stats.extractions', task.counts.extractions],
@@ -1443,23 +1484,21 @@ window.__ModuleLoader__.load({
             h(
               'div',
               { className: 'rw-card__title' },
-              t('overview.topics'),
-              h(Btn, { size: 'small', variant: 'ghost', onClick: () => onTab('topics') }, t('common.viewAll')),
+              t('sources.channels'),
+              h(Btn, { size: 'small', variant: 'ghost', onClick: () => onTab('sources') }, t('sources.discover')),
             ),
-            topics.length
-              ? h(
-                  'div',
-                  { className: 'rw-list' },
-                  topics.slice(0, 5).map((topic) =>
-                    h(
-                      'div',
-                      { key: topic.id, className: 'rw-item rw-card--tight' },
-                      h('div', { className: 'rw-item__title' }, topic.title),
-                      topic.question ? h('div', { className: 'rw-item__meta' }, topic.question) : null,
-                    ),
-                  ),
-                )
-              : h(Empty, { title: t('topics.empty') }),
+            h(
+              'div',
+              { className: 'rw-kv', style: { marginBottom: 8 } },
+              DISCOVERY_CHANNELS.map((channel) => h(Chip, { key: channel.id, tone: channel.access === 'open' ? 'brand' : '' }, channel.label)),
+            ),
+            task.discovery
+              ? h('div', { className: 'rw-sub' }, t('sources.discoverySummary', {
+                  added: task.discovery.added || 0,
+                  skipped: task.discovery.skipped || 0,
+                  errors: (task.discovery.errors || []).length,
+                }))
+              : h('div', { className: 'rw-sub' }, t('sources.discoverHint')),
           ),
           h(
             'div',
@@ -1779,6 +1818,19 @@ window.__ModuleLoader__.load({
     function SourcesView({ task, snap, job, call, run, attempt, t }) {
       const [adding, setAdding] = useState(false);
       const [expanded, setExpanded] = useState({});
+      const [channels, setChannels] = useState(() =>
+        Array.isArray(task.channels) && task.channels.length ? task.channels : DEFAULT_CHANNEL_IDS,
+      );
+      const [discovering, setDiscovering] = useState(false);
+      const [discoveryNote, setDiscoveryNote] = useState(() =>
+        task.discovery
+          ? t('sources.discoverySummary', {
+              added: task.discovery.added || 0,
+              skipped: task.discovery.skipped || 0,
+              errors: (task.discovery.errors || []).length,
+            })
+          : '',
+      );
       const sources = snap.sources.filter((row) => row.taskId === task.id);
       const pending = sources.filter((row) => row.status !== 'analyzed');
 
@@ -1794,16 +1846,84 @@ window.__ModuleLoader__.load({
       const explore = (sourceIds) =>
         run(t('common.analyze'), () => call('explore.start', { taskId: task.id, sourceIds }));
 
+      const toggleChannel = (id) => {
+        setChannels((current) =>
+          current.includes(id) ? current.filter((value) => value !== id) : [...current, id],
+        );
+      };
+
+      const discover = async () => {
+        if (discovering || !channels.length) return;
+        setDiscovering(true);
+        setDiscoveryNote('');
+        try {
+          const result = await run(t('sources.discovering'), () =>
+            call('source.discover', { taskId: task.id, channels, perProvider: 2 }),
+          );
+          if (result) {
+            setDiscoveryNote(
+              result.added
+                ? t('sources.discoverySummary', {
+                    added: result.added,
+                    skipped: result.skipped || 0,
+                    errors: (result.errors || []).length,
+                  })
+                : t('sources.discoveryEmpty'),
+            );
+            if (Array.isArray(result.channels) && result.channels.length) setChannels(result.channels);
+          }
+        } finally {
+          setDiscovering(false);
+        }
+      };
+
       return h(
         'div',
         { className: 'rw-section' },
         h('p', { className: 'rw-hint' }, t('sources.hint')),
         h(
           'div',
+          { className: 'rw-card' },
+          h(
+            'div',
+            { className: 'rw-card__title', style: { marginBottom: 4 } },
+            t('sources.discover'),
+            h(
+              Btn,
+              { size: 'small', variant: 'primary', onClick: discover, disabled: discovering || !channels.length },
+              discovering ? h(Spinner) : h(Icon, { name: 'search', size: 14 }),
+              discovering ? t('sources.discovering') : t('sources.discover'),
+            ),
+          ),
+          h('p', { className: 'rw-sub', style: { margin: '0 0 8px' } }, t('sources.discoverHint')),
+          h(
+            'div',
+            { className: 'rw-kv' },
+            DISCOVERY_CHANNELS.map((channel) =>
+              h(
+                'label',
+                { key: channel.id, className: 'rw-chip', style: { cursor: 'pointer', gap: 4 } },
+                h('input', { type: 'checkbox', checked: channels.includes(channel.id), onChange: () => toggleChannel(channel.id) }),
+                channel.label,
+                h('span', { className: 'rw-sub' }, t(`sources.access.${channel.access}`)),
+              ),
+            ),
+          ),
+          discoveryNote ? h('div', { className: 'rw-sub', style: { marginTop: 8 } }, discoveryNote) : null,
+          task.discovery && task.discovery.errors && task.discovery.errors.length
+            ? h(
+                'div',
+                { className: 'rw-sub', style: { marginTop: 4 } },
+                task.discovery.errors.map((row) => `${row.channel}: ${row.message}`).join(' · '),
+              )
+            : null,
+        ),
+        h(
+          'div',
           { className: 'rw-row' },
-          h(Btn, { variant: 'primary', size: 'small', onClick: () => setAdding((value) => !value) }, h(Icon, { name: 'plus', size: 14 }), t('sources.add')),
+          h(Btn, { size: 'small', onClick: () => setAdding((value) => !value) }, h(Icon, { name: 'plus', size: 14 }), t('sources.add')),
           h(Btn, { size: 'small', onClick: () => explore([]), disabled: !pending.length || (job && job.status === 'running') }, h(Icon, { name: 'spark', size: 14 }), t('sources.analyzeAll')),
-          h('span', { className: 'rw-sub' }, t('sources.progress', { analyzed: task.counts.analyzed, total: sources.length })),
+          h('span', { className: 'rw-sub' }, t('sources.progress', { analyzed: task.counts.withAnalysis ?? task.counts.analyzed, total: sources.length })),
         ),
         adding ? h(SourceForm, { task, onCreate: add, onCancel: () => setAdding(false), t }) : null,
         job ? h(JobBanner, { job, t }) : null,
@@ -1828,6 +1948,8 @@ window.__ModuleLoader__.load({
                         { className: 'rw-item__meta' },
                         [
                           t(`source.type.${source.type}`),
+                          source.provider ? source.provider : '',
+                          source.access === 'open' || source.access === 'meta' ? t(`sources.access.${source.access}`) : '',
                           source.authors ? source.authors : '',
                           source.year,
                           source.venue,

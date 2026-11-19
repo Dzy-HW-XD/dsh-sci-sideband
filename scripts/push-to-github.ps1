@@ -10,13 +10,17 @@
 
 param(
   [string]$Repo = "Dzy-HW-XD/dsh-sci-sideband",
-  [string]$Remote = "https://github.com/Dzy-HW-XD/dsh-sci-sideband.git"
+  [string]$Remote = "https://github.com/Dzy-HW-XD/dsh-sci-sideband.git",
+  [string]$Tag = ""
 )
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Push-Location $root
 try {
+  if (-not $Tag) {
+    $Tag = "v" + ((Get-Content (Join-Path $root "package.json") -Raw | ConvertFrom-Json).version)
+  }
   $secure = Read-Host "GitHub PAT (hidden; repo or Contents: Read+Write)" -AsSecureString
   $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
   try {
@@ -36,8 +40,8 @@ try {
   git -c credential.helper= -c "credential.helper=$helper" push -u origin main
   if ($LASTEXITCODE -ne 0) { throw "push main failed" }
 
-  Write-Host "pushing tag v0.1.0 ..."
-  git -c credential.helper= -c "credential.helper=$helper" push origin v0.1.0
+  Write-Host "pushing tag $Tag ..."
+  git -c credential.helper= -c "credential.helper=$helper" push origin $Tag
   if ($LASTEXITCODE -ne 0) { throw "push tag failed" }
 
   Write-Host "done: https://github.com/$Repo"

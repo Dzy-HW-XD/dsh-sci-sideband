@@ -63,6 +63,130 @@ const SUGGESTIONS = {
   ],
 };
 
+const ARXIV_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <entry>
+    <id>http://arxiv.org/abs/2601.00001v1</id>
+    <published>2026-01-02T00:00:00Z</published>
+    <title>Interfacial coating thickness and cycling stability</title>
+    <summary>We study a 10 nm coating and report 88% capacity retention after 1000 cycles.</summary>
+    <author><name>Alice Example</name></author>
+    <author><name>Bob Example</name></author>
+    <arxiv:doi>10.1000/arxiv.example</arxiv:doi>
+  </entry>
+</feed>`;
+
+const OPENALEX_JSON = {
+  results: [
+    {
+      id: 'https://openalex.org/W1',
+      doi: 'https://doi.org/10.1000/openalex.example',
+      title: 'Long-cycle stability of solid electrolytes',
+      publication_year: 2025,
+      authorships: [{ author: { display_name: 'Carol Example' } }],
+      primary_location: { source: { display_name: 'Journal of Mock Electrolytes' }, landing_page_url: 'https://example.org/openalex' },
+      open_access: { oa_url: 'https://example.org/openalex.pdf' },
+      best_oa_location: { pdf_url: 'https://example.org/openalex.pdf' },
+      abstract_inverted_index: { We: [0], test: [1], long: [2], cycling: [3] },
+    },
+  ],
+};
+
+const CROSSREF_JSON = {
+  message: {
+    items: [
+      {
+        DOI: '10.1000/crossref.example',
+        title: ['Journal article on coating interfaces'],
+        author: [{ given: 'Dana', family: 'Example' }],
+        issued: { 'date-parts': [[2024]] },
+        'container-title': ['Journal of Mock Interfaces'],
+        URL: 'https://example.org/crossref',
+        abstract: '<jats:p>Journal metadata abstract about coating thickness.</jats:p>',
+        link: [{ 'content-type': 'application/pdf', URL: 'https://example.org/crossref.pdf' }],
+      },
+    ],
+  },
+};
+
+const EUROPEPMC_JSON = {
+  resultList: {
+    result: [
+      {
+        id: 'PMC123',
+        source: 'MED',
+        pmcid: 'PMC123',
+        title: 'Europe PMC coating study',
+        authorString: 'Eve Example',
+        pubYear: '2023',
+        journalTitle: 'Mock PMC Journal',
+        doi: '10.1000/pmc.example',
+        abstractText: 'Abstract about interface resistance.',
+        isOpenAccess: 'Y',
+      },
+    ],
+  },
+};
+
+const DOAJ_JSON = {
+  results: [
+    {
+      id: 'doaj1',
+      bibjson: {
+        title: 'DOAJ open access coating study',
+        author: [{ name: 'Frank Example' }],
+        year: '2022',
+        journal: { title: 'Mock OA Journal' },
+        identifier: [{ type: 'doi', id: '10.1000/doaj.example' }],
+        link: [{ type: 'fulltext', url: 'https://example.org/doaj' }],
+        abstract: 'Open access abstract about cycling.',
+      },
+    },
+  ],
+};
+
+const S2_JSON = {
+  data: [
+    {
+      paperId: 's2-1',
+      title: 'Semantic Scholar coating review',
+      authors: [{ name: 'Grace Example' }],
+      year: 2021,
+      venue: 'Mock S2 Venue',
+      abstract: 'Semantic abstract about interface.',
+      externalIds: { DOI: '10.1000/s2.example' },
+      openAccessPdf: { url: 'https://example.org/s2.pdf' },
+      url: 'https://example.org/s2',
+    },
+  ],
+};
+
+function mockWeb() {
+  return {
+    async fetch({ url }) {
+      if (url.includes('export.arxiv.org')) {
+        return { statusCode: 200, body: { kind: 'text', content: ARXIV_XML } };
+      }
+      if (url.includes('api.openalex.org')) {
+        return { statusCode: 200, body: { kind: 'text', content: JSON.stringify(OPENALEX_JSON) } };
+      }
+      if (url.includes('api.crossref.org')) {
+        return { statusCode: 200, body: { kind: 'text', content: JSON.stringify(CROSSREF_JSON) } };
+      }
+      if (url.includes('europepmc') || url.includes('ebi.ac.uk')) {
+        return { statusCode: 200, body: { kind: 'text', content: JSON.stringify(EUROPEPMC_JSON) } };
+      }
+      if (url.includes('doaj.org')) {
+        return { statusCode: 200, body: { kind: 'text', content: JSON.stringify(DOAJ_JSON) } };
+      }
+      if (url.includes('api.semanticscholar.org')) {
+        return { statusCode: 200, body: { kind: 'text', content: JSON.stringify(S2_JSON) } };
+      }
+      throw new Error(`unexpected URL ${url}`);
+    },
+  };
+}
+
 let lastPrompt = '';
 
 function mockLlm() {
@@ -95,6 +219,7 @@ function mockCtx({ withLlm }) {
   return {
     get(name) {
       if (name === 'llm' && withLlm) return mockLlm();
+      if (name === 'web') return mockWeb();
       if (name === 'agentDefaultModel') return { currentSelection: () => ({ provider: 'mock', model: 'mock-1' }) };
       return undefined;
     },
@@ -249,6 +374,53 @@ async function runWithModel() {
   return { mode: 'model', extractions: snapshot.extractions.length };
 }
 
+async function runDiscovery() {
+  const dir = await tempDir();
+  const lab = new ResearchLab(mockCtx({ withLlm: true }), { dataDir: dir });
+  await lab.ready();
+  const task = await lab.run('task.create', {
+    title: 'Solid electrolyte interface',
+    objective: 'Find open-access evidence on coating thickness and long-cycle stability.',
+  });
+  assert.deepEqual(task.channels, ['arxiv', 'openalex', 'crossref', 'europepmc', 'doaj', 'semanticscholar']);
+
+  const discovery = await lab.run('source.discover', {
+    taskId: task.id,
+    channels: ['arxiv', 'openalex', 'crossref', 'europepmc', 'doaj', 'semanticscholar'],
+    perProvider: 1,
+  });
+  if (discovery.added !== 6) console.error('discovery debug', JSON.stringify(discovery, null, 2));
+  assert.equal(discovery.added, 6);
+  assert.equal(discovery.errors.length, 0);
+  assert.ok(discovery.job);
+  assert.ok(discovery.query.includes('coating thickness'));
+
+  const finished = await waitJob(lab, task.id);
+  assert.equal(finished.status, 'done');
+  const snapshot = await lab.run('state.get', {});
+  assert.equal(snapshot.sources.length, 6);
+  assert.equal(snapshot.sources.filter((row) => row.analysis).length, 6);
+  assert.ok(snapshot.sources.some((row) => row.provider === 'arxiv' && row.access === 'open'));
+  assert.ok(snapshot.sources.some((row) => row.provider === 'openalex' && row.access === 'open'));
+  assert.ok(snapshot.sources.some((row) => row.provider === 'crossref'));
+  assert.ok(snapshot.sources.some((row) => row.provider === 'europepmc'));
+  assert.ok(snapshot.sources.some((row) => row.provider === 'doaj'));
+  assert.ok(snapshot.sources.some((row) => row.provider === 'semanticscholar'));
+
+  const repeat = await lab.run('source.discover', {
+    taskId: task.id,
+    channels: ['arxiv', 'openalex', 'crossref', 'europepmc', 'doaj', 'semanticscholar'],
+    perProvider: 1,
+  });
+  assert.equal(repeat.added, 0);
+  assert.equal(repeat.skipped, 6);
+  assert.equal(repeat.job, null);
+
+  await lab.run('task.delete', { taskId: task.id });
+  await fs.rm(dir, { recursive: true, force: true });
+  return { mode: 'discovery', sources: snapshot.sources.length };
+}
+
 async function runWithoutModel() {
   const dir = await tempDir();
   const lab = new ResearchLab(mockCtx({ withLlm: false }), { dataDir: dir });
@@ -281,5 +453,6 @@ async function runWithoutModel() {
 
 const results = [];
 results.push(await runWithModel());
+results.push(await runDiscovery());
 results.push(await runWithoutModel());
 console.log(JSON.stringify({ ok: true, results }, null, 2));
