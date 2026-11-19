@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 — 2026-11-19
+
+- Citation snowballing: “按引用深度探索” follows references and cited-by papers of analyzed sources via OpenAlex, with Semantic Scholar fallback, dedup, relevance filtering, and one-level-at-a-time depth.
+- Broader first-pass discovery: default 3 records per provider (up to 6), up to 24 records per run.
+- Experiment proposals are now a separate, constraint-aware flow: a lab-constraints input (e.g. one A100 80GB, 20 GPU-hours/week) is stored with the project and fed into generation.
+- Proposal output is shorter and structured like a research proposal: hypothesis, brief rationale, 3–4 design steps, variables/controls, 2–3 readouts, resources, 1–2 risks.
+- Suggestion generation uses lower reasoning effort and a larger output budget, avoiding reasoning-only failures.
+
 ## 0.2.2 — 2026-11-19
 
 - Discovery precision: model extracts 2–4 English phrases; arXiv uses quoted AND phrases; candidates must match at least two phrases when available.

@@ -134,6 +134,10 @@ window.__ModuleLoader__.load({
       'sources.discoverHint': '默认检索 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar。开放获取内容会抓取全文；付费墙期刊只取元数据/摘要，全文取决于是否开放。',
       'sources.discover': '从默认源发现并分析',
       'sources.discovering': '正在检索默认开放源…',
+      'sources.deepen': '按引用深度探索',
+      'sources.deepenRunning': '正在追踪参考文献/引用…',
+      'sources.deepenSummary': '引用探索：从 {targets} 篇出发，新增 {added} 条，{errors} 个错误。',
+      'sources.deepenHint': '对已分析内容追踪其参考文献和被引文献，再分析一层；适合从一篇关键论文扩散。',
       'sources.channels': '默认检索源',
       'sources.discoverySummary': '发现 {added} 条，跳过 {skipped} 条重复；{errors} 个源失败。',
       'sources.discoveryEmpty': '没有发现新的可加入内容；可以换关键词、勾选更多源，或手动添加 URL/DOI。',
@@ -146,6 +150,8 @@ window.__ModuleLoader__.load({
       'sources.autoDiscover': '创建后自动从默认源发现并分析',
       'sources.access.open': '开放全文',
       'sources.access.meta': '元数据/摘要',
+      'sources.relation.reference': '参考文献',
+      'sources.relation.citation': '被引文献',
       'sources.add': '添加科研内容',
       'sources.addTitle': '论文标题（留空则尝试从正文首行推断）',
       'sources.url': 'URL',
@@ -217,6 +223,10 @@ window.__ModuleLoader__.load({
       'experiments.generate': '生成实验建议',
       'experiments.generating': '正在把证据转成实验设计…',
       'experiments.empty': '还没有实验建议。先完成内容分析，再生成一版设计建议。',
+      'experiments.brief': '实验条件 / 资源约束',
+      'experiments.briefHint': '例如：只有 1 台 A100 80GB，每周 20 GPU 小时；无湿实验条件；数据集只有 10 万条。生成建议时会按这些约束设计。',
+      'experiments.objective': '研究目的（来自项目）',
+      'experiments.resources': '所需资源',
       'experiments.count': '生成数量',
       'experiments.priority.high': '高优先级',
       'experiments.priority.medium': '中优先级',
@@ -367,6 +377,10 @@ window.__ModuleLoader__.load({
       'sources.discoverHint': 'Searches arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar. Open-access records may include full text; paywalled journals contribute metadata/abstract only.',
       'sources.discover': 'Discover and analyze',
       'sources.discovering': 'Searching default open sources…',
+      'sources.deepen': 'Follow citations',
+      'sources.deepenRunning': 'Following references and citations…',
+      'sources.deepenSummary': 'Citation exploration: from {targets} papers, added {added} records, {errors} errors.',
+      'sources.deepenHint': 'Follow references and cited-by papers of analyzed sources one level deeper; good for expanding from one key paper.',
       'sources.channels': 'Discovery channels',
       'sources.discoverySummary': 'Found {added}, skipped {skipped} duplicates; {errors} sources failed.',
       'sources.discoveryEmpty': 'No new records were found. Try different keywords, more channels, or add a URL/DOI manually.',
@@ -379,6 +393,8 @@ window.__ModuleLoader__.load({
       'sources.autoDiscover': 'Discover and analyze after creating the project',
       'sources.access.open': 'Open full text',
       'sources.access.meta': 'Metadata / abstract',
+      'sources.relation.reference': 'Reference',
+      'sources.relation.citation': 'Cited by',
       'sources.add': 'Add content',
       'sources.addTitle': 'Paper title (leave blank to infer from the first line)',
       'sources.url': 'URL',
@@ -450,6 +466,10 @@ window.__ModuleLoader__.load({
       'experiments.generate': 'Generate experiment ideas',
       'experiments.generating': 'Turning evidence into experiment designs…',
       'experiments.empty': 'No experiment suggestions yet. Analyze content first, then generate a set.',
+      'experiments.brief': 'Lab constraints / resources',
+      'experiments.briefHint': 'e.g. one A100 80GB, 20 GPU-hours/week; no wet lab; dataset limited to 100k samples. Suggestions are scoped to these constraints.',
+      'experiments.objective': 'Research objective (from project)',
+      'experiments.resources': 'Resources needed',
       'experiments.count': 'How many',
       'experiments.priority.high': 'High priority',
       'experiments.priority.medium': 'Medium priority',
@@ -1847,7 +1867,8 @@ window.__ModuleLoader__.load({
         Array.isArray(task.channels) && task.channels.length ? task.channels : DEFAULT_CHANNEL_IDS,
       );
       const [discovering, setDiscovering] = useState(false);
-      const [perProvider, setPerProvider] = useState(2);
+      const [deepening, setDeepening] = useState(false);
+      const [perProvider, setPerProvider] = useState(3);
       const [autoAnalyze, setAutoAnalyze] = useState(true);
       const [discoveryNote, setDiscoveryNote] = useState(() =>
         task.discovery
@@ -1860,6 +1881,7 @@ window.__ModuleLoader__.load({
       );
       const sources = snap.sources.filter((row) => row.taskId === task.id);
       const pending = sources.filter((row) => row.status !== 'analyzed');
+      const analyzed = sources.filter((row) => row.analysis);
 
       const add = async (payload) => {
         const created = await attempt(t('sources.add'), () => call('source.create', payload));
@@ -1912,6 +1934,28 @@ window.__ModuleLoader__.load({
         }
       };
 
+      const deepen = async () => {
+        if (deepening || !analyzed.length) return;
+        setDeepening(true);
+        setDiscoveryNote('');
+        try {
+          const result = await run(t('sources.deepenRunning'), () =>
+            call('source.deepen', { taskId: task.id, perSource: 4, autoAnalyze: true }),
+          );
+          if (result) {
+            setDiscoveryNote(
+              t('sources.deepenSummary', {
+                targets: (result.targets || []).length,
+                added: result.added || 0,
+                errors: (result.errors || []).length,
+              }),
+            );
+          }
+        } finally {
+          setDeepening(false);
+        }
+      };
+
       return h(
         'div',
         { className: 'rw-section' },
@@ -1941,7 +1985,7 @@ window.__ModuleLoader__.load({
               h(
                 'select',
                 { className: 'rw-select', style: { width: 68 }, value: perProvider, onChange: (e) => setPerProvider(Number(e.target.value)) },
-                [1, 2, 3, 4].map((value) => h('option', { key: value, value }, value)),
+                [1, 2, 3, 4, 5, 6].map((value) => h('option', { key: value, value }, value)),
               ),
             ),
             h(
@@ -1979,6 +2023,17 @@ window.__ModuleLoader__.load({
                 task.discovery.errors.map((row) => `${row.channel}: ${row.message}`).join(' · '),
               )
             : null,
+          h(
+            'div',
+            { className: 'rw-row', style: { marginTop: 10, borderTop: '1px solid var(--dsw-alias-border-l2)', paddingTop: 10 } },
+            h(
+              Btn,
+              { size: 'small', onClick: deepen, disabled: deepening || !analyzed.length },
+              deepening ? h(Spinner) : h(Icon, { name: 'spark', size: 14 }),
+              deepening ? t('sources.deepenRunning') : t('sources.deepen'),
+            ),
+            h('span', { className: 'rw-sub' }, t('sources.deepenHint')),
+          ),
         ),
         h(
           'div',
@@ -2011,6 +2066,7 @@ window.__ModuleLoader__.load({
                         [
                           t(`source.type.${source.type}`),
                           source.provider ? source.provider : '',
+                          source.relation ? t(`sources.relation.${source.relation}`) : '',
                           source.access === 'open' || source.access === 'meta' ? t(`sources.access.${source.access}`) : '',
                           source.authors ? source.authors : '',
                           source.year,
@@ -2375,6 +2431,7 @@ window.__ModuleLoader__.load({
 
     function ExperimentsView({ task, snap, call, run, t }) {
       const [count, setCount] = useState(4);
+      const [brief, setBrief] = useState(task.experimentBrief || '');
       const [generating, setGenerating] = useState(false);
       const [batchNote, setBatchNote] = useState('');
       const suggestions = (snap.suggestions || []).filter((row) => row.taskId === task.id);
@@ -2387,7 +2444,9 @@ window.__ModuleLoader__.load({
         setGenerating(true);
         setBatchNote('');
         try {
-          const result = await run(t('experiments.generating'), () => call('suggestion.generate', { taskId: task.id, count }));
+          const result = await run(t('experiments.generating'), () =>
+            call('suggestion.generate', { taskId: task.id, count, experimentBrief: brief }),
+          );
           if (result && result.returned < result.requested) {
             setBatchNote(t('experiments.returned', { requested: result.requested, returned: result.returned }));
           }
@@ -2405,6 +2464,23 @@ window.__ModuleLoader__.load({
         'div',
         { className: 'rw-section' },
         h('p', { className: 'rw-hint' }, t('experiments.hint')),
+        h(
+          'div',
+          { className: 'rw-card' },
+          h('div', { className: 'rw-card__title' }, t('experiments.objective')),
+          h('p', { className: 'rw-item__body' }, task.objective || t('task.objectiveEmpty')),
+          h(
+            Field,
+            { label: t('experiments.brief'), hint: t('experiments.briefHint') },
+            h('textarea', {
+              className: 'rw-textarea',
+              rows: 3,
+              value: brief,
+              onChange: (e) => setBrief(e.target.value),
+              placeholder: '例如：只有 1 台 A100 80GB，每周 20 GPU 小时；不能做湿实验；数据集只有 10 万条。',
+            }),
+          ),
+        ),
         h(
           'div',
           { className: 'rw-card' },
@@ -2491,6 +2567,9 @@ window.__ModuleLoader__.load({
                       : null,
                     row.design
                       ? h('div', null, h('div', { className: 'rw-field__label' }, t('experiments.design')), h('p', { className: 'rw-item__body' }, row.design))
+                      : null,
+                    row.resources
+                      ? h('div', null, h('div', { className: 'rw-field__label' }, t('experiments.resources')), h('p', { className: 'rw-item__body' }, row.resources))
                       : null,
                     h(
                       'div',

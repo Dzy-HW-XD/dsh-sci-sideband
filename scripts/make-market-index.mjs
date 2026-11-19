@@ -105,8 +105,8 @@ const index = {
   format: 1,
   title: { en: 'Sci Sideband plugins', zh: '科研探索边带' },
   description: {
-    en: 'A research-exploration sideband for DeepSeek Harness: give one interest and objective, auto-discover papers from arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar, capture traceable evidence, suggest experiments, and compose review articles.',
-    zh: 'DeepSeek Harness 的科研探索边带：给出一个研究兴趣与目的即可，自动从 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar 发现论文，沉淀可核查证据，生成实验建议与综述论述。',
+    en: 'A research-exploration sideband for DeepSeek Harness: give one interest and objective, auto-discover papers from arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar, deepen through references/citations, capture traceable evidence, and turn it into concise experiment proposals and review articles.',
+    zh: 'DeepSeek Harness 的科研探索边带：给出一个研究兴趣与目的即可，自动从 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar 发现论文，按参考文献/被引文献继续深挖，沉淀可核查证据，生成精简实验 proposal 与综述论述。',
   },
   metadata: {
     categories: {

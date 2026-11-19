@@ -76,6 +76,43 @@ const ARXIV_XML = `<?xml version="1.0" encoding="UTF-8"?>
   </entry>
 </feed>`;
 
+const DEEPEN_WORK = {
+  id: 'https://openalex.org/W100',
+  doi: 'https://doi.org/10.1000/seed',
+  title: 'Seed paper on silent data corruption',
+  publication_year: 2024,
+  authorships: [{ author: { display_name: 'Seed Author' } }],
+  primary_location: { source: { display_name: 'Seed Journal' }, landing_page_url: 'https://example.org/seed' },
+  open_access: {},
+  best_oa_location: {},
+  abstract_inverted_index: { Seed: [0], abstract: [1] },
+  referenced_works: ['https://openalex.org/W101'],
+};
+
+const DEEPEN_REF = {
+  id: 'https://openalex.org/W101',
+  doi: 'https://doi.org/10.1000/ref',
+  title: 'Referenced paper on quantization faults',
+  publication_year: 2023,
+  authorships: [{ author: { display_name: 'Ref Author' } }],
+  primary_location: { source: { display_name: 'Ref Journal' }, landing_page_url: 'https://example.org/ref' },
+  open_access: {},
+  best_oa_location: {},
+  abstract_inverted_index: { Referenced: [0], paper: [1], about: [2], quantization: [3], and: [4], silent: [5], data: [6], corruption: [7] },
+};
+
+const DEEPEN_CITE = {
+  id: 'https://openalex.org/W102',
+  doi: 'https://doi.org/10.1000/cite',
+  title: 'Citing paper on SDC sensitivity',
+  publication_year: 2025,
+  authorships: [{ author: { display_name: 'Cite Author' } }],
+  primary_location: { source: { display_name: 'Cite Journal' }, landing_page_url: 'https://example.org/cite' },
+  open_access: {},
+  best_oa_location: {},
+  abstract_inverted_index: { Citing: [0], paper: [1], on: [2], silent: [3], data: [4], corruption: [5], sensitivity: [6] },
+};
+
 const OPENALEX_JSON = {
   results: [
     {
@@ -168,6 +205,15 @@ function mockWeb() {
         return { statusCode: 200, body: { kind: 'text', content: ARXIV_XML } };
       }
       if (url.includes('api.openalex.org')) {
+        if (url.includes('/works/https://doi.org/') || /\/works\/W\d+$/.test(url)) {
+          return { statusCode: 200, body: { kind: 'text', content: JSON.stringify(DEEPEN_WORK) } };
+        }
+        if (url.includes('filter=cites:')) {
+          return { statusCode: 200, body: { kind: 'text', content: JSON.stringify({ results: [DEEPEN_CITE] }) } };
+        }
+        if (url.includes('filter=openalex_id')) {
+          return { statusCode: 200, body: { kind: 'text', content: JSON.stringify({ results: [DEEPEN_REF] }) } };
+        }
         return { statusCode: 200, body: { kind: 'text', content: JSON.stringify(OPENALEX_JSON) } };
       }
       if (url.includes('api.crossref.org')) {
@@ -428,6 +474,55 @@ async function runDiscovery() {
   return { mode: 'discovery', sources: snapshot.sources.length };
 }
 
+async function runDeepen() {
+  const dir = await tempDir();
+  const lab = new ResearchLab(mockCtx({ withLlm: true }), { dataDir: dir });
+  await lab.ready();
+  const task = await lab.run('task.create', {
+    title: 'Citation snowball',
+    objective: 'Find evidence on silent data corruption and quantization sensitivity.',
+    experimentBrief: 'Only one A100 80GB; 20 GPU-hours per week.',
+  });
+  const seed = await lab.run('source.create', {
+    taskId: task.id,
+    title: 'Seed paper on silent data corruption',
+    doi: '10.1000/seed',
+    abstract: 'Seed abstract about silent data corruption and quantization.',
+    autoExplore: true,
+  });
+  assert.ok(seed.job);
+  assert.equal((await waitJob(lab, task.id)).status, 'done');
+
+  const deepened = await lab.run('source.deepen', {
+    taskId: task.id,
+    sourceIds: [seed.id],
+    perSource: 4,
+  });
+  assert.equal(deepened.added, 2);
+  assert.equal(deepened.targets.length, 1);
+  assert.ok(deepened.job);
+  assert.equal((await waitJob(lab, task.id)).status, 'done');
+
+  const snapshot = await lab.run('state.get', {});
+  assert.equal(snapshot.sources.length, 3);
+  assert.ok(snapshot.sources.some((row) => row.relation === 'reference' && row.parentSourceId === seed.id));
+  assert.ok(snapshot.sources.some((row) => row.relation === 'citation' && row.parentSourceId === seed.id));
+  assert.equal(snapshot.sources.filter((row) => row.analysis).length, 3);
+  assert.equal(snapshot.tasks[0].experimentBrief, 'Only one A100 80GB; 20 GPU-hours per week.');
+
+  const suggestions = await lab.run('suggestion.generate', {
+    taskId: task.id,
+    count: 1,
+    experimentBrief: 'Only one A100 80GB; 20 GPU-hours per week.',
+  });
+  assert.equal(suggestions.returned, 1);
+  assert.ok(lastPrompt.includes('A100'), 'experiment brief must reach the proposal prompt');
+
+  await lab.run('task.delete', { taskId: task.id });
+  await fs.rm(dir, { recursive: true, force: true });
+  return { mode: 'deepen', sources: snapshot.sources.length };
+}
+
 async function runWithoutModel() {
   const dir = await tempDir();
   const lab = new ResearchLab(mockCtx({ withLlm: false }), { dataDir: dir });
@@ -461,5 +556,6 @@ async function runWithoutModel() {
 const results = [];
 results.push(await runWithModel());
 results.push(await runDiscovery());
+results.push(await runDeepen());
 results.push(await runWithoutModel());
 console.log(JSON.stringify({ ok: true, results }, null, 2));
