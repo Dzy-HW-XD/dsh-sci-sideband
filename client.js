@@ -131,7 +131,7 @@ window.__ModuleLoader__.load({
       'topics.question': '待回答',
       'topics.deleteHint': '删除这个题目？',
       'sources.hint': '无需先拆题目。给出研究兴趣/目的后，可直接从默认开放源检索相关论文并加入科研内容，随后后台分析；也可以手动贴 URL/DOI 或粘贴原文。',
-      'sources.discoverHint': '默认检索 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar。开放获取内容会抓取全文；付费墙期刊只取元数据/摘要，全文取决于是否开放。',
+      'sources.discoverHint': '默认检索 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar，每源最多取 20 条候选，不按固定条数截断；只有与目的/检索短语相似度达到阈值的记录才会加入。开放获取内容会抓取全文；付费墙期刊只取元数据/摘要，全文取决于是否开放。',
       'sources.discover': '从默认源发现并分析',
       'sources.discovering': '正在检索默认开放源…',
       'sources.deepen': '按引用深度探索',
@@ -146,7 +146,9 @@ window.__ModuleLoader__.load({
       'sources.query': '检索式：{query}',
       'sources.queryExpanded': '已扩写',
       'sources.autoAnalyze': '加入后立即分析',
-      'sources.perProvider': '每源条数',
+      'sources.perProvider': '每源检索深度',
+      'sources.minSimilarity': '相似度阈值',
+      'sources.similarity': '匹配度 {n}',
       'sources.autoDiscover': '创建后自动从默认源发现并分析',
       'sources.access.open': '开放全文',
       'sources.access.meta': '元数据/摘要',
@@ -374,7 +376,7 @@ window.__ModuleLoader__.load({
       'topics.question': 'Question',
       'topics.deleteHint': 'Delete this topic?',
       'sources.hint': 'No topics are required. Give the research interest/objective and discover relevant papers from default open sources, or add a URL/DOI/pasted text manually.',
-      'sources.discoverHint': 'Searches arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar. Open-access records may include full text; paywalled journals contribute metadata/abstract only.',
+      'sources.discoverHint': 'Searches arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar with up to 20 candidates per source. There is no fixed per-source import cap; only records above the similarity threshold are added. Open-access records may include full text; paywalled journals contribute metadata/abstract only.',
       'sources.discover': 'Discover and analyze',
       'sources.discovering': 'Searching default open sources…',
       'sources.deepen': 'Follow citations',
@@ -389,7 +391,9 @@ window.__ModuleLoader__.load({
       'sources.query': 'Query: {query}',
       'sources.queryExpanded': 'expanded',
       'sources.autoAnalyze': 'Analyze immediately after adding',
-      'sources.perProvider': 'Records per source',
+      'sources.perProvider': 'Retrieval depth / source',
+      'sources.minSimilarity': 'Similarity threshold',
+      'sources.similarity': 'Match {n}',
       'sources.autoDiscover': 'Discover and analyze after creating the project',
       'sources.access.open': 'Open full text',
       'sources.access.meta': 'Metadata / abstract',
@@ -1868,7 +1872,8 @@ window.__ModuleLoader__.load({
       );
       const [discovering, setDiscovering] = useState(false);
       const [deepening, setDeepening] = useState(false);
-      const [perProvider, setPerProvider] = useState(3);
+      const [perProvider, setPerProvider] = useState(20);
+      const [minSimilarity, setMinSimilarity] = useState(0.3);
       const [autoAnalyze, setAutoAnalyze] = useState(true);
       const [discoveryNote, setDiscoveryNote] = useState(() =>
         task.discovery
@@ -1907,7 +1912,7 @@ window.__ModuleLoader__.load({
         setDiscoveryNote('');
         try {
           const result = await run(t('sources.discovering'), () =>
-            call('source.discover', { taskId: task.id, channels, perProvider, autoAnalyze }),
+            call('source.discover', { taskId: task.id, channels, perProvider, minSimilarity, autoAnalyze }),
           );
           if (result) {
             const errors = result.errors || [];
@@ -1985,7 +1990,17 @@ window.__ModuleLoader__.load({
               h(
                 'select',
                 { className: 'rw-select', style: { width: 68 }, value: perProvider, onChange: (e) => setPerProvider(Number(e.target.value)) },
-                [1, 2, 3, 4, 5, 6].map((value) => h('option', { key: value, value }, value)),
+                [10, 20, 30, 50, 100].map((value) => h('option', { key: value, value }, value)),
+              ),
+            ),
+            h(
+              'label',
+              { className: 'rw-row', style: { gap: 6 } },
+              h('span', { className: 'rw-sub' }, t('sources.minSimilarity')),
+              h(
+                'select',
+                { className: 'rw-select', style: { width: 80 }, value: minSimilarity, onChange: (e) => setMinSimilarity(Number(e.target.value)) },
+                [0.2, 0.3, 0.4, 0.5, 0.6].map((value) => h('option', { key: value, value }, value.toFixed(1))),
               ),
             ),
             h(
@@ -2067,6 +2082,7 @@ window.__ModuleLoader__.load({
                           t(`source.type.${source.type}`),
                           source.provider ? source.provider : '',
                           source.relation ? t(`sources.relation.${source.relation}`) : '',
+                          source.similarity ? t('sources.similarity', { n: Number(source.similarity).toFixed(2) }) : '',
                           source.access === 'open' || source.access === 'meta' ? t(`sources.access.${source.access}`) : '',
                           source.authors ? source.authors : '',
                           source.year,

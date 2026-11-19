@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — 2026-11-19
+
+- Discovery no longer imports a fixed 3 records per source. It retrieves up to 20 candidates per provider (adjustable to 100), scores every candidate against the objective/search phrases, and imports everything above a 0.3 similarity threshold (adjustable 0.2–0.6).
+- The Sources tab shows each record's similarity score and the active threshold; the safety ceiling is 120 imports per run.
+- Citation deepening uses the same relevance logic and still filters noisy reference/citation neighbors.
+
 ## 0.3.0 — 2026-11-19
 
 - Citation snowballing: “按引用深度探索” follows references and cited-by papers of analyzed sources via OpenAlex, with Semantic Scholar fallback, dedup, relevance filtering, and one-level-at-a-time depth.
