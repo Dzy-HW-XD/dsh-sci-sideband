@@ -1,0 +1,273 @@
+import assert from 'node:assert/strict';
+import { promises as fs } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { ResearchLab } from '../lib/lab.js';
+
+const ANALYSIS = {
+  summary: '该文研究了界面改性对固态电解质循环寿命的影响，报告了电导率与循环次数的变化。',
+  researchQuestion: '界面改性是否能提升循环寿命？',
+  methods: ['磁控溅射', '电化学阻抗谱', '恒流充放电'],
+  findings: [
+    { claim: '界面改性使循环寿命提升约 40%', evidence: '1000 次循环后容量保持 82%', quote: 'capacity retention reached 82% after 1000 cycles' },
+  ],
+  dataPoints: [
+    { label: '离子电导率', value: '1.2', unit: 'mS/cm', context: '室温', confidence: 'high' },
+    { label: '容量保持率', value: '82', unit: '%', context: '1000 次循环后', confidence: 'medium' },
+  ],
+  limitations: ['只测试了一种改性层厚度'],
+  relevance: 'high',
+  relevanceNote: '直接回答循环寿命与界面改性关系。',
+  topics: ['界面改性与循环寿命'],
+};
+
+const REPORT = {
+  title: '界面改性对固态电解质循环寿命的影响：证据综合',
+  abstract: '本文综合分析了界面改性对固态电解质循环寿命的影响。结果表明界面改性可显著提升容量保持率。',
+  keywords: ['固态电解质', '界面改性', '循环寿命'],
+  sections: [
+    { heading: '1. 引言', paragraphs: ['固态电解质的界面问题限制了循环寿命。'] },
+    { heading: '2. 相关研究', paragraphs: ['已有研究采用磁控溅射进行界面改性 [1]。'] },
+    { heading: '3. 结果与讨论', paragraphs: ['界面改性后容量保持率达到 82% [1]。'] },
+    { heading: '4. 结论与展望', paragraphs: ['现有证据支持界面改性的作用，但仍需更多独立复现。'] },
+  ],
+  references: [{ label: '[1]', text: 'mock' }],
+};
+
+const SUGGESTIONS = {
+  items: [
+    {
+      title: '检验改性层厚度对循环寿命的剂量效应',
+      hypothesis: '在相同界面化学条件下，改性层厚度存在最优区间，过厚会提高阻抗。',
+      rationale: '已有研究报告 1000 次循环后 82% 容量保持，但只测试了一种厚度 [1]。',
+      design: '设置 3 个厚度水平与未改性对照，随机分配，控制批次与温度，进行 1000 次循环。',
+      variables: { independent: '改性层厚度', dependent: '1000 次循环容量保持率', controls: '未改性对照、同批次、同温度' },
+      readouts: ['容量保持率', '界面阻抗', '库仑效率'],
+      risks: ['厚度工艺窗口可能不足', '样本量需先做功效分析'],
+      priority: 'high',
+      citations: ['[1]'],
+      evidence: [{ label: '[1] Mock paper', quote: 'capacity retention reached 82% after 1000 cycles' }],
+    },
+    {
+      title: '复现长循环条件下的界面稳定性',
+      hypothesis: '更长的循环会暴露短期测试未发现的界面退化。',
+      rationale: '现有证据只覆盖 1000 次循环 [1]。',
+      design: '将循环延长至 3000 次，并每 500 次做阻抗谱。',
+      variables: { independent: '循环次数', dependent: '界面阻抗增长', controls: '同批次对照' },
+      readouts: ['阻抗增长率', '容量衰减曲线'],
+      risks: ['测试周期长'],
+      priority: 'medium',
+      citations: ['[1]'],
+      evidence: [],
+    },
+  ],
+};
+
+function mockLlm() {
+  return {
+    async listConfigurableProviders() {
+      return [{ provider: 'mock', displayName: 'Mock' }];
+    },
+    async listModels() {
+      return [{ id: 'mock-1', name: 'Mock 1' }];
+    },
+    stream(options) {
+      const prompt = options.messages?.[0]?.content?.[0]?.text || '';
+      const isAnalysis = prompt.includes('【待分析内容');
+      const isSuggestion = prompt.includes('请提出') && prompt.includes('实验建议');
+      const payload = isAnalysis ? ANALYSIS : isSuggestion ? SUGGESTIONS : REPORT;
+      const text = JSON.stringify(payload);
+      return (async function* stream() {
+        await new Promise((resolve) => setTimeout(resolve, 25));
+        for (let i = 0; i < text.length; i += 120) {
+          yield { type: 'text-delta', index: 0, text: text.slice(i, i + 120) };
+        }
+        yield { type: 'finish', reason: { kind: 'stop' } };
+      })();
+    },
+  };
+}
+
+function mockCtx({ withLlm }) {
+  return {
+    get(name) {
+      if (name === 'llm' && withLlm) return mockLlm();
+      if (name === 'agentDefaultModel') return { currentSelection: () => ({ provider: 'mock', model: 'mock-1' }) };
+      return undefined;
+    },
+  };
+}
+
+function tempDir() {
+  return fs.mkdtemp(path.join(os.tmpdir(), 'rw-selftest-'));
+}
+
+async function waitJob(lab, taskId, timeoutMs = 5000) {
+  const started = Date.now();
+  for (;;) {
+    const job = lab.exploreStatus({ taskId });
+    if (job && job.status !== 'running') return job;
+    if (Date.now() - started > timeoutMs) throw new Error(`job timeout: ${JSON.stringify(job)}`);
+    await new Promise((resolve) => setTimeout(resolve, 40));
+  }
+}
+
+async function runWithModel() {
+  const dir = await tempDir();
+  const lab = new ResearchLab(mockCtx({ withLlm: true }), { dataDir: dir });
+  await lab.ready();
+
+  const task = await lab.run('task.create', {
+    title: '界面改性对固态电解质循环寿命的影响',
+    objective: '评估界面改性对循环寿命的影响，并找出关键实验条件。',
+    currentState: '已完成 3 组溅射厚度实验，1000 次循环保持率 82%；缺少对照与长循环数据。',
+    field: '材料科学',
+  });
+  assert.ok(task.id);
+  assert.ok(task.currentState.includes('82%'));
+
+  const topic = await lab.run('topic.create', {
+    taskId: task.id,
+    title: '界面改性与循环寿命',
+    question: '改性层如何影响容量保持率？',
+  });
+  assert.ok(topic.id);
+
+  const source = await lab.run('source.create', {
+    taskId: task.id,
+    title: 'Interfacial modification of solid electrolytes',
+    authors: 'Zhang, Y.; Li, X.',
+    year: '2024',
+    venue: 'Journal of Mock Materials',
+    rawText:
+      'Interfacial modification of solid electrolytes improves capacity retention. The ionic conductivity reached 1.2 mS/cm at room temperature. After 1000 cycles, capacity retention reached 82% with the modified interface. A limitation is that only one coating thickness was tested.',
+  });
+  assert.ok(source.id);
+  assert.equal(source.status, 'ready');
+
+  const job = await lab.run('explore.start', { taskId: task.id, sourceIds: [source.id] });
+  assert.equal(job.status, 'running');
+
+  // Add a source while the job is already running: the active loop must pick it up.
+  const late = await lab.run('source.create', {
+    taskId: task.id,
+    title: 'Late-added source',
+    rawText: 'We found that the late-added source reached 77% retention after 500 cycles.',
+    autoExplore: true,
+  });
+  assert.ok(late.id);
+
+  // Saved with autoExplore=false: the running job must NOT pull it in.
+  const manual = await lab.run('source.create', {
+    taskId: task.id,
+    title: 'Save-only source',
+    rawText: 'Save-only source with a measured value of 9.9 units.',
+    autoExplore: false,
+  });
+  assert.ok(manual.id);
+
+  const finished = await waitJob(lab, task.id);
+  assert.equal(finished.status, 'done');
+  assert.equal(finished.total, 2);
+  assert.equal(finished.done, 2);
+
+  const snapshot = await lab.run('state.get', {});
+  const analyzed = snapshot.sources.find((row) => row.id === source.id);
+  assert.equal(analyzed.status, 'analyzed');
+  assert.equal(analyzed.analysis.mode, 'model');
+  assert.ok(analyzed.analysis.summary.length > 10);
+  assert.ok(snapshot.sources.find((row) => row.id === late.id).analysis, 'late source must be analyzed too');
+  const savedOnly = snapshot.sources.find((row) => row.id === manual.id);
+  assert.equal(savedOnly.analysis, null, 'save-only source must not be analyzed by a running job');
+  assert.equal(savedOnly.status, 'ready');
+  assert.ok(snapshot.extractions.length >= 2, 'auto extractions should include data points');
+  assert.ok(snapshot.extractions.some((row) => row.kind === 'finding'), 'findings should be captured as data rows');
+  assert.equal(snapshot.tasks[0].counts.analyzed, 2);
+
+  // An explicit single-source request analyzes exactly that source.
+  const secondJob = await lab.run('explore.start', { taskId: task.id, sourceIds: [manual.id] });
+  assert.equal(secondJob.total, 1);
+  await waitJob(lab, task.id);
+  const afterManual = await lab.run('state.get', {});
+  assert.ok(afterManual.sources.find((row) => row.id === manual.id).analysis);
+  assert.equal(afterManual.tasks[0].counts.analyzed, 3);
+
+  const edited = await lab.run('extraction.update', {
+    extractionId: afterManual.extractions[0].id,
+    value: '0.99',
+    confidence: 'high',
+  });
+  assert.equal(edited.value, '0.99');
+  assert.equal(edited.confidence, 'high');
+
+  const generated = await lab.run('suggestion.generate', { taskId: task.id, count: 2 });
+  assert.equal(generated.mode, 'model');
+  assert.equal(generated.items.length, 2);
+  assert.ok(generated.items[0].hypothesis);
+  assert.ok(generated.items[0].design);
+  assert.ok(Array.isArray(generated.items[0].citations));
+
+  const withSuggestions = await lab.run('state.get', {});
+  assert.equal(withSuggestions.tasks[0].counts.suggestions, 2);
+  const removedSuggestion = await lab.run('suggestion.delete', { suggestionId: generated.items[0].id });
+  assert.equal(removedSuggestion.deleted, true);
+
+  const report = await lab.run('report.compose', { taskId: task.id });
+  assert.equal(report.mode, 'model');
+  assert.ok(report.sections.length >= 3);
+  assert.ok(report.markdown.includes('# '));
+  assert.ok(report.references.length >= 1);
+  assert.ok(report.markdown.includes('[1]'));
+
+  const titled = await lab.run('report.compose', { taskId: task.id, title: '自定义标题' });
+  assert.ok(titled.markdown.startsWith('# 自定义标题'), 'title override must reach the markdown export');
+
+  const full = await lab.run('report.get', { reportId: report.id });
+  assert.equal(full.id, report.id);
+
+  await lab.run('task.delete', { taskId: task.id });
+  const after = await lab.run('state.get', {});
+  assert.equal(after.tasks.length, 0);
+  assert.equal(after.sources.length, 0);
+  assert.equal(after.extractions.length, 0);
+  assert.equal(after.reports.length, 0);
+  assert.equal(after.suggestions.length, 0);
+
+  await fs.rm(dir, { recursive: true, force: true });
+  return { mode: 'model', extractions: snapshot.extractions.length };
+}
+
+async function runWithoutModel() {
+  const dir = await tempDir();
+  const lab = new ResearchLab(mockCtx({ withLlm: false }), { dataDir: dir });
+  await lab.ready();
+  const task = await lab.run('task.create', { title: '无模型回退测试', objective: '测试本地规则抽取。' });
+  const source = await lab.run('source.create', {
+    taskId: task.id,
+    title: 'Heuristic paper',
+    rawText:
+      'We found that the treated sample reached 95% efficiency at 25 °C. The method used a two-step coating. A limitation is the small sample size. The measured conductivity was 3.4 mS/cm.',
+    autoExplore: true,
+  });
+  assert.ok(source.job);
+  const finished = await waitJob(lab, task.id);
+  assert.equal(finished.status, 'done');
+  const snapshot = await lab.run('state.get', {});
+  const analyzed = snapshot.sources.find((row) => row.id === source.id);
+  assert.equal(analyzed.analysis.mode, 'heuristic');
+  assert.ok(analyzed.analysis.dataPoints.length >= 1);
+  const suggestions = await lab.run('suggestion.generate', { taskId: task.id, count: 2 });
+  assert.equal(suggestions.mode, 'fallback');
+  assert.ok(suggestions.items.length >= 1);
+  assert.ok(suggestions.items[0].title);
+  const report = await lab.run('report.compose', { taskId: task.id });
+  assert.equal(report.mode, 'fallback');
+  assert.ok(report.markdown.length > 100);
+  await fs.rm(dir, { recursive: true, force: true });
+  return { mode: 'heuristic', extractions: snapshot.extractions.length };
+}
+
+const results = [];
+results.push(await runWithModel());
+results.push(await runWithoutModel());
+console.log(JSON.stringify({ ok: true, results }, null, 2));

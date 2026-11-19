@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Sci Sideband",
+    "description": "Adds a research-exploration sideband to DeepSeek Harness: track projects you are interested in and the results you already have, register papers, preprints, reports, project pages, patents, and other content, fetch and analyze it in the background, capture traceable evidence (metrics, claims, conditions, verbatim quotes), then turn that evidence into actionable experiment suggestions and a coherent review article. Open it from the Sci Sideband icon in the left sidebar. It manages, explores, and synthesizes research content; it does not run experiments or process raw experimental data. Analysis uses the chat model configured under Settings → Models; without one it labels the result and falls back to local rules/templates. Data is stored locally in the sci-sideband folder under the DSH data directory; URLs are fetched through the web service and source text is sent to the selected model. Disabling the plugin removes the sideband and keeps saved data.",
+    "detail": "docs/DETAIL.md"
+  }
+}

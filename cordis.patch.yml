@@ -1,0 +1,4 @@
+- insert:
+    - id: sci-sideband
+      name: 'dsh-sci-sideband'
+      config: {}
