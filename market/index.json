@@ -1,7 +1,7 @@
 {
   "format": 1,
   "title": {
-    "en": "dsh-sci-sideband plugins",
+    "en": "Sci Sideband plugins",
     "zh": "科研探索边带"
   },
   "description": {
@@ -58,11 +58,11 @@
       "versions": [
         {
           "version": "0.1.0",
-          "publishTimestamp": 1795058884,
+          "publishTimestamp": 1795059480,
           "source": {
             "type": "git",
             "url": "https://github.com/Dzy-HW-XD/dsh-sci-sideband",
-            "commit": "88a81d1f162738af513ea345d1cd606dc1a171f5"
+            "commit": "f99b1b882b774297cb2ab1dab8c560d23dd1eb38"
           },
           "engines": {
             "dsh": ">=0.2.2-rc.1 <0.3.0-0"
