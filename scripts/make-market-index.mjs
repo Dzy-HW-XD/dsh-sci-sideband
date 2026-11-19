@@ -59,12 +59,15 @@ if (pkg.name !== PKG_NAME) {
 }
 
 const explicit = argValue('--commit', '');
+const explicitEpoch = Number(argValue('--epoch', ''));
 const version = pkg.version;
 const ref = explicit || (git(['rev-parse', '--verify', `v${version}^{commit}`]) ? `v${version}` : 'HEAD');
-const commit = resolveCommit(ref);
-const epoch = Number(git(['show', '-s', '--format=%ct', commit]));
+const commit = /^[0-9a-f]{40}$/.test(explicit) ? explicit : resolveCommit(ref);
+const epoch = Number.isInteger(explicitEpoch) && explicitEpoch > 0
+  ? explicitEpoch
+  : Number(git(['show', '-s', '--format=%ct', commit]));
 if (!Number.isInteger(epoch) || epoch <= 0) {
-  console.error(`cannot read commit timestamp for ${commit}`);
+  console.error(`cannot read commit timestamp for ${commit}; pass --epoch <unix-seconds>`);
   process.exit(2);
 }
 
