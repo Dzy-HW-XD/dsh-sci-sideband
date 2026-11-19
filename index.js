@@ -115,7 +115,7 @@ export function apply(ctx, config = {}) {
     ctx.inject(['tools'], (serviceCtx) => {
       const tools = pick(serviceCtx, 'tools') || pick(ctx, 'tools');
       if (!tools || typeof tools.register !== 'function') {
-        note(ctx, 'warn', 'tools 服务不可用，research_* 工具未注册');
+        note(ctx, 'warn', 'tools 服务不可用，sci_* 工具未注册');
         return;
       }
       registerTools(tools);

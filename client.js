@@ -125,7 +125,7 @@ window.__ModuleLoader__.load({
       'sources.addTitle': '论文标题（留空则尝试从正文首行推断）',
       'sources.url': 'URL',
       'sources.doi': 'DOI',
-      'sources.raw': '粘贴论文全文',
+      'sources.raw': '粘贴原文（论文 / 报告 / 项目页）',
       'sources.authors': '作者（用分号分隔）',
       'sources.year': '年份',
       'sources.venue': '期刊 / 会议',
@@ -138,7 +138,7 @@ window.__ModuleLoader__.load({
       'sources.summary': '摘要与结论',
       'sources.methods': '方法',
       'sources.findings': '可引用结论',
-      'sources.dataPoints': '提取的数据点',
+      'sources.dataPoints': '提取的证据',
       'sources.limitations': '局限',
       'sources.relevance': '与本研究的相关性',
       'sources.noAnalysis': '还没有分析结果。',
@@ -146,7 +146,7 @@ window.__ModuleLoader__.load({
       'sources.meta': '{authors} · {year} · {venue}',
       'sources.pasteHint': '如果 URL 需要登录或抓不到正文，直接把 PDF 里的正文粘贴到这里最可靠。',
       'sources.analyzeHint': '分析会调用当前模型；没有可用模型时自动退回本地规则抽取，并明确标注。',
-      'sources.deleteHint': '删除这条科研源及其沉淀数据？',
+      'sources.deleteHint': '删除这条科研内容及其证据？',
       'sources.progress': '{analyzed}/{total} 已分析',
       'sources.chars': '{n} 字符',
       'data.hint': '从已分析内容中沉淀的可核查证据（指标、结论、条件、引文），以及手工补充的记录。生成综述与实验建议时会把它们作为依据；这里不处理原始实验数据。',
@@ -162,13 +162,13 @@ window.__ModuleLoader__.load({
       'data.manual': '手工',
       'data.auto': '自动',
       'data.edited': '已人工修正',
-      'data.deleteHint': '删除这条数据点？',
+      'data.deleteHint': '删除这条证据？',
       'data.kind.metric': '指标',
       'data.kind.finding': '结论',
       'data.kind.method': '方法',
       'data.kind.limitation': '局限',
       'data.kind.note': '备注',
-      'data.edit': '编辑数据点',
+      'data.edit': '编辑证据',
       'data.quote': '原文引文',
       'confidence.high': '高',
       'confidence.medium': '中',
@@ -188,7 +188,7 @@ window.__ModuleLoader__.load({
       'reports.selectHint': '点击一份综述查看全文。',
       'reports.deleteHint': '删除这份综述？',
       'reports.downloadName': '科研综述',
-      'experiments.hint': '基于研究兴趣、已有成果和已分析内容，提出可检验的实验设计建议。工作台只做设计建议，不执行实验、不处理原始实验数据。',
+      'experiments.hint': '基于研究兴趣、已有成果和已分析内容，提出可检验的实验设计建议。边带只做设计建议，不执行实验、不处理原始实验数据。',
       'experiments.generate': '生成实验建议',
       'experiments.generating': '正在把证据转成实验设计…',
       'experiments.empty': '还没有实验建议。先完成内容分析，再生成一版设计建议。',
@@ -209,6 +209,8 @@ window.__ModuleLoader__.load({
       'experiments.deleteHint': '删除这条实验建议？',
       'experiments.requiresEvidence': '先完成至少一条科研内容的分析，才能生成实验建议。',
       'experiments.note': '这些是设计建议，不是实验结果；执行前需人工论证、预注册与伦理审查。',
+      'experiments.mode.template': '模板建议',
+      'experiments.returned': '请求 {requested} 条，实际返回 {returned} 条。',
       'modal.createTask': '新建科研项目',
       'modal.editTask': '编辑科研项目',
       'modal.confirm': '请确认',
@@ -262,7 +264,7 @@ window.__ModuleLoader__.load({
       'tabs.topics': 'Topics',
       'tabs.sources': 'Content',
       'tabs.data': 'Evidence',
-      'tabs.experiments': 'Experiments',
+      'tabs.experiments': 'Experiment ideas',
       'tabs.reports': 'Reviews',
       'common.add': 'Add',
       'common.cancel': 'Cancel',
@@ -339,7 +341,7 @@ window.__ModuleLoader__.load({
       'sources.addTitle': 'Paper title (leave blank to infer from the first line)',
       'sources.url': 'URL',
       'sources.doi': 'DOI',
-      'sources.raw': 'Paste full paper text',
+      'sources.raw': 'Paste source text (paper / report / project page)',
       'sources.authors': 'Authors (separated by semicolons)',
       'sources.year': 'Year',
       'sources.venue': 'Journal / venue',
@@ -352,7 +354,7 @@ window.__ModuleLoader__.load({
       'sources.summary': 'Summary and findings',
       'sources.methods': 'Methods',
       'sources.findings': 'Citable findings',
-      'sources.dataPoints': 'Extracted data points',
+      'sources.dataPoints': 'Captured evidence',
       'sources.limitations': 'Limitations',
       'sources.relevance': 'Relevance to this research',
       'sources.noAnalysis': 'No analysis yet.',
@@ -360,7 +362,7 @@ window.__ModuleLoader__.load({
       'sources.meta': '{authors} · {year} · {venue}',
       'sources.pasteHint': 'If the URL is behind a login or returns no body, paste the paper text here instead.',
       'sources.analyzeHint': 'Analysis uses the configured chat model; without one it falls back to local rules and labels the result.',
-      'sources.deleteHint': 'Delete this source and its captured data?',
+      'sources.deleteHint': 'Delete this content and its evidence?',
       'sources.progress': '{analyzed}/{total} analyzed',
       'sources.chars': '{n} chars',
       'data.hint': 'Traceable evidence captured from analyzed content (metrics, claims, conditions, quotes) plus manual notes. Reviews and experiment suggestions use it as evidence; raw experimental data is out of scope.',
@@ -376,13 +378,13 @@ window.__ModuleLoader__.load({
       'data.manual': 'Manual',
       'data.auto': 'Auto',
       'data.edited': 'Edited',
-      'data.deleteHint': 'Delete this data point?',
+      'data.deleteHint': 'Delete this evidence row?',
       'data.kind.metric': 'Metric',
       'data.kind.finding': 'Finding',
       'data.kind.method': 'Method',
       'data.kind.limitation': 'Limitation',
       'data.kind.note': 'Note',
-      'data.edit': 'Edit data point',
+      'data.edit': 'Edit evidence',
       'data.quote': 'Verbatim quote',
       'confidence.high': 'High',
       'confidence.medium': 'Medium',
@@ -423,6 +425,8 @@ window.__ModuleLoader__.load({
       'experiments.deleteHint': 'Delete this experiment suggestion?',
       'experiments.requiresEvidence': 'Analyze at least one content source before generating experiment suggestions.',
       'experiments.note': 'These are design suggestions, not results. Validate, pre-register, and review ethics before running anything.',
+      'experiments.mode.template': 'Template suggestion',
+      'experiments.returned': 'Requested {requested}, received {returned}.',
       'modal.createTask': 'New research project',
       'modal.editTask': 'Edit research project',
       'modal.confirm': 'Please confirm',
@@ -635,6 +639,10 @@ window.__ModuleLoader__.load({
 
     function safeName(title) {
       return String(title || 'report').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80) || 'report';
+    }
+
+    function suggestionModeLabel(t, mode) {
+      return mode === 'model' ? t('mode.model') : t('experiments.mode.template');
     }
 
     function createCall(ctx, t) {
@@ -1317,6 +1325,8 @@ window.__ModuleLoader__.load({
                           key: id,
                           type: 'button',
                           role: 'tab',
+                          id: `rw-tab-${id}`,
+                          'aria-controls': `rw-panel-${id}`,
                           'aria-selected': tab === id,
                           className: cls('rw-tab', tab === id && 'is-active'),
                           onClick: () => setTab(id),
@@ -1328,7 +1338,7 @@ window.__ModuleLoader__.load({
                   ),
                   h(
                     'div',
-                    { key: 'content', className: 'rw-content' },
+                    { key: 'content', className: 'rw-content', id: `rw-panel-${tab}`, role: 'tabpanel', 'aria-labelledby': `rw-tab-${tab}` },
                     tab === 'overview'
                       ? h(Overview, { key: task.id, task, snap, job, t, onTab: setTab, onNewTask: () => setDialog({ type: 'create' }) })
                       : tab === 'topics'
@@ -1381,11 +1391,12 @@ window.__ModuleLoader__.load({
     function Overview({ task, snap, job, t, onTab }) {
       const topics = snap.topics.filter((row) => row.taskId === task.id);
       const sources = snap.sources.filter((row) => row.taskId === task.id);
+      const analyzedCount = task.counts.withAnalysis ?? task.counts.analyzed;
       const next = !topics.length
         ? 'overview.nextTopics'
         : !sources.length
           ? 'overview.nextSources'
-          : task.counts.analyzed < sources.length
+          : analyzedCount < sources.length
             ? 'overview.nextExplore'
             : !task.counts.suggestions
               ? 'overview.nextExperiments'
@@ -1400,7 +1411,7 @@ window.__ModuleLoader__.load({
           [
             ['overview.stats.topics', task.counts.topics],
             ['overview.stats.sources', task.counts.sources],
-            ['overview.stats.analyzed', task.counts.analyzed],
+            ['overview.stats.analyzed', analyzedCount],
             ['overview.stats.extractions', task.counts.extractions],
             ['overview.stats.suggestions', task.counts.suggestions],
             ['overview.stats.reports', task.counts.reports],
@@ -2181,14 +2192,21 @@ window.__ModuleLoader__.load({
     function ExperimentsView({ task, snap, call, run, t }) {
       const [count, setCount] = useState(4);
       const [generating, setGenerating] = useState(false);
+      const [batchNote, setBatchNote] = useState('');
       const suggestions = (snap.suggestions || []).filter((row) => row.taskId === task.id);
-      const canGenerate = task.counts.analyzed > 0;
+      const analyzedSources = snap.sources.filter((row) => row.taskId === task.id && row.analysis);
+      const citationTitle = new Map(analyzedSources.map((source, index) => [`[${index + 1}]`, source.title]));
+      const canGenerate = (task.counts.withAnalysis ?? task.counts.analyzed) > 0;
 
       const generate = async () => {
         if (generating) return;
         setGenerating(true);
+        setBatchNote('');
         try {
-          await run(t('experiments.generating'), () => call('suggestion.generate', { taskId: task.id, count }));
+          const result = await run(t('experiments.generating'), () => call('suggestion.generate', { taskId: task.id, count }));
+          if (result && result.returned < result.requested) {
+            setBatchNote(t('experiments.returned', { requested: result.requested, returned: result.returned }));
+          }
         } finally {
           setGenerating(false);
         }
@@ -2213,7 +2231,7 @@ window.__ModuleLoader__.load({
               'div',
               { style: { minWidth: 0 } },
               h('div', { className: 'rw-card__title', style: { margin: 0 } }, t('experiments.generate')),
-              h('div', { className: 'rw-sub' }, `${t('reports.sourceCount', { n: task.counts.analyzed })} · ${t('reports.dataCount', { n: task.counts.extractions })}`),
+              h('div', { className: 'rw-sub' }, `${t('sources.progress', { analyzed: task.counts.withAnalysis ?? task.counts.analyzed, total: task.counts.sources })} · ${t('reports.dataCount', { n: task.counts.extractions })}`),
             ),
             h(
               'div',
@@ -2225,7 +2243,7 @@ window.__ModuleLoader__.load({
                 h(
                   'select',
                   { className: 'rw-select', style: { width: 74 }, value: count, onChange: (e) => setCount(Number(e.target.value)) },
-                  [2, 3, 4, 5, 6].map((value) => h('option', { key: value, value }, value)),
+                  [1, 2, 3, 4, 5, 6].map((value) => h('option', { key: value, value }, value)),
                 ),
               ),
               h(
@@ -2239,6 +2257,7 @@ window.__ModuleLoader__.load({
           !canGenerate ? h('p', { className: 'rw-sub', style: { margin: '8px 0 0' } }, t('experiments.requiresEvidence')) : null,
         ),
         h('p', { className: 'rw-sub' }, t('experiments.note')),
+        batchNote ? h('p', { className: 'rw-sub' }, batchNote) : null,
         suggestions.length
           ? h(
               'div',
@@ -2258,7 +2277,8 @@ window.__ModuleLoader__.load({
                         'div',
                         { className: 'rw-row', style: { gap: 6, marginTop: 4 } },
                         h(Chip, { tone: row.priority === 'high' ? 'ok' : row.priority === 'low' ? 'warn' : 'brand' }, t(`experiments.priority.${row.priority}`)),
-                        h(Chip, { tone: row.mode === 'model' ? 'brand' : 'warn' }, analysisModeLabel(t, row.mode)),
+                        h(Chip, { tone: row.mode === 'model' ? 'brand' : 'warn' }, suggestionModeLabel(t, row.mode)),
+                        h('span', { className: 'rw-sub' }, fmtTime(row.batchAt || row.createdAt)),
                       ),
                     ),
                     h(
@@ -2333,7 +2353,7 @@ window.__ModuleLoader__.load({
                           h(
                             'div',
                             { className: 'rw-row', style: { marginTop: 4 } },
-                            (row.citations || []).map((item, index) => h(Chip, { key: `c${index}`, tone: 'brand' }, item)),
+                            (row.citations || []).map((item, index) => h(Chip, { key: `c${index}`, tone: 'brand', title: citationTitle.get(item) || '' }, item)),
                           ),
                           (row.evidence || []).map((item, index) =>
                             h('blockquote', { key: `e${index}`, className: 'rw-quote', style: { marginTop: 6 } }, `${item.label}${item.quote ? `：${item.quote}` : ''}`),
@@ -2465,7 +2485,7 @@ window.__ModuleLoader__.load({
       const [reportId, setReportId] = useState(null);
       const [composing, setComposing] = useState(false);
       const reports = snap.reports.filter((row) => row.taskId === task.id);
-      const canCompose = task.counts.analyzed > 0;
+      const canCompose = (task.counts.withAnalysis ?? task.counts.analyzed) > 0;
 
       useEffect(() => {
         if (reportId && !reports.some((row) => row.id === reportId)) setReportId(null);
@@ -2496,7 +2516,7 @@ window.__ModuleLoader__.load({
               'div',
               null,
               h('div', { className: 'rw-card__title', style: { margin: 0 } }, t('reports.generate')),
-              h('div', { className: 'rw-sub' }, `${t('reports.sourceCount', { n: task.counts.analyzed })} · ${t('reports.dataCount', { n: task.counts.extractions })}`),
+              h('div', { className: 'rw-sub' }, `${t('sources.progress', { analyzed: task.counts.withAnalysis ?? task.counts.analyzed, total: task.counts.sources })} · ${t('reports.dataCount', { n: task.counts.extractions })}`),
             ),
             h(
               Btn,

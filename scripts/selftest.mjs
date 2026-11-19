@@ -63,6 +63,8 @@ const SUGGESTIONS = {
   ],
 };
 
+let lastPrompt = '';
+
 function mockLlm() {
   return {
     async listConfigurableProviders() {
@@ -73,6 +75,7 @@ function mockLlm() {
     },
     stream(options) {
       const prompt = options.messages?.[0]?.content?.[0]?.text || '';
+      lastPrompt = prompt;
       const isAnalysis = prompt.includes('【待分析内容');
       const isSuggestion = prompt.includes('请提出') && prompt.includes('实验建议');
       const payload = isAnalysis ? ANALYSIS : isSuggestion ? SUGGESTIONS : REPORT;
@@ -209,11 +212,20 @@ async function runWithModel() {
 
   const withSuggestions = await lab.run('state.get', {});
   assert.equal(withSuggestions.tasks[0].counts.suggestions, 2);
-  const removedSuggestion = await lab.run('suggestion.delete', { suggestionId: generated.items[0].id });
+
+  const secondBatch = await lab.run('suggestion.generate', { taskId: task.id, count: 2 });
+  assert.equal(secondBatch.returned, 2);
+  assert.notEqual(secondBatch.batchId, generated.batchId);
+  const afterReplace = await lab.run('state.get', {});
+  assert.equal(afterReplace.tasks[0].counts.suggestions, 2, 'generate replaces the previous batch by default');
+
+  const removedSuggestion = await lab.run('suggestion.delete', { suggestionId: secondBatch.items[0].id });
   assert.equal(removedSuggestion.deleted, true);
 
   const report = await lab.run('report.compose', { taskId: task.id });
   assert.equal(report.mode, 'model');
+  assert.ok(lastPrompt.includes('0.99'), 'edited evidence value must reach the report corpus');
+  assert.ok(lastPrompt.includes('已有成果'), 'currentState must reach the report corpus');
   assert.ok(report.sections.length >= 3);
   assert.ok(report.markdown.includes('# '));
   assert.ok(report.references.length >= 1);

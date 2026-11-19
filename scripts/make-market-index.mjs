@@ -103,7 +103,7 @@ versions.sort((a, b) => String(b.version).localeCompare(String(a.version), undef
 
 const index = {
   format: 1,
-  title: { en: 'dsh-sci-sideband plugins', zh: '科研探索边带' },
+  title: { en: 'Sci Sideband plugins', zh: '科研探索边带' },
   description: {
     en: 'A research-exploration sideband for DeepSeek Harness: projects, content sources, traceable evidence, experiment suggestions, and review articles.',
     zh: 'DeepSeek Harness 的科研探索边带：项目管理、科研内容探索、可核查证据、实验建议与综述论述。',
