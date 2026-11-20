@@ -229,12 +229,16 @@ window.__ModuleLoader__.load({
       'experiments.brief': '实验条件 / 资源约束',
       'experiments.briefHint': '例如：只有 1 台 A100 80GB，每周 20 GPU 小时；无湿实验条件；数据集只有 10 万条。生成建议时会按这些约束设计。',
       'experiments.objective': '研究目的（来自项目）',
-      'experiments.resources': '所需资源',
+      'experiments.resources': '资源与时间线',
       'experiments.count': '生成数量',
       'experiments.priority.high': '高优先级',
       'experiments.priority.medium': '中优先级',
       'experiments.priority.low': '低优先级',
       'experiments.hypothesis': '待验证假设',
+      'experiments.question': '研究问题与目标',
+      'experiments.approach': '方法与步骤',
+      'experiments.expectedOutcome': '预期结果',
+      'experiments.evidence': '查看原文依据',
       'experiments.rationale': '依据',
       'experiments.design': '建议设计',
       'experiments.variables': '变量与对照',
@@ -475,12 +479,16 @@ window.__ModuleLoader__.load({
       'experiments.brief': 'Lab constraints / resources',
       'experiments.briefHint': 'e.g. one A100 80GB, 20 GPU-hours/week; no wet lab; dataset limited to 100k samples. Suggestions are scoped to these constraints.',
       'experiments.objective': 'Research objective (from project)',
-      'experiments.resources': 'Resources needed',
+      'experiments.resources': 'Resources & timeline',
       'experiments.count': 'How many',
       'experiments.priority.high': 'High priority',
       'experiments.priority.medium': 'Medium priority',
       'experiments.priority.low': 'Low priority',
       'experiments.hypothesis': 'Hypothesis to test',
+      'experiments.question': 'Research question & aim',
+      'experiments.approach': 'Approach & steps',
+      'experiments.expectedOutcome': 'Expected outcome',
+      'experiments.evidence': 'View source evidence',
       'experiments.rationale': 'Rationale',
       'experiments.design': 'Suggested design',
       'experiments.variables': 'Variables and controls',
@@ -641,6 +649,21 @@ window.__ModuleLoader__.load({
 .rw-item__meta{font-size:12px;color:var(--dsw-alias-label-secondary);overflow-wrap:anywhere}
 .rw-item__body{font-size:13px;color:var(--dsw-alias-label-primary);white-space:pre-wrap;overflow-wrap:anywhere}
 .rw-quote{margin:0;padding:8px 10px;border-left:2px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-2);border-radius:0 6px 6px 0;font-size:12px;color:var(--dsw-alias-label-secondary);white-space:pre-wrap}
+.rw-proposal{border-left:3px solid var(--dsw-alias-brand-primary);padding-left:11px;display:flex;flex-direction:column;gap:9px;margin-top:7px}
+.rw-proposal__section{min-width:0}
+.rw-proposal__label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dsw-alias-brand-primary)}
+.rw-proposal__label b{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:5px;background:color-mix(in srgb,var(--dsw-alias-brand-primary) 12%,transparent);font-size:9px;letter-spacing:0}
+.rw-proposal__body{margin:3px 0 0;font-size:12.5px;line-height:1.45;color:var(--dsw-alias-label-primary);overflow-wrap:anywhere}
+.rw-proposal__steps{margin:3px 0 0;padding-left:17px;font-size:12.5px;line-height:1.45;color:var(--dsw-alias-label-primary)}
+.rw-proposal__steps li{margin:1px 0}
+.rw-proposal__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:3px}
+.rw-proposal__cell{padding:5px 7px;border:1px solid var(--dsw-alias-border-l1);border-radius:6px;background:var(--dsw-alias-bg-layer-1)}
+.rw-proposal__cell span{display:block;font-size:9px;letter-spacing:.04em;color:var(--dsw-alias-label-tertiary)}
+.rw-proposal__cell strong{display:block;margin-top:2px;font-size:11.5px;font-weight:500;line-height:1.4;color:var(--dsw-alias-label-primary);overflow-wrap:anywhere}
+.rw-proposal__inline{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.rw-proposal__details{margin-top:2px;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.rw-proposal__details summary{cursor:pointer;color:var(--dsw-alias-brand-primary);font-weight:600}
+@media (max-width:560px){.rw-proposal__grid{grid-template-columns:1fr}}
 .rw-table{width:100%;border-collapse:collapse;font-size:13px}
 .rw-table th,.rw-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--dsw-alias-border-l1);vertical-align:top}
 .rw-table th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--dsw-alias-label-secondary);font-weight:600;background:var(--dsw-alias-bg-layer-2)}
@@ -2375,6 +2398,15 @@ window.__ModuleLoader__.load({
 
     /* ----------------------------------------------------------- experiments */
 
+    function ProposalSection({ no, label, children }) {
+      return h(
+        'section',
+        { className: 'rw-proposal__section' },
+        h('div', { className: 'rw-proposal__label' }, h('b', null, no), label),
+        children,
+      );
+    }
+
     function ExperimentsView({ task, snap, call, run, t }) {
       const [count, setCount] = useState(4);
       const [brief, setBrief] = useState(task.experimentBrief || '');
@@ -2409,7 +2441,6 @@ window.__ModuleLoader__.load({
       return h(
         'div',
         { className: 'rw-section' },
-        h('p', { className: 'rw-hint' }, t('experiments.hint')),
         h(
           'div',
           { className: 'rw-card' },
@@ -2501,29 +2532,34 @@ window.__ModuleLoader__.load({
                   ),
                   h(
                     'div',
-                    { style: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 } },
+                    { className: 'rw-proposal' },
                     h(
-                      'div',
-                      null,
-                      h('div', { className: 'rw-field__label' }, t('experiments.hypothesis')),
-                      h('p', { className: 'rw-item__body' }, row.hypothesis),
+                      ProposalSection,
+                      { no: '01', label: t('experiments.question') },
+                      h('p', { className: 'rw-proposal__body' }, row.question || task.objective || '—'),
                     ),
-                    row.rationale
-                      ? h('div', null, h('div', { className: 'rw-field__label' }, t('experiments.rationale')), h('p', { className: 'rw-item__body' }, row.rationale))
-                      : null,
-                    row.design
-                      ? h('div', null, h('div', { className: 'rw-field__label' }, t('experiments.design')), h('p', { className: 'rw-item__body' }, row.design))
-                      : null,
-                    row.resources
-                      ? h('div', null, h('div', { className: 'rw-field__label' }, t('experiments.resources')), h('p', { className: 'rw-item__body' }, row.resources))
-                      : null,
                     h(
-                      'div',
-                      null,
-                      h('div', { className: 'rw-field__label' }, t('experiments.variables')),
+                      ProposalSection,
+                      { no: '02', label: t('experiments.hypothesis') },
+                      h('p', { className: 'rw-proposal__body' }, row.hypothesis),
+                    ),
+                    h(
+                      ProposalSection,
+                      { no: '03', label: t('experiments.approach') },
+                      row.approach && row.approach.length
+                        ? h(
+                            'ol',
+                            { className: 'rw-proposal__steps' },
+                            row.approach.map((step, index) => h('li', { key: index }, step)),
+                          )
+                        : h('p', { className: 'rw-proposal__body' }, row.design || '—'),
+                    ),
+                    h(
+                      ProposalSection,
+                      { no: '04', label: t('experiments.variables') },
                       h(
                         'div',
-                        { className: 'rw-grid rw-grid--3', style: { marginTop: 4 } },
+                        { className: 'rw-proposal__grid' },
                         [
                           ['experiments.independent', row.variables && row.variables.independent],
                           ['experiments.dependent', row.variables && row.variables.dependent],
@@ -2531,42 +2567,70 @@ window.__ModuleLoader__.load({
                         ].map(([label, value]) =>
                           h(
                             'div',
-                            { key: label, className: 'rw-card rw-card--tight' },
-                            h('div', { className: 'rw-field__label' }, t(label)),
-                            h('div', { className: 'rw-sub', style: { marginTop: 2 } }, value || '—'),
+                            { key: label, className: 'rw-proposal__cell' },
+                            h('span', null, t(label)),
+                            h('strong', null, value || '—'),
                           ),
                         ),
                       ),
+                      row.readouts && row.readouts.length
+                        ? h(
+                            'div',
+                            { className: 'rw-proposal__inline' },
+                            h('span', { className: 'rw-sub' }, `${t('experiments.readouts')}:`),
+                            row.readouts.map((item, index) => h(Chip, { key: index }, item)),
+                          )
+                        : null,
                     ),
-                    row.readouts && row.readouts.length
+                    h(
+                      ProposalSection,
+                      { no: '05', label: t('experiments.resources') },
+                      h(
+                        'p',
+                        { className: 'rw-proposal__body' },
+                        [row.resources, row.timeline].filter(Boolean).join(' · ') || '—',
+                      ),
+                      row.risks && row.risks.length
+                        ? h(
+                            'ul',
+                            { className: 'rw-proposal__steps' },
+                            row.risks.map((item, index) => h('li', { key: index }, item)),
+                          )
+                        : null,
+                    ),
+                    row.expectedOutcome
                       ? h(
-                          'div',
-                          null,
-                          h('div', { className: 'rw-field__label' }, t('experiments.readouts')),
-                          h('ul', { style: { margin: '4px 0 0', paddingLeft: 18 } }, row.readouts.map((item, index) => h('li', { key: index }, item))),
-                        )
-                      : null,
-                    row.risks && row.risks.length
-                      ? h(
-                          'div',
-                          null,
-                          h('div', { className: 'rw-field__label' }, t('experiments.risks')),
-                          h('ul', { style: { margin: '4px 0 0', paddingLeft: 18 } }, row.risks.map((item, index) => h('li', { key: index }, item))),
+                          ProposalSection,
+                          { no: '06', label: t('experiments.expectedOutcome') },
+                          h('p', { className: 'rw-proposal__body' }, row.expectedOutcome),
                         )
                       : null,
                     (row.citations && row.citations.length) || (row.evidence && row.evidence.length)
                       ? h(
-                          'div',
-                          null,
-                          h('div', { className: 'rw-field__label' }, t('experiments.citations')),
+                          ProposalSection,
+                          { no: '07', label: t('experiments.citations') },
                           h(
                             'div',
-                            { className: 'rw-row', style: { marginTop: 4 } },
-                            (row.citations || []).map((item, index) => h(Chip, { key: `c${index}`, tone: 'brand', title: citationTitle.get(item) || '' }, item)),
+                            { className: 'rw-row' },
+                            (row.citations || []).map((item, index) =>
+                              h(Chip, { key: `c${index}`, tone: 'brand', title: citationTitle.get(item) || '' }, item),
+                            ),
                           ),
-                          (row.evidence || []).map((item, index) =>
-                            h('blockquote', { key: `e${index}`, className: 'rw-quote', style: { marginTop: 6 } }, `${item.label}${item.quote ? `：${item.quote}` : ''}`),
-                          ),
+                          row.rationale ? h('p', { className: 'rw-proposal__body' }, row.rationale) : null,
+                          (row.evidence || []).length
+                            ? h(
+                                'details',
+                                { className: 'rw-proposal__details' },
+                                h('summary', null, t('experiments.evidence')),
+                                (row.evidence || []).map((item, index) =>
+                                  h(
+                                    'blockquote',
+                                    { key: `e${index}`, className: 'rw-quote', style: { marginTop: 6 } },
+                                    `${item.label}${item.quote ? `：${item.quote}` : ''}`,
+                                  ),
+                                ),
+                              )
+                            : null,
                         )
                       : null,
                     row.note ? h('div', { className: 'rw-sub' }, row.note) : null,

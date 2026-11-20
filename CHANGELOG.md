@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 — 2026-11-20
+
+- Experiment suggestions now follow a concise research-proposal structure: research question/aim, hypothesis, approach, variables/controls, readouts, resources/timeline, risks, expected outcome, and traceable evidence.
+- Prompt follows standard proposal components (specific aims/objectives, hypothesis, approach, feasibility, expected outcomes) and enforces short sections.
+- Proposal UI uses distinct numbered section labels, compact typography, a left accent rail, and collapsible source evidence to reduce visual fatigue.
+- Removed the long experiment-page hint; objectives and constraints remain at the top.
+
 ## 0.3.3 — 2026-11-20
 
 - Simplified the panel: removed the query line, discovery summary, provider candidate/passed stats, source error list, and the long discovery/deepening hints from the Sources tab.

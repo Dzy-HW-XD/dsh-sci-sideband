@@ -247,7 +247,7 @@ function mockLlm() {
       const prompt = options.messages?.[0]?.content?.[0]?.text || '';
       lastPrompt = prompt;
       const isAnalysis = prompt.includes('【待分析内容');
-      const isSuggestion = prompt.includes('请提出') && prompt.includes('实验建议');
+      const isSuggestion = prompt.includes('科研 proposal') || (prompt.includes('请提出') && prompt.includes('实验建议'));
       const isPhrases = prompt.includes('Return 2-4 English phrases');
       const payload = isAnalysis
         ? ANALYSIS

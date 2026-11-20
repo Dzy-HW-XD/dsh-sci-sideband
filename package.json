@@ -1,6 +1,6 @@
 {
   "name": "dsh-sci-sideband",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "A research-exploration sideband for DeepSeek Harness: give one interest and objective, auto-discover papers from arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar, analyze them in the background, capture traceable evidence, suggest experiments, and compose review articles.",
   "keywords": [
     "dsh",
