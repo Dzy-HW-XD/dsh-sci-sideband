@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.1 — 2026-11-20
+
+- Replaced the cramped three-card variable grid with an aligned label/value table; readouts are now a normal bulleted list with a consistent label column.
+- Moved section 04 to “变量与读端” to match its content.
+
 ## 0.6.0 — 2026-11-20
 
 - Discovery now defaults to 100 candidates per provider and can import up to 200; the previous 50-per-provider clamp is gone.

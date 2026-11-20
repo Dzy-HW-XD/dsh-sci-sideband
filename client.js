@@ -253,7 +253,7 @@ window.__ModuleLoader__.load({
       'experiments.references': '引用论文',
       'experiments.rationale': '依据',
       'experiments.design': '建议设计',
-      'experiments.variables': '变量与对照',
+      'experiments.variables': '变量与读端',
       'experiments.independent': '自变量',
       'experiments.dependent': '因变量',
       'experiments.controls': '对照 / 混杂控制',
@@ -515,7 +515,7 @@ window.__ModuleLoader__.load({
       'experiments.references': 'Cited papers',
       'experiments.rationale': 'Rationale',
       'experiments.design': 'Suggested design',
-      'experiments.variables': 'Variables and controls',
+      'experiments.variables': 'Variables & readouts',
       'experiments.independent': 'Independent',
       'experiments.dependent': 'Dependent',
       'experiments.controls': 'Controls / confounders',
@@ -684,6 +684,15 @@ window.__ModuleLoader__.load({
 .rw-proposal__cell{padding:5px 7px;border:1px solid var(--dsw-alias-border-l1);border-radius:6px;background:var(--dsw-alias-bg-layer-1)}
 .rw-proposal__cell span{display:block;font-size:9px;letter-spacing:.04em;color:var(--dsw-alias-label-tertiary)}
 .rw-proposal__cell strong{display:block;margin-top:2px;font-size:11.5px;font-weight:500;line-height:1.4;color:var(--dsw-alias-label-primary);overflow-wrap:anywhere}
+.rw-proposal__vars{margin-top:4px;border:1px solid var(--dsw-alias-border-l1);border-radius:8px;overflow:hidden}
+.rw-proposal__var{display:grid;grid-template-columns:92px minmax(0,1fr);gap:10px;padding:7px 10px;border-top:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1)}
+.rw-proposal__var:first-child{border-top:0}
+.rw-proposal__var>span{font-size:10px;line-height:1.5;letter-spacing:.04em;color:var(--dsw-alias-label-tertiary)}
+.rw-proposal__var>div{font-size:12.5px;line-height:1.45;color:var(--dsw-alias-label-primary);overflow-wrap:anywhere}
+.rw-proposal__readouts{display:grid;grid-template-columns:92px minmax(0,1fr);gap:10px;margin-top:7px}
+.rw-proposal__readouts-label{font-size:10px;line-height:1.5;letter-spacing:.04em;color:var(--dsw-alias-label-tertiary)}
+.rw-proposal__readouts ul{margin:0;padding-left:16px;font-size:12.5px;line-height:1.45;color:var(--dsw-alias-label-primary)}
+.rw-proposal__readouts li{margin:1px 0}
 .rw-proposal__inline{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
 .rw-proposal__details{margin-top:2px;font-size:12px;color:var(--dsw-alias-label-secondary)}
 .rw-proposal__details summary{cursor:pointer;color:var(--dsw-alias-brand-primary);font-weight:600}
@@ -2616,26 +2625,26 @@ window.__ModuleLoader__.load({
                       { no: '04', label: t('experiments.variables') },
                       h(
                         'div',
-                        { className: 'rw-proposal__grid' },
-                        [
-                          ['experiments.independent', row.variables && row.variables.independent],
-                          ['experiments.dependent', row.variables && row.variables.dependent],
-                          ['experiments.controls', row.variables && row.variables.controls],
-                        ].map(([label, value]) =>
+                        { className: 'rw-proposal__vars' },
+                        ['independent', 'dependent', 'controls'].map((key) =>
                           h(
                             'div',
-                            { key: label, className: 'rw-proposal__cell' },
-                            h('span', null, t(label)),
-                            h('strong', null, value || '—'),
+                            { key, className: 'rw-proposal__var' },
+                            h('span', null, t(`experiments.${key}`)),
+                            h('div', null, (row.variables && row.variables[key]) || '—'),
                           ),
                         ),
                       ),
                       row.readouts && row.readouts.length
                         ? h(
                             'div',
-                            { className: 'rw-proposal__inline' },
-                            h('span', { className: 'rw-sub' }, `${t('experiments.readouts')}:`),
-                            row.readouts.map((item, index) => h(Chip, { key: index }, item)),
+                            { className: 'rw-proposal__readouts' },
+                            h('span', { className: 'rw-proposal__readouts-label' }, t('experiments.readouts')),
+                            h(
+                              'ul',
+                              null,
+                              row.readouts.map((item, index) => h('li', { key: index }, item)),
+                            ),
                           )
                         : null,
                     ),
