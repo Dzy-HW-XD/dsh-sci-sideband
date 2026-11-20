@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.2 — 2026-11-20
+
+- Updated the `sci_task` tool description so `experimentBrief` is documented as a targeted research question/focus, matching the panel.
+
 ## 0.5.1 — 2026-11-20
 
 - Relabelled the experiment input from “实验条件” to “想探究的问题” and changed its semantics: it is now a targeted research question/focus, not only a resource field.
