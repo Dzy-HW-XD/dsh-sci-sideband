@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1 — 2026-11-20
+
+- Relabelled the experiment input from “实验条件” to “想探究的问题” and changed its semantics: it is now a targeted research question/focus, not only a resource field.
+- Proposal generation must make every `question` directly answer the user focus; resource limits in the same text are still respected.
+- The current project's A100/time limits moved into “已有成果 / 当前进展”, and its focus seeded with a targeted question about quantization width/algorithms and SDC detectability.
+
 ## 0.5.0 — 2026-11-20
 
 - Automatic knowledge-base export: every analyzed source is written as Markdown under `sci-sideband/wiki/`, with a machine-readable `index.jsonl` for LLM/RAG ingestion.

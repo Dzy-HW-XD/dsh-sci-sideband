@@ -229,6 +229,7 @@ window.__ModuleLoader__.load({
       'experiments.generating': '正在把证据转成实验设计…',
       'experiments.empty': '还没有实验建议。先完成内容分析，再生成一版设计建议。',
       'experiments.brief': '实验条件',
+      'experiments.focus': '想探究的问题',
       'experiments.briefHint': '例如：只有 1 台 A100 80GB，每周 20 GPU 小时；无湿实验条件；数据集只有 10 万条。生成建议时会按这些约束设计。',
       'experiments.objective': '研究目的（来自项目）',
       'experiments.resources': '资源与时间线',
@@ -481,6 +482,7 @@ window.__ModuleLoader__.load({
       'experiments.generating': 'Turning evidence into experiment designs…',
       'experiments.empty': 'No experiment suggestions yet. Analyze content first, then generate a set.',
       'experiments.brief': 'Lab conditions',
+      'experiments.focus': 'What do you want to explore?',
       'experiments.briefHint': 'e.g. one A100 80GB, 20 GPU-hours/week; no wet lab; dataset limited to 100k samples. Suggestions are scoped to these constraints.',
       'experiments.objective': 'Research objective (from project)',
       'experiments.resources': 'Resources & timeline',
@@ -2454,7 +2456,7 @@ window.__ModuleLoader__.load({
 
     function ExperimentsView({ task, snap, call, run, t }) {
       const [count, setCount] = useState(4);
-      const [brief, setBrief] = useState(task.experimentBrief || '');
+      const [focus, setFocus] = useState(task.experimentBrief || '');
       const [generating, setGenerating] = useState(false);
       const [batchNote, setBatchNote] = useState('');
       const suggestions = (snap.suggestions || []).filter((row) => row.taskId === task.id);
@@ -2468,7 +2470,7 @@ window.__ModuleLoader__.load({
         setBatchNote('');
         try {
           const result = await run(t('experiments.generating'), () =>
-            call('suggestion.generate', { taskId: task.id, count, experimentBrief: brief }),
+            call('suggestion.generate', { taskId: task.id, count, experimentBrief: focus }),
           );
           if (result && result.returned < result.requested) {
             setBatchNote(t('experiments.returned', { requested: result.requested, returned: result.returned }));
@@ -2491,13 +2493,13 @@ window.__ModuleLoader__.load({
           { className: 'rw-card' },
           h(
             Field,
-            { label: t('experiments.brief') },
+            { label: t('experiments.focus') },
             h('textarea', {
               className: 'rw-textarea',
               rows: 2,
-              value: brief,
-              onChange: (e) => setBrief(e.target.value),
-              placeholder: t('experiments.brief'),
+              value: focus,
+              onChange: (e) => setFocus(e.target.value),
+              placeholder: t('experiments.focus'),
             }),
           ),
         ),
