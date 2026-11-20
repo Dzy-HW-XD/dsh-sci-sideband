@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2 — 2026-11-20
+
+- The evidence tab is hidden from the panel; evidence is still captured and used internally by experiment proposals and review synthesis.
+- Evidence counts are removed from the overview, experiment, and review chrome.
+- Discovery now scores twice as many candidates per provider (40 at depth 20) instead of slicing to the first page, and shows per-provider candidate/passed counts plus errors.
+- Deduplication checks both DOI and title, so an arXiv record without a DOI no longer duplicates the same paper imported from OpenAlex/Semantic Scholar.
+
 ## 0.3.1 — 2026-11-19
 
 - Discovery no longer imports a fixed 3 records per source. It retrieves up to 20 candidates per provider (adjustable to 100), scores every candidate against the objective/search phrases, and imports everything above a 0.3 similarity threshold (adjustable 0.2–0.6).

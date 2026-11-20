@@ -149,6 +149,7 @@ window.__ModuleLoader__.load({
       'sources.perProvider': '每源检索深度',
       'sources.minSimilarity': '相似度阈值',
       'sources.similarity': '匹配度 {n}',
+      'sources.providerStat': '{channel}: {candidates} 候选 / {accepted} 通过',
       'sources.autoDiscover': '创建后自动从默认源发现并分析',
       'sources.access.open': '开放全文',
       'sources.access.meta': '元数据/摘要',
@@ -394,6 +395,7 @@ window.__ModuleLoader__.load({
       'sources.perProvider': 'Retrieval depth / source',
       'sources.minSimilarity': 'Similarity threshold',
       'sources.similarity': 'Match {n}',
+      'sources.providerStat': '{channel}: {candidates} candidates / {accepted} passed',
       'sources.autoDiscover': 'Discover and analyze after creating the project',
       'sources.access.open': 'Open full text',
       'sources.access.meta': 'Metadata / abstract',
@@ -623,7 +625,7 @@ window.__ModuleLoader__.load({
 .rw-grid--3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .rw-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .rw-row--end{justify-content:flex-end}
-.rw-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.rw-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .rw-stat{border:1px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-bg-layer-1);padding:12px}
 .rw-stat b{display:block;font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .rw-stat span{display:block;font-size:12px;color:var(--dsw-alias-label-secondary);margin-top:2px}
@@ -1263,10 +1265,10 @@ window.__ModuleLoader__.load({
       const tabs = [
         ['overview', 'tabs.overview', null],
         ['sources', 'tabs.sources', task ? task.counts.sources : 0],
-        ['data', 'tabs.data', task ? task.counts.extractions : 0],
         ['experiments', 'tabs.experiments', task ? task.counts.suggestions : 0],
         ['reports', 'tabs.reports', task ? task.counts.reports : 0],
       ];
+      const activeTab = tabs.some(([id]) => id === tab) ? tab : 'overview';
 
       return h(
         'div',
@@ -1430,16 +1432,14 @@ window.__ModuleLoader__.load({
                   ),
                   h(
                     'div',
-                    { key: 'content', className: 'rw-content', id: `rw-panel-${tab}`, role: 'tabpanel', 'aria-labelledby': `rw-tab-${tab}` },
-                    tab === 'overview'
+                    { key: 'content', className: 'rw-content', id: `rw-panel-${activeTab}`, role: 'tabpanel', 'aria-labelledby': `rw-tab-${activeTab}` },
+                    activeTab === 'overview'
                       ? h(Overview, { key: task.id, task, snap, job, t, onTab: setTab, onNewTask: () => setDialog({ type: 'create' }) })
-                      : tab === 'sources'
+                      : activeTab === 'sources'
                         ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
-                        : tab === 'data'
-                          ? h(DataView, { key: task.id, task, snap, call, run, attempt, t })
-                          : tab === 'experiments'
-                            ? h(ExperimentsView, { key: task.id, task, snap, call, run, t })
-                            : h(ReportsView, { key: task.id, task, snap, call, run, t }),
+                        : activeTab === 'experiments'
+                          ? h(ExperimentsView, { key: task.id, task, snap, call, run, t })
+                          : h(ReportsView, { key: task.id, task, snap, call, run, t }),
                   ),
                 ]
               : h(
@@ -1500,7 +1500,6 @@ window.__ModuleLoader__.load({
           [
             ['overview.stats.sources', task.counts.sources],
             ['overview.stats.analyzed', analyzedCount],
-            ['overview.stats.extractions', task.counts.extractions],
             ['overview.stats.suggestions', task.counts.suggestions],
             ['overview.stats.reports', task.counts.reports],
           ].map(([label, value]) => h('div', { key: label, className: 'rw-stat' }, h('b', null, value), h('span', null, t(label)))),
@@ -2038,6 +2037,21 @@ window.__ModuleLoader__.load({
                 task.discovery.errors.map((row) => `${row.channel}: ${row.message}`).join(' · '),
               )
             : null,
+          task.discovery && task.discovery.providerStats && task.discovery.providerStats.length
+            ? h(
+                'div',
+                { className: 'rw-sub', style: { marginTop: 4 } },
+                task.discovery.providerStats
+                  .map((row) =>
+                    t('sources.providerStat', {
+                      channel: row.channel,
+                      candidates: row.candidates || 0,
+                      accepted: row.accepted || 0,
+                    }) + (row.error ? ` (${row.error})` : ''),
+                  )
+                  .join(' · '),
+              )
+            : null,
           h(
             'div',
             { className: 'rw-row', style: { marginTop: 10, borderTop: '1px solid var(--dsw-alias-border-l2)', paddingTop: 10 } },
@@ -2507,7 +2521,7 @@ window.__ModuleLoader__.load({
               'div',
               { style: { minWidth: 0 } },
               h('div', { className: 'rw-card__title', style: { margin: 0 } }, t('experiments.generate')),
-              h('div', { className: 'rw-sub' }, `${t('sources.progress', { analyzed: task.counts.withAnalysis ?? task.counts.analyzed, total: task.counts.sources })} · ${t('reports.dataCount', { n: task.counts.extractions })}`),
+              h('div', { className: 'rw-sub' }, t('sources.progress', { analyzed: task.counts.withAnalysis ?? task.counts.analyzed, total: task.counts.sources })),
             ),
             h(
               'div',
@@ -2704,7 +2718,7 @@ window.__ModuleLoader__.load({
         h(
           'div',
           { className: 'rw-row', style: { justifyContent: 'space-between' } },
-          h('div', { className: 'rw-meta' }, h(Chip, { tone: report.mode === 'model' ? 'brand' : 'warn' }, t(report.mode === 'model' ? 'reports.mode.model' : 'reports.mode.fallback')), h('span', null, fmtTime(report.createdAt)), h('span', null, t('reports.sourceCount', { n: report.sourceCount })), h('span', null, t('reports.dataCount', { n: report.dataPointCount }))),
+          h('div', { className: 'rw-meta' }, h(Chip, { tone: report.mode === 'model' ? 'brand' : 'warn' }, t(report.mode === 'model' ? 'reports.mode.model' : 'reports.mode.fallback')), h('span', null, fmtTime(report.createdAt)), h('span', null, t('reports.sourceCount', { n: report.sourceCount }))),
           h(
             'div',
             { className: 'rw-row' },
@@ -2795,7 +2809,7 @@ window.__ModuleLoader__.load({
               'div',
               null,
               h('div', { className: 'rw-card__title', style: { margin: 0 } }, t('reports.generate')),
-              h('div', { className: 'rw-sub' }, `${t('sources.progress', { analyzed: task.counts.withAnalysis ?? task.counts.analyzed, total: task.counts.sources })} · ${t('reports.dataCount', { n: task.counts.extractions })}`),
+              h('div', { className: 'rw-sub' }, t('sources.progress', { analyzed: task.counts.withAnalysis ?? task.counts.analyzed, total: task.counts.sources })),
             ),
             h(
               Btn,
@@ -2834,7 +2848,7 @@ window.__ModuleLoader__.load({
                         h(
                           'span',
                           { className: 'rw-item__meta' },
-                          `${fmtTime(report.createdAt)} · ${t('reports.sourceCount', { n: report.sourceCount })} · ${t('reports.dataCount', { n: report.dataPointCount })}`,
+                          `${fmtTime(report.createdAt)} · ${t('reports.sourceCount', { n: report.sourceCount })}`,
                         ),
                       ),
                     ),
