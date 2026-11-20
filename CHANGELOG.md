@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3 — 2026-11-20
+
+- Simplified the panel: removed the query line, discovery summary, provider candidate/passed stats, source error list, and the long discovery/deepening hints from the Sources tab.
+- Removed provider/relation/similarity metadata from source cards.
+- The overview no longer repeats discovery counts.
+
 ## 0.3.2 — 2026-11-20
 
 - The evidence tab is hidden from the panel; evidence is still captured and used internally by experiment proposals and review synthesis.

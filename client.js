@@ -1540,13 +1540,6 @@ window.__ModuleLoader__.load({
                 h(Chip, { key: channel.id, tone: channel.access === 'open' ? 'brand' : '' }, channel.label),
               ),
             ),
-            task.discovery
-              ? h('div', { className: 'rw-sub' }, t('sources.discoverySummary', {
-                  added: task.discovery.added || 0,
-                  skipped: task.discovery.skipped || 0,
-                  errors: (task.discovery.errors || []).length,
-                }))
-              : h('div', { className: 'rw-sub' }, t('sources.discoverHint')),
           ),
           h(
             'div',
@@ -1874,15 +1867,6 @@ window.__ModuleLoader__.load({
       const [perProvider, setPerProvider] = useState(20);
       const [minSimilarity, setMinSimilarity] = useState(0.3);
       const [autoAnalyze, setAutoAnalyze] = useState(true);
-      const [discoveryNote, setDiscoveryNote] = useState(() =>
-        task.discovery
-          ? t('sources.discoverySummary', {
-              added: task.discovery.added || 0,
-              skipped: task.discovery.skipped || 0,
-              errors: (task.discovery.errors || []).length,
-            })
-          : '',
-      );
       const sources = snap.sources.filter((row) => row.taskId === task.id);
       const pending = sources.filter((row) => row.status !== 'analyzed');
       const analyzed = sources.filter((row) => row.analysis);
@@ -1908,31 +1892,11 @@ window.__ModuleLoader__.load({
       const discover = async () => {
         if (discovering || !channels.length) return;
         setDiscovering(true);
-        setDiscoveryNote('');
         try {
           const result = await run(t('sources.discovering'), () =>
             call('source.discover', { taskId: task.id, channels, perProvider, minSimilarity, autoAnalyze }),
           );
-          if (result) {
-            const errors = result.errors || [];
-            const detail = errors.map((row) => `${row.channel}: ${row.message}`).join('；');
-            if (result.added) {
-              setDiscoveryNote(
-                t('sources.discoverySummary', {
-                  added: result.added,
-                  skipped: result.skipped || 0,
-                  errors: errors.length,
-                }),
-              );
-            } else if (errors.length && errors.length >= (result.channels || channels).length) {
-              setDiscoveryNote(t('sources.allFailed', { detail }));
-            } else if (errors.length) {
-              setDiscoveryNote(t('sources.partialEmpty', { n: errors.length, detail }));
-            } else {
-              setDiscoveryNote(t('sources.discoveryEmpty'));
-            }
-            if (Array.isArray(result.channels) && result.channels.length) setChannels(result.channels);
-          }
+          if (result && Array.isArray(result.channels) && result.channels.length) setChannels(result.channels);
         } finally {
           setDiscovering(false);
         }
@@ -1941,20 +1905,10 @@ window.__ModuleLoader__.load({
       const deepen = async () => {
         if (deepening || !analyzed.length) return;
         setDeepening(true);
-        setDiscoveryNote('');
         try {
-          const result = await run(t('sources.deepenRunning'), () =>
+          await run(t('sources.deepenRunning'), () =>
             call('source.deepen', { taskId: task.id, perSource: 4, autoAnalyze: true }),
           );
-          if (result) {
-            setDiscoveryNote(
-              t('sources.deepenSummary', {
-                targets: (result.targets || []).length,
-                added: result.added || 0,
-                errors: (result.errors || []).length,
-              }),
-            );
-          }
         } finally {
           setDeepening(false);
         }
@@ -1963,7 +1917,6 @@ window.__ModuleLoader__.load({
       return h(
         'div',
         { className: 'rw-section' },
-        h('p', { className: 'rw-hint' }, t('sources.hint')),
         h(
           'div',
           { className: 'rw-card' },
@@ -1978,7 +1931,6 @@ window.__ModuleLoader__.load({
               discovering ? t('sources.discovering') : t('sources.discover'),
             ),
           ),
-          h('p', { className: 'rw-sub', style: { margin: '0 0 8px' } }, t('sources.discoverHint')),
           h(
             'div',
             { className: 'rw-row', style: { marginBottom: 8 } },
@@ -2018,40 +1970,9 @@ window.__ModuleLoader__.load({
                 { key: channel.id, className: 'rw-chip', style: { cursor: 'pointer', gap: 4 } },
                 h('input', { type: 'checkbox', checked: channels.includes(channel.id), onChange: () => toggleChannel(channel.id) }),
                 channel.label,
-                h('span', { className: 'rw-sub' }, t(`sources.access.${channel.access}`)),
               ),
             ),
           ),
-          h(
-            'div',
-            { className: 'rw-sub', style: { marginTop: 8 } },
-            task.discovery && task.discovery.query
-              ? `${t('sources.query', { query: task.discovery.query })}${task.discovery.queryExpanded ? ` · ${t('sources.queryExpanded')}` : ''}`
-              : '',
-          ),
-          discoveryNote ? h('div', { className: 'rw-sub', style: { marginTop: 4 } }, discoveryNote) : null,
-          task.discovery && task.discovery.errors && task.discovery.errors.length
-            ? h(
-                'div',
-                { className: 'rw-sub', style: { marginTop: 4 } },
-                task.discovery.errors.map((row) => `${row.channel}: ${row.message}`).join(' · '),
-              )
-            : null,
-          task.discovery && task.discovery.providerStats && task.discovery.providerStats.length
-            ? h(
-                'div',
-                { className: 'rw-sub', style: { marginTop: 4 } },
-                task.discovery.providerStats
-                  .map((row) =>
-                    t('sources.providerStat', {
-                      channel: row.channel,
-                      candidates: row.candidates || 0,
-                      accepted: row.accepted || 0,
-                    }) + (row.error ? ` (${row.error})` : ''),
-                  )
-                  .join(' · '),
-              )
-            : null,
           h(
             'div',
             { className: 'rw-row', style: { marginTop: 10, borderTop: '1px solid var(--dsw-alias-border-l2)', paddingTop: 10 } },
@@ -2061,7 +1982,6 @@ window.__ModuleLoader__.load({
               deepening ? h(Spinner) : h(Icon, { name: 'spark', size: 14 }),
               deepening ? t('sources.deepenRunning') : t('sources.deepen'),
             ),
-            h('span', { className: 'rw-sub' }, t('sources.deepenHint')),
           ),
         ),
         h(
@@ -2094,10 +2014,6 @@ window.__ModuleLoader__.load({
                         { className: 'rw-item__meta' },
                         [
                           t(`source.type.${source.type}`),
-                          source.provider ? source.provider : '',
-                          source.relation ? t(`sources.relation.${source.relation}`) : '',
-                          source.similarity ? t('sources.similarity', { n: Number(source.similarity).toFixed(2) }) : '',
-                          source.access === 'open' || source.access === 'meta' ? t(`sources.access.${source.access}`) : '',
                           source.authors ? source.authors : '',
                           source.year,
                           source.venue,
