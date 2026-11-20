@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 — 2026-11-20
+
+- Discovery now defaults to 100 candidates per provider and can import up to 200; the previous 50-per-provider clamp is gone.
+- Experiment proposals go through an independent reviewer call: a fresh context with no conversation memory, temperature 0, reasoning off. Only approved proposals are returned; review score/issues are stored and shown.
+- Each proposal now carries a `references` list with the cited paper title/URL/DOI, not just citation numbers.
+- Paper analysis now outputs only five fields: problem addressed, proposed method, key achievements, critical assessment/limitations, and key formulas. The source detail and wiki export use this structure only.
+
 ## 0.5.2 — 2026-11-20
 
 - Updated the `sci_task` tool description so `experimentBrief` is documented as a targeted research question/focus, matching the panel.

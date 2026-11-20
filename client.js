@@ -178,6 +178,11 @@ window.__ModuleLoader__.load({
       'sources.limitations': '局限',
       'sources.relevance': '与本研究的相关性',
       'sources.noAnalysis': '还没有分析结果。',
+      'sources.problem': '解决的问题',
+      'sources.method': '提出的方法',
+      'sources.achievements': '关键成果',
+      'sources.critique': '批判性思考 / 局限',
+      'sources.keyFormulas': '关键公式',
       'sources.error': '上次失败原因',
       'sources.meta': '{authors} · {year} · {venue}',
       'sources.pasteHint': '如果 URL 需要登录或抓不到正文，直接把 PDF 里的正文粘贴到这里最可靠。',
@@ -242,6 +247,10 @@ window.__ModuleLoader__.load({
       'experiments.approach': '方法与步骤',
       'experiments.expectedOutcome': '预期结果',
       'experiments.evidence': '查看原文依据',
+      'experiments.reviewed': '已审核',
+      'experiments.reviewScore': '审核 {score}/10',
+      'experiments.reviewIssues': '审核意见',
+      'experiments.references': '引用论文',
       'experiments.rationale': '依据',
       'experiments.design': '建议设计',
       'experiments.variables': '变量与对照',
@@ -431,6 +440,11 @@ window.__ModuleLoader__.load({
       'sources.limitations': 'Limitations',
       'sources.relevance': 'Relevance to this research',
       'sources.noAnalysis': 'No analysis yet.',
+      'sources.problem': 'Problem addressed',
+      'sources.method': 'Proposed method',
+      'sources.achievements': 'Key achievements',
+      'sources.critique': 'Critical assessment / limitations',
+      'sources.keyFormulas': 'Key formulas',
       'sources.error': 'Last failure',
       'sources.meta': '{authors} · {year} · {venue}',
       'sources.pasteHint': 'If the URL is behind a login or returns no body, paste the paper text here instead.',
@@ -495,6 +509,10 @@ window.__ModuleLoader__.load({
       'experiments.approach': 'Approach & steps',
       'experiments.expectedOutcome': 'Expected outcome',
       'experiments.evidence': 'View source evidence',
+      'experiments.reviewed': 'Reviewed',
+      'experiments.reviewScore': 'Review {score}/10',
+      'experiments.reviewIssues': 'Review notes',
+      'experiments.references': 'Cited papers',
       'experiments.rationale': 'Rationale',
       'experiments.design': 'Suggested design',
       'experiments.variables': 'Variables and controls',
@@ -1680,78 +1698,64 @@ window.__ModuleLoader__.load({
     function SourceDetail({ source, t }) {
       const analysis = source.analysis;
       if (!analysis) return h('p', { className: 'rw-sub' }, t('sources.noAnalysis'));
+      const problem = analysis.problem || analysis.researchQuestion || analysis.summary || '';
+      const method = analysis.method || (analysis.methods || []).join('；');
+      const achievements = analysis.achievements || (analysis.findings || []).map((row) => row.claim).filter(Boolean);
+      const critique = analysis.critique || analysis.limitations || [];
+      const formulas = analysis.keyFormulas || [];
       return h(
         'div',
-        { style: { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 6 } },
-        analysis.summary ? h('p', { className: 'rw-item__body' }, analysis.summary) : null,
-        analysis.researchQuestion ? h('div', { className: 'rw-sub' }, `${t('topics.question')}: ${analysis.researchQuestion}`) : null,
-        analysis.methods && analysis.methods.length
+        { className: 'rw-proposal' },
+        problem
           ? h(
-              'div',
-              null,
-              h('div', { className: 'rw-field__label' }, t('sources.methods')),
-              h('div', { className: 'rw-kv', style: { marginTop: 4 } }, analysis.methods.map((method, index) => h(Chip, { key: index }, method))),
+              ProposalSection,
+              { no: '01', label: t('sources.problem') },
+              h('p', { className: 'rw-proposal__body' }, problem),
             )
           : null,
-        analysis.findings && analysis.findings.length
+        method
           ? h(
-              'div',
-              null,
-              h('div', { className: 'rw-field__label' }, t('sources.findings')),
+              ProposalSection,
+              { no: '02', label: t('sources.method') },
+              h('p', { className: 'rw-proposal__body' }, method),
+            )
+          : null,
+        achievements.length
+          ? h(
+              ProposalSection,
+              { no: '03', label: t('sources.achievements') },
               h(
                 'ul',
-                { style: { margin: '4px 0 0', paddingLeft: 18 } },
-                analysis.findings.map((finding, index) =>
-                  h(
-                    'li',
-                    { key: index, style: { marginBottom: 6 } },
-                    h('div', null, finding.claim),
-                    finding.quote ? h('blockquote', { className: 'rw-quote' }, finding.quote) : null,
-                  ),
-                ),
+                { className: 'rw-proposal__steps' },
+                achievements.map((item, index) => h('li', { key: index }, item)),
               ),
             )
           : null,
-        analysis.dataPoints && analysis.dataPoints.length
+        critique.length
           ? h(
-              'div',
-              null,
-              h('div', { className: 'rw-field__label' }, t('sources.dataPoints')),
+              ProposalSection,
+              { no: '04', label: t('sources.critique') },
               h(
-                'table',
-                { className: 'rw-table', style: { marginTop: 4 } },
-                h('thead', null, h('tr', null, h('th', null, t('data.label')), h('th', null, t('data.value')), h('th', null, t('data.context')))),
+                'ul',
+                { className: 'rw-proposal__steps' },
+                critique.map((item, index) => h('li', { key: index }, item)),
+              ),
+            )
+          : null,
+        formulas.length
+          ? h(
+              ProposalSection,
+              { no: '05', label: t('sources.keyFormulas') },
+              formulas.map((item, index) =>
                 h(
-                  'tbody',
-                  null,
-                  analysis.dataPoints.map((point, index) =>
-                    h(
-                      'tr',
-                      { key: index },
-                      h('td', null, point.label),
-                      h('td', { className: 'rw-mono' }, `${point.value || ''}${point.unit ? ` ${point.unit}` : ''}`),
-                      h('td', { className: 'rw-sub' }, point.context || ''),
-                    ),
-                  ),
+                  'div',
+                  { key: index, style: { marginTop: 4 } },
+                  h('code', { className: 'rw-mono', style: { display: 'block', whiteSpace: 'pre-wrap' } }, item.formula || item),
+                  item.meaning ? h('div', { className: 'rw-sub' }, item.meaning) : null,
                 ),
               ),
             )
           : null,
-        analysis.limitations && analysis.limitations.length
-          ? h(
-              'div',
-              null,
-              h('div', { className: 'rw-field__label' }, t('sources.limitations')),
-              h('ul', { style: { margin: '4px 0 0', paddingLeft: 18 } }, analysis.limitations.map((item, index) => h('li', { key: index }, item))),
-            )
-          : null,
-        h(
-          'div',
-          { className: 'rw-row' },
-          h(Chip, { tone: analysis.relevance === 'high' ? 'ok' : analysis.relevance === 'medium' ? 'warn' : '' }, `${t('sources.relevance')}: ${t(`relevance.${analysis.relevance || 'low'}`)}`),
-          analysis.mode ? h(Chip, { tone: analysis.mode === 'model' ? 'brand' : 'warn' }, analysisModeLabel(t, analysis.mode)) : null,
-        ),
-        analysis.relevanceNote ? h('div', { className: 'rw-sub' }, analysis.relevanceNote) : null,
         analysis.note ? h('div', { className: 'rw-sub' }, analysis.note) : null,
       );
     }
@@ -1893,7 +1897,7 @@ window.__ModuleLoader__.load({
       );
       const [discovering, setDiscovering] = useState(false);
       const [deepening, setDeepening] = useState(false);
-      const [perProvider, setPerProvider] = useState(20);
+      const [perProvider, setPerProvider] = useState(100);
       const [minSimilarity, setMinSimilarity] = useState(0.3);
       const [autoAnalyze, setAutoAnalyze] = useState(true);
       const [autoScan, setAutoScan] = useState(task.autoScan === true);
@@ -1980,7 +1984,7 @@ window.__ModuleLoader__.load({
               h(
                 'select',
                 { className: 'rw-select', style: { width: 68 }, value: perProvider, onChange: (e) => setPerProvider(Number(e.target.value)) },
-                [10, 20, 30, 50, 100].map((value) => h('option', { key: value, value }, value)),
+                [20, 50, 100].map((value) => h('option', { key: value, value }, value)),
               ),
             ),
             h(
@@ -2559,6 +2563,15 @@ window.__ModuleLoader__.load({
                         { className: 'rw-row', style: { gap: 6, marginTop: 4 } },
                         h(Chip, { tone: row.priority === 'high' ? 'ok' : row.priority === 'low' ? 'warn' : 'brand' }, t(`experiments.priority.${row.priority}`)),
                         h(Chip, { tone: row.mode === 'model' ? 'brand' : 'warn' }, suggestionModeLabel(t, row.mode)),
+                        row.review
+                          ? h(
+                              Chip,
+                              { tone: row.review.approved ? 'ok' : 'warn' },
+                              row.review.score != null
+                                ? t('experiments.reviewScore', { score: Number(row.review.score).toFixed(1) })
+                                : t('experiments.reviewed'),
+                            )
+                          : null,
                         h('span', { className: 'rw-sub' }, fmtTime(row.batchAt || row.createdAt)),
                       ),
                     ),
@@ -2661,6 +2674,43 @@ window.__ModuleLoader__.load({
                             ),
                           ),
                           row.rationale ? h('p', { className: 'rw-proposal__body' }, row.rationale) : null,
+                          row.references && row.references.length
+                            ? h(
+                                'div',
+                                { className: 'rw-proposal__details' },
+                                h('div', { className: 'rw-field__label' }, t('experiments.references')),
+                                row.references.map((ref, index) =>
+                                  h(
+                                    'div',
+                                    { key: `r${index}`, style: { marginTop: 3 } },
+                                    h(
+                                      'a',
+                                      {
+                                        className: 'rw-link',
+                                        href: ref.url || (ref.doi ? `https://doi.org/${encodeURIComponent(ref.doi)}` : undefined),
+                                        target: '_blank',
+                                        rel: 'noreferrer',
+                                      },
+                                      `${ref.label} ${ref.title}`,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : null,
+                          row.review && (row.review.issues || []).concat(row.review.citationIssues || []).length
+                            ? h(
+                                'details',
+                                { className: 'rw-proposal__details' },
+                                h('summary', null, t('experiments.reviewIssues')),
+                                h(
+                                  'ul',
+                                  { className: 'rw-proposal__steps' },
+                                  (row.review.issues || [])
+                                    .concat(row.review.citationIssues || [])
+                                    .map((item, index) => h('li', { key: `i${index}` }, item)),
+                                ),
+                              )
+                            : null,
                           (row.evidence || []).length
                             ? h(
                                 'details',

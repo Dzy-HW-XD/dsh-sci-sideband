@@ -248,14 +248,26 @@ function mockLlm() {
       lastPrompt = prompt;
       const isAnalysis = prompt.includes('【待分析内容');
       const isSuggestion = prompt.includes('科研 proposal') || (prompt.includes('请提出') && prompt.includes('实验建议'));
+      const isReview = prompt.includes('待审核 proposal') || prompt.includes('independent scientific proposal reviewer');
       const isPhrases = prompt.includes('Return 2-4 English phrases');
       const payload = isAnalysis
         ? ANALYSIS
-        : isSuggestion
-          ? SUGGESTIONS
-          : isPhrases
-            ? { phrases: ['coating'] }
-            : REPORT;
+        : isReview
+          ? {
+              summary: 'mock review',
+              items: [0, 1, 2, 3].map((index) => ({
+                index,
+                approved: true,
+                score: 8,
+                issues: [],
+                citationIssues: [],
+              })),
+            }
+          : isSuggestion
+            ? SUGGESTIONS
+            : isPhrases
+              ? { phrases: ['coating'] }
+              : REPORT;
       const text = JSON.stringify(payload);
       return (async function* stream() {
         await new Promise((resolve) => setTimeout(resolve, 25));
