@@ -145,6 +145,8 @@ window.__ModuleLoader__.load({
       'sources.partialEmpty': '没有新增内容；{n} 个源失败：{detail}',
       'sources.query': '检索式：{query}',
       'sources.queryExpanded': '已扩写',
+      'sources.autoScan': '自动扫描',
+      'sources.scanEvery': '每 {h} 小时',
       'sources.autoAnalyze': '加入后立即分析',
       'sources.perProvider': '每源检索深度',
       'sources.minSimilarity': '相似度阈值',
@@ -226,7 +228,7 @@ window.__ModuleLoader__.load({
       'experiments.generate': '生成实验建议',
       'experiments.generating': '正在把证据转成实验设计…',
       'experiments.empty': '还没有实验建议。先完成内容分析，再生成一版设计建议。',
-      'experiments.brief': '实验条件 / 资源约束',
+      'experiments.brief': '实验条件',
       'experiments.briefHint': '例如：只有 1 台 A100 80GB，每周 20 GPU 小时；无湿实验条件；数据集只有 10 万条。生成建议时会按这些约束设计。',
       'experiments.objective': '研究目的（来自项目）',
       'experiments.resources': '资源与时间线',
@@ -396,6 +398,8 @@ window.__ModuleLoader__.load({
       'sources.query': 'Query: {query}',
       'sources.queryExpanded': 'expanded',
       'sources.autoAnalyze': 'Analyze immediately after adding',
+      'sources.autoScan': 'Auto-scan',
+      'sources.scanEvery': 'every {h}h',
       'sources.perProvider': 'Retrieval depth / source',
       'sources.minSimilarity': 'Similarity threshold',
       'sources.similarity': 'Match {n}',
@@ -476,7 +480,7 @@ window.__ModuleLoader__.load({
       'experiments.generate': 'Generate experiment ideas',
       'experiments.generating': 'Turning evidence into experiment designs…',
       'experiments.empty': 'No experiment suggestions yet. Analyze content first, then generate a set.',
-      'experiments.brief': 'Lab constraints / resources',
+      'experiments.brief': 'Lab conditions',
       'experiments.briefHint': 'e.g. one A100 80GB, 20 GPU-hours/week; no wet lab; dataset limited to 100k samples. Suggestions are scoped to these constraints.',
       'experiments.objective': 'Research objective (from project)',
       'experiments.resources': 'Resources & timeline',
@@ -1890,6 +1894,8 @@ window.__ModuleLoader__.load({
       const [perProvider, setPerProvider] = useState(20);
       const [minSimilarity, setMinSimilarity] = useState(0.3);
       const [autoAnalyze, setAutoAnalyze] = useState(true);
+      const [autoScan, setAutoScan] = useState(task.autoScan === true);
+      const [scanHours, setScanHours] = useState(Number(task.scanHours) || 24);
       const sources = snap.sources.filter((row) => row.taskId === task.id);
       const pending = sources.filter((row) => row.status !== 'analyzed');
       const analyzed = sources.filter((row) => row.analysis);
@@ -1909,6 +1915,14 @@ window.__ModuleLoader__.load({
       const toggleChannel = (id) => {
         setChannels((current) =>
           current.includes(id) ? current.filter((value) => value !== id) : [...current, id],
+        );
+      };
+
+      const saveScan = async (nextAuto, nextHours) => {
+        setAutoScan(nextAuto);
+        setScanHours(nextHours);
+        await run(t('common.save'), () =>
+          call('task.update', { taskId: task.id, autoScan: nextAuto, scanHours: nextHours }),
         );
       };
 
@@ -1982,6 +1996,37 @@ window.__ModuleLoader__.load({
               { className: 'rw-row', style: { gap: 6, cursor: 'pointer' } },
               h('input', { type: 'checkbox', checked: autoAnalyze, onChange: (e) => setAutoAnalyze(e.target.checked) }),
               h('span', { className: 'rw-sub' }, t('sources.autoAnalyze')),
+            ),
+          ),
+          h(
+            'div',
+            { className: 'rw-row', style: { marginBottom: 8 } },
+            h(
+              'label',
+              { className: 'rw-row', style: { gap: 6, cursor: 'pointer' } },
+              h('input', {
+                type: 'checkbox',
+                checked: autoScan,
+                onChange: (e) => saveScan(e.target.checked, scanHours),
+              }),
+              h('span', { className: 'rw-sub' }, t('sources.autoScan')),
+            ),
+            h(
+              'label',
+              { className: 'rw-row', style: { gap: 6 } },
+              h(
+                'select',
+                {
+                  className: 'rw-select',
+                  style: { width: 88 },
+                  value: scanHours,
+                  disabled: !autoScan,
+                  onChange: (e) => saveScan(true, Number(e.target.value)),
+                },
+                [12, 24, 72, 168].map((value) =>
+                  h('option', { key: value, value }, t('sources.scanEvery', { h: value })),
+                ),
+              ),
             ),
           ),
           h(
@@ -2444,17 +2489,15 @@ window.__ModuleLoader__.load({
         h(
           'div',
           { className: 'rw-card' },
-          h('div', { className: 'rw-card__title' }, t('experiments.objective')),
-          h('p', { className: 'rw-item__body' }, task.objective || t('task.objectiveEmpty')),
           h(
             Field,
-            { label: t('experiments.brief'), hint: t('experiments.briefHint') },
+            { label: t('experiments.brief') },
             h('textarea', {
               className: 'rw-textarea',
-              rows: 3,
+              rows: 2,
               value: brief,
               onChange: (e) => setBrief(e.target.value),
-              placeholder: '例如：只有 1 台 A100 80GB，每周 20 GPU 小时；不能做湿实验；数据集只有 10 万条。',
+              placeholder: t('experiments.brief'),
             }),
           ),
         ),
@@ -2493,7 +2536,6 @@ window.__ModuleLoader__.load({
           ),
           !canGenerate ? h('p', { className: 'rw-sub', style: { margin: '8px 0 0' } }, t('experiments.requiresEvidence')) : null,
         ),
-        h('p', { className: 'rw-sub' }, t('experiments.note')),
         batchNote ? h('p', { className: 'rw-sub' }, batchNote) : null,
         suggestions.length
           ? h(

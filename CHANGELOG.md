@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 — 2026-11-20
+
+- Automatic knowledge-base export: every analyzed source is written as Markdown under `sci-sideband/wiki/`, with a machine-readable `index.jsonl` for LLM/RAG ingestion.
+- Long-running projects: new projects have optional auto-scan enabled (default 24h, configurable 12/24/72/168h); a host timer checks due projects every 15 minutes and runs discovery/analysis in the background. Existing projects can opt in from the Sources tab.
+- Simplified experiment page: removed the project objective block and long constraints hint; the input is now one field labelled “实验条件”. Removed the design-disclaimer paragraph.
+
 ## 0.4.0 — 2026-11-20
 
 - Experiment suggestions now follow a concise research-proposal structure: research question/aim, hypothesis, approach, variables/controls, readouts, resources/timeline, risks, expected outcome, and traceable evidence.

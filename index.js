@@ -66,6 +66,11 @@ function pick(ctx, name) {
 export function apply(ctx, config = {}) {
   const lab = new ResearchLab(ctx, config);
   lab.ready().catch((error) => note(ctx, 'error', `数据存储初始化失败：${(error && error.message) || error}`));
+  try {
+    ctx.effect(() => lab.startAutoScan(), 'sci-sideband auto scan');
+  } catch (error) {
+    note(ctx, 'warn', `自动扫描启动失败：${(error && error.message) || error}`);
+  }
 
   let toolsRegistered = false;
   let routeRegistered = false;
