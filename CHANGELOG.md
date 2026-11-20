@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.2 — 2026-11-20
+
+- Query expansion now enforces 2–4 word phrases; long concatenated phrases were returning zero arXiv hits.
+- Providers run sequentially with retry/backoff, page sizes are capped at 100, Crossref is paginated in 25-item pages, and a native `fetch` fallback is used when the host web service rejects/truncates a JSON response.
+- This makes 100-source discovery more reliable when a provider rate-limits or returns an unsupported content type.
+
 ## 0.6.1 — 2026-11-20
 
 - Replaced the cramped three-card variable grid with an aligned label/value table; readouts are now a normal bulleted list with a consistent label column.
