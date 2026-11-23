@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.11.5 — 2026-11-23
+
+- Fixed the broken PDF export: it no longer prints a hidden 0×0 iframe (which could save an empty/unopenable PDF). It now opens a visible A4 report preview with a “打印 / 保存为 PDF” button.
+
 ## 0.11.4 — 2026-11-23
 
 - Reduced report corpus size (900-char summaries, 6 evidence rows/source) and capped the manuscript at 8 sections/2000 characters; raised output budget to 40k. This prevents the 38-source report from exhausting JSON output and falling back to evidence assembly.

@@ -237,7 +237,7 @@ window.__ModuleLoader__.load({
       'reports.keywords': '关键词',
       'reports.references': '参考文献',
       'reports.figures': '图表计划',
-      'reports.pdf': '导出 PDF',
+      'reports.pdf': '打印 / 导出 PDF',
       'reports.meta': '{sources} 条内容 · {points} 条证据 · {mode}',
       'reports.sourceCount': '{n} 条内容',
       'reports.dataCount': '{n} 条证据',
@@ -516,7 +516,7 @@ window.__ModuleLoader__.load({
       'reports.keywords': 'Keywords',
       'reports.references': 'References',
       'reports.figures': 'Figure plan',
-      'reports.pdf': 'Export PDF',
+      'reports.pdf': 'Print / Export PDF',
       'reports.meta': '{sources} sources · {points} evidence rows · {mode}',
       'reports.sourceCount': '{n} sources',
       'reports.dataCount': '{n} evidence rows',
@@ -2771,7 +2771,10 @@ window.__ModuleLoader__.load({
         const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(report.title)}</title>
 <style>
 @page{size:A4;margin:22mm 20mm}
-body{font-family:"Noto Serif SC","Songti SC",Georgia,serif;color:#111;line-height:1.7;font-size:11pt;max-width:760px;margin:auto}
+body{font-family:"Noto Serif SC","Songti SC",Georgia,serif;color:#111;line-height:1.7;font-size:11pt;max-width:760px;margin:auto;padding:18px}
+.toolbar{position:sticky;top:0;background:#fff;border-bottom:1px solid #ddd;padding:8px 0;margin-bottom:12px;display:flex;gap:12px;align-items:center}
+.toolbar button{background:#111;color:#fff;border:0;border-radius:6px;padding:7px 12px;cursor:pointer}
+.toolbar span{color:#666;font-size:10pt}
 h1{font-size:20pt;line-height:1.25;margin:0 0 8px}
 h2{font-size:13pt;margin:20px 0 6px;border-bottom:1px solid #ddd;padding-bottom:3px}
 h3{font-size:11pt}
@@ -2780,7 +2783,9 @@ p{margin:0 0 9px;text-align:justify}
 .meta,.ref,figcaption,small{color:#555;font-size:9pt}
 figure{border:1px dashed #bbb;padding:8px 10px;margin:10px 0;break-inside:avoid}
 figure:before{content:"图表计划";display:block;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:.08em}
+@media print{.toolbar{display:none}body{padding:0;max-width:none}}
 </style></head><body>
+<div class="toolbar"><button onclick="window.print()">打印 / 保存为 PDF</button><span>在打印对话框选择“另存为 PDF”</span></div>
 <h1>${esc(report.title)}</h1>
 <p class="meta">${esc(fmtTime(report.createdAt))} · ${report.sourceCount || 0} 篇文献</p>
 ${report.abstract ? `<div class="abstract">${esc(report.abstract)}</div>` : ''}
@@ -2788,23 +2793,12 @@ ${sections}
 ${figures ? `<h2>图表计划</h2>${figures}` : ''}
 ${references ? `<h2>参考文献</h2>${references}` : ''}
 </body></html>`;
-        const frame = document.createElement('iframe');
-        frame.style.position = 'fixed';
-        frame.style.right = '0';
-        frame.style.bottom = '0';
-        frame.style.width = '0';
-        frame.style.height = '0';
-        frame.style.border = '0';
-        frame.srcdoc = html;
-        frame.onload = () => {
-          try {
-            frame.contentWindow.focus();
-            frame.contentWindow.print();
-          } finally {
-            setTimeout(() => frame.remove(), 1500);
-          }
-        };
-        document.body.appendChild(frame);
+        const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+        const opened = window.open(url, '_blank');
+        if (!opened) {
+          setError('浏览器拦截了新窗口。请允许弹窗后重试，或使用 .md 下载。');
+        }
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
       };
 
       if (error) return h('div', { className: 'rw-error' }, error);
