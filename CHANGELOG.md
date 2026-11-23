@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.11.6 — 2026-11-23
+
+- PDF export no longer opens a popup (which the browser blocked). It renders a print-only A4 report in the current page and calls `window.print()`, so “另存为 PDF” works without popup permission.
+
 ## 0.11.5 — 2026-11-23
 
 - Fixed the broken PDF export: it no longer prints a hidden 0×0 iframe (which could save an empty/unopenable PDF). It now opens a visible A4 report preview with a “打印 / 保存为 PDF” button.
