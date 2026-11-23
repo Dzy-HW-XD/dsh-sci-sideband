@@ -1366,7 +1366,6 @@ window.__ModuleLoader__.load({
       const tabs = [
         ['overview', 'tabs.overview', null],
         ['sources', 'tabs.sources', task ? task.counts.sources : 0],
-        ['knowledge', 'tabs.knowledge', task ? task.counts.cards : 0],
         ['reports', 'reports.generate', task ? task.counts.reports : 0],
         ['skills', 'tabs.skills', null],
       ];
@@ -1539,11 +1538,9 @@ window.__ModuleLoader__.load({
                       ? h(Overview, { key: task.id, task, snap, job, t, onTab: setTab, onNewTask: () => setDialog({ type: 'create' }) })
                       : activeTab === 'sources'
                         ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
-                        : activeTab === 'knowledge'
-                          ? h(KnowledgeView, { key: task.id, task, snap, t })
-                          : activeTab === 'skills'
-                            ? h(SkillsView, { key: 'skills', call, t })
-                            : h(ReportsView, { key: task.id, task, snap, call, run, t }),
+                        : activeTab === 'skills'
+                          ? h(SkillsView, { key: 'skills', call, t })
+                          : h(ReportsView, { key: task.id, task, snap, call, run, t }),
                   ),
                 ]
               : h(

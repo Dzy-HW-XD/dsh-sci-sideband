@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.2 — 2026-11-23
+
+- Removed the knowledge-card listing tab; the knowledge base stays internal for writer/reviewer.
+- Backfills figure cards from figure captions for existing sources, and new analyses emit figure interpretation cards.
+- Background evidence consolidation: the router periodically classifies/merges cards even when no new papers are due, tracked by `knowledgeReviewedAt`.
+
 ## 0.12.1 — 2026-11-23
 
 - Backfilled knowledge cards from existing analyses, so old projects populate the knowledge base without re-running every paper.
