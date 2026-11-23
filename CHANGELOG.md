@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.2 — 2026-11-23
+
+- Writer now receives the report input focus explicitly; the report prompt must directly answer it rather than only restating the project objective.
+- Reviewers already receive the same focus; report mode passes it through writer → writer reviewer.
+
+## 0.10.1 — 2026-11-23
+
+- Added **导出 PDF** on reports: a print-ready A4 academic layout opens the browser print dialog, which can be saved as PDF with CJK fonts and figure plans.
+
 ## 0.10.0 — 2026-11-23
 
 - Simplified the Sources tab to only **添加科研内容** and a paper count; discovery/analysis happen in the background after adding.
