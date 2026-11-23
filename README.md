@@ -53,7 +53,7 @@ grabber → analysis → evidence reviewer → writer → dedicated writer revie
 - grabber：发现/引用扩散并去重入账
 - analysis：逐篇五段式分析，沉淀证据
 - evidence reviewer：`sci_review`，temperature 0，合并/删除/补充证据，核验引用
-- writer：加载 `skills/scientific-writing` 与 `skills/scientific-figures`，基于清洗后证据写实验计划、目的与意义，生成 proposal / 综述和图表计划
+- writer：加载 K-Dense `scientific-writing`，基于清洗后证据写实验计划、目的与意义，生成 proposal / 综述
 - writer reviewer：按科研论文标准审核 writer 的稿件，检查贡献、证据、引用、结构、局限、图表与可发表性
 
 流程状态显示在「科研内容」页；`sci_pipeline` 工具也能从 Agent 侧启动同一流程。拓扑见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。

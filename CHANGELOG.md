@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.11.1 — 2026-11-23
+
+- Removed the local `scientific-figures` skill and its manifest entry; writer only loads K-Dense `scientific-writing`. Report figure-plan generation was removed to reduce prompt/output overhead.
+
 ## 0.11.0 — 2026-11-23
 
 - Writer now loads a K-Dense-derived `scientific-writing` skill; writer/proposal reviewers load a K-Dense-derived `peer-review` skill. Source, MIT license, version, and pinned commit are recorded in `skills/manifest.json`.

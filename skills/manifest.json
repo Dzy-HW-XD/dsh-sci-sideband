@@ -24,18 +24,6 @@
       "remotePath": "skills/peer-review/SKILL.md",
       "commit": "529b9f73ab4b48925027145800d7b49e96ccfd3c",
       "source": "https://github.com/K-Dense-AI/claude-scientific-writer"
-    },
-    {
-      "id": "scientific-figures",
-      "name": "Scientific Figures (local)",
-      "path": "skills/scientific-figures",
-      "version": "1.0.0",
-      "license": "local",
-      "repo": "",
-      "branch": "",
-      "remotePath": "",
-      "commit": "",
-      "source": "dsh-sci-sideband"
     }
   ]
 }
