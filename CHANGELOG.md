@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0 — 2026-11-23
+
+- Added `sci_review`: an independent evidence/report reviewer call with no conversation context and temperature 0. It returns approve/score, evidence merge/delete/add recommendations, citation issues, and required fixes.
+- Added the companion `dsh-sci-superagent` preset: a Research Supervisor that dispatches grabber → analysis → reviewer → writer → report-reviewer as independent child sessions through `dsh-mini-superagent`. The scheduler briefs each role; reviewers are fresh subagents and report requirements are part of their rubric.
+- The panel remains the shared ledger; subagents use the same `sci_*` tools.
+
 ## 0.6.2 — 2026-11-20
 
 - Query expansion now enforces 2–4 word phrases; long concatenated phrases were returning zero arXiv hits.

@@ -42,6 +42,26 @@
 - **无模型兜底**：没有可用模型或模型失败时，明确标注并退回本地规则/模板，流程不中断。
 - **Agent 工具**：`sci_task`、`sci_source`、`sci_status`、`sci_data`、`sci_experiment`、`sci_report`，与面板共用同一套动作层。
 
+## 科研 Superagent
+
+仓库里的 `superagent/` 是一个独立的 agent preset bundle。它把主会话变成调度器，并通过 `dsh-mini-superagent` 把任务派给四个独立子会话：
+
+```text
+Research Supervisor
+  ├─ grabber   发现 / 引用扩散
+  ├─ analysis  逐篇五段式分析
+  ├─ reviewer  用 sci_review 清洗证据、核验引用、审核报告
+  └─ writer    基于清洗后证据写实验计划、目的与意义
+```
+
+使用前：
+
+1. 安装 `dsh-mini-superagent`（提供 `dispatch_*` 工具）。
+2. 安装 `superagent/` bundle。
+3. 新建会话时选择 **科研 Superagent** preset。
+
+Reviewer 是独立子会话，不共享调度器上下文；`sci_review` 本身用隔离 LLM 调用、`temperature=0` 执行审核。调度器负责路由与合并报告，不亲自做 grabber/analysis/reviewer/writer 的工作。
+
 ## 安装
 
 ### 本地目录安装

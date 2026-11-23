@@ -1,0 +1,12 @@
+{
+  "name": "@local/dsh-sci-superagent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Research Supervisor preset: scheduler + grabber/analysis/reviewer/writer via dsh-mini-superagent",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
