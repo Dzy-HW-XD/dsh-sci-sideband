@@ -66,8 +66,16 @@ window.__ModuleLoader__.load({
       'tabs.reports': '综述论述',
       'tabs.skills': '技能管理',
       'tabs.settings': '设置',
-      'settings.channels': '默认检索源',
+      'settings.channels': '文献源管理',
+      'settings.channelsHint': '选择用于自动发现与分析的开放文献源。',
+      'settings.automation': '自动化',
+      'settings.automationHint': '控制 Router 何时发现新论文并触发分析。',
       'settings.autoScan': '自动扫描新论文',
+      'settings.autoScanHint': 'Router 会按间隔检查并触发 grabber → analysis → evidence reviewer。',
+      'settings.skills': '技能管理',
+      'settings.skillsHint': '查看写作/审稿技能的版本、来源与上游更新。',
+      'settings.title': '设置',
+      'settings.hint': '文献源、自动化与科研技能的集中配置。',
       'settings.scanHours': '扫描间隔',
       'settings.save': '保存设置',
       'settings.saving': '保存中…',
@@ -349,8 +357,16 @@ window.__ModuleLoader__.load({
       'tabs.reports': 'Reviews',
       'tabs.skills': 'Skills',
       'tabs.settings': 'Settings',
-      'settings.channels': 'Default discovery sources',
+      'settings.channels': 'Literature sources',
+      'settings.channelsHint': 'Choose the open sources used for automatic discovery and analysis.',
+      'settings.automation': 'Automation',
+      'settings.automationHint': 'Control when the Router discovers papers and starts analysis.',
       'settings.autoScan': 'Auto-scan for new papers',
+      'settings.autoScanHint': 'The Router checks on schedule and runs grabber → analysis → evidence reviewer.',
+      'settings.skills': 'Skills',
+      'settings.skillsHint': 'Versions, sources, and upstream updates for writing/review skills.',
+      'settings.title': 'Settings',
+      'settings.hint': 'Central configuration for sources, automation, and research skills.',
       'settings.scanHours': 'Scan interval',
       'settings.save': 'Save settings',
       'settings.saving': 'Saving…',
@@ -773,6 +789,54 @@ window.__ModuleLoader__.load({
 .rw-reportrow{appearance:none;font:inherit;text-align:left;color:inherit;background:transparent;border:1px solid transparent;border-radius:9px;padding:9px 10px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
 .rw-reportrow:hover{background:var(--dsw-alias-bg-layer-2)}
 .rw-reportrow.is-active{border-color:var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-2)}
+
+/* professional settings */
+.rw-content{background:linear-gradient(180deg,color-mix(in srgb,var(--dsw-alias-bg-layer-2) 55%,transparent),transparent 220px)}
+.rw-section{gap:18px}
+.rw-card{box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px color-mix(in srgb,var(--dsw-alias-label-primary) 4%,transparent)}
+.rw-pagehead{padding:2px 2px 4px}
+.rw-pagehead h2{margin:0;font-size:22px;line-height:1.25;font-weight:650;letter-spacing:-.02em}
+.rw-pagehead p{margin:5px 0 0;color:var(--dsw-alias-label-secondary);font-size:13px}
+.rw-settings{max-width:980px}
+.rw-settings__card{padding:0;overflow:hidden}
+.rw-settings__head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid var(--dsw-alias-border-l1);background:color-mix(in srgb,var(--dsw-alias-bg-layer-2) 45%,transparent)}
+.rw-settings__head h3{margin:0;font-size:14px;font-weight:650}
+.rw-settings__head p{margin:3px 0 0;font-size:12px;color:var(--dsw-alias-label-secondary);max-width:620px}
+.rw-settings__badge{font-size:11px;font-variant-numeric:tabular-nums;padding:3px 8px;border-radius:999px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary)}
+.rw-sourcegrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:16px 18px}
+.rw-sourceoption{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;padding:10px 11px;background:var(--dsw-alias-bg-layer-1);cursor:pointer;transition:border-color .12s ease,background .12s ease}
+.rw-sourceoption:hover{border-color:color-mix(in srgb,var(--dsw-alias-brand-primary) 35%,var(--dsw-alias-border-l1))}
+.rw-sourceoption.is-on{border-color:color-mix(in srgb,var(--dsw-alias-brand-primary) 45%,var(--dsw-alias-border-l1));background:color-mix(in srgb,var(--dsw-alias-brand-primary) 6%,var(--dsw-alias-bg-layer-1))}
+.rw-sourceoption input{margin:2px 0 0;accent-color:var(--dsw-alias-brand-primary)}
+.rw-sourceoption__body{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rw-sourceoption__body strong{font-size:12.5px;font-weight:600}
+.rw-sourceoption__body small{font-size:10.5px;color:var(--dsw-alias-label-tertiary)}
+.rw-settings__form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;padding:16px 18px}
+.rw-switchrow{display:flex;align-items:flex-start;gap:9px;cursor:pointer}
+.rw-switchrow input{margin-top:2px;accent-color:var(--dsw-alias-brand-primary)}
+.rw-switchrow span{display:flex;flex-direction:column;gap:2px}
+.rw-switchrow strong{font-size:12.5px;font-weight:600}
+.rw-switchrow small{font-size:11px;color:var(--dsw-alias-label-secondary)}
+.rw-field--inline{flex-direction:row;align-items:center;gap:10px;margin:0}
+.rw-field--inline .rw-select{width:110px}
+.rw-settings__actions{display:flex;justify-content:flex-end;padding:0 18px 16px}
+.rw-settings__skills{padding:14px 18px 18px;display:flex;flex-direction:column;gap:10px}
+.rw-settings__skills>.rw-row:first-child{justify-content:flex-end}
+@media (max-width:760px){.rw-sourcegrid{grid-template-columns:1fr}.rw-settings__form{grid-template-columns:1fr}}
+
+/* overall polish */
+.rw-head{background:color-mix(in srgb,var(--dsw-alias-bg-base) 92%,var(--dsw-alias-bg-layer-2));box-shadow:0 1px 0 color-mix(in srgb,var(--dsw-alias-border-l1) 70%,transparent)}
+.rw-rail{background:color-mix(in srgb,var(--dsw-alias-bg-layer-2) 28%,var(--dsw-alias-bg-base))}
+.rw-task{transition:background .12s ease,border-color .12s ease}
+.rw-task.is-active{box-shadow:inset 3px 0 0 var(--dsw-alias-brand-primary)}
+.rw-taskhead{background:color-mix(in srgb,var(--dsw-alias-bg-base) 96%,var(--dsw-alias-bg-layer-2))}
+.rw-tab.is-active{background:color-mix(in srgb,var(--dsw-alias-brand-primary) 7%,transparent);border-radius:7px 7px 0 0}
+.rw-stat{position:relative;overflow:hidden;transition:border-color .12s ease,transform .12s ease}
+.rw-stat:hover{border-color:color-mix(in srgb,var(--dsw-alias-brand-primary) 28%,var(--dsw-alias-border-l1));transform:translateY(-1px)}
+.rw-stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--dsw-alias-brand-primary);opacity:.55}
+.rw-item{transition:border-color .12s ease,background .12s ease}
+.rw-item:hover{border-color:color-mix(in srgb,var(--dsw-alias-brand-primary) 20%,var(--dsw-alias-border-l1))}
+.rw-card__title{font-size:13.5px;letter-spacing:-.01em}
 @media (max-width:900px){
   .rw-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
   .rw-grid,.rw-grid--3{grid-template-columns:1fr}
@@ -1365,7 +1429,6 @@ window.__ModuleLoader__.load({
         ['overview', 'tabs.overview', null],
         ['sources', 'tabs.sources', task ? task.counts.sources : 0],
         ['reports', 'reports.generate', task ? task.counts.reports : 0],
-        ['skills', 'tabs.skills', null],
         ['settings', 'tabs.settings', null],
       ];
       const activeTab = tabs.some(([id]) => id === tab) ? tab : 'overview';
@@ -1537,11 +1600,11 @@ window.__ModuleLoader__.load({
                       ? h(Overview, { key: task.id, task, snap, job, t, onTab: setTab, onNewTask: () => setDialog({ type: 'create' }) })
                       : activeTab === 'sources'
                         ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
-                        : activeTab === 'skills'
-                          ? h(SkillsView, { key: 'skills', call, t })
-                          : activeTab === 'settings'
-                            ? h(SettingsView, { key: task.id, task, call, run, t })
-                            : h(ReportsView, { key: task.id, task, snap, call, run, t }),
+                      : activeTab === 'sources'
+                        ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
+                        : activeTab === 'settings'
+                          ? h(SettingsView, { key: task.id, task, call, run, t })
+                          : h(ReportsView, { key: task.id, task, snap, call, run, t }),
                   ),
                 ]
               : h(
@@ -2998,46 +3061,70 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
 
       return h(
         'div',
-        { className: 'rw-section' },
+        { className: 'rw-section rw-settings' },
         h(
           'div',
-          { className: 'rw-card' },
-          h('div', { className: 'rw-card__title' }, t('settings.channels')),
+          { className: 'rw-pagehead' },
+          h('h2', null, t('settings.title')),
+          h('p', null, t('settings.hint')),
+        ),
+        h(
+          'section',
+          { className: 'rw-card rw-settings__card' },
           h(
             'div',
-            { className: 'rw-kv' },
+            { className: 'rw-settings__head' },
+            h('div', null, h('h3', null, t('settings.channels')), h('p', null, t('settings.channelsHint'))),
+            h('span', { className: 'rw-settings__badge' }, `${channels.length}/${DISCOVERY_CHANNELS.length}`),
+          ),
+          h(
+            'div',
+            { className: 'rw-sourcegrid' },
             DISCOVERY_CHANNELS.map((channel) =>
               h(
                 'label',
-                { key: channel.id, className: 'rw-chip', style: { cursor: 'pointer', gap: 4 } },
+                { key: channel.id, className: cls('rw-sourceoption', channels.includes(channel.id) && 'is-on') },
                 h('input', {
                   type: 'checkbox',
                   checked: channels.includes(channel.id),
                   onChange: () => toggle(channel.id),
                 }),
-                channel.label,
+                h('span', { className: 'rw-sourceoption__body' }, h('strong', null, channel.label), h('small', null, channel.access === 'open' ? 'Open access' : 'Metadata / abstract')),
+              ),
+            ),
+          ),
+        ),
+        h(
+          'section',
+          { className: 'rw-card rw-settings__card' },
+          h(
+            'div',
+            { className: 'rw-settings__head' },
+            h('div', null, h('h3', null, t('settings.automation')), h('p', null, t('settings.automationHint'))),
+          ),
+          h(
+            'div',
+            { className: 'rw-settings__form' },
+            h(
+              'label',
+              { className: 'rw-switchrow' },
+              h('input', { type: 'checkbox', checked: autoScan, onChange: (e) => setAutoScan(e.target.checked) }),
+              h('span', null, h('strong', null, t('settings.autoScan')), h('small', null, t('settings.autoScanHint'))),
+            ),
+            h(
+              'label',
+              { className: 'rw-field rw-field--inline' },
+              h('span', { className: 'rw-field__label' }, t('settings.scanHours')),
+              h(
+                'select',
+                { className: 'rw-select', value: scanHours, onChange: (e) => setScanHours(Number(e.target.value)) },
+                [12, 24, 72, 168].map((value) => h('option', { key: value, value }, `${value} h`)),
               ),
             ),
           ),
           h(
-            'label',
-            { className: 'rw-row', style: { marginTop: 10, cursor: 'pointer' } },
-            h('input', { type: 'checkbox', checked: autoScan, onChange: (e) => setAutoScan(e.target.checked) }),
-            h('span', { className: 'rw-sub' }, t('settings.autoScan')),
-          ),
-          h(
-            'label',
-            { className: 'rw-row', style: { marginTop: 6 } },
-            h('span', { className: 'rw-sub' }, t('settings.scanHours')),
-            h(
-              'select',
-              { className: 'rw-select', style: { width: 130 }, value: scanHours, onChange: (e) => setScanHours(Number(e.target.value)) },
-              [12, 24, 72, 168].map((value) => h('option', { key: value, value }, `${value} h`)),
-            ),
-          ),
-          h(
             'div',
-            { className: 'rw-row', style: { marginTop: 12, justifyContent: 'flex-end' } },
+            { className: 'rw-settings__actions' },
             h(
               Btn,
               { variant: 'primary', onClick: save, disabled: saving || !channels.length },
@@ -3045,6 +3132,16 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
               saving ? t('settings.saving') : t('settings.save'),
             ),
           ),
+        ),
+        h(
+          'section',
+          { className: 'rw-card rw-settings__card' },
+          h(
+            'div',
+            { className: 'rw-settings__head' },
+            h('div', null, h('h3', null, t('settings.skills')), h('p', null, t('settings.skillsHint'))),
+          ),
+          h(SkillsView, { call, t, embedded: true }),
         ),
       );
     }
@@ -3091,7 +3188,7 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
       );
     }
 
-    function SkillsView({ call, t }) {
+    function SkillsView({ call, t, embedded = false }) {
       const [data, setData] = useState(null);
       const [checking, setChecking] = useState(false);
       const [error, setError] = useState('');
@@ -3124,16 +3221,18 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
 
       return h(
         'div',
-        { className: 'rw-section' },
+        { className: embedded ? 'rw-settings__skills' : 'rw-section' },
         h(
           'div',
           { className: 'rw-row', style: { justifyContent: 'space-between' } },
-          h(
-            'div',
-            null,
-            h('div', { className: 'rw-card__title', style: { margin: 0 } }, t('skills.title')),
-            data && data.checkedAt ? h('div', { className: 'rw-sub' }, `${t('skills.checked')}: ${fmtTime(data.checkedAt)}`) : null,
-          ),
+          embedded
+            ? h('div', { className: 'rw-sub' }, data && data.checkedAt ? `${t('skills.checked')}: ${fmtTime(data.checkedAt)}` : '')
+            : h(
+                'div',
+                null,
+                h('div', { className: 'rw-card__title', style: { margin: 0 } }, t('skills.title')),
+                data && data.checkedAt ? h('div', { className: 'rw-sub' }, `${t('skills.checked')}: ${fmtTime(data.checkedAt)}`) : null,
+              ),
           h(
             Btn,
             { size: 'small', variant: 'primary', onClick: check, disabled: checking },

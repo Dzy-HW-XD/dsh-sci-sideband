@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.0 — 2026-11-23
+
+- Professional settings redesign: literature-source management, automation, and skill management are now in one Settings tab.
+- Skill management is embedded in Settings; the separate Skills tab is gone.
+- Refined overall layout: card depth, settings sections, source option grid, switch rows, active task rail, tab treatment, and stat accents.
+
 ## 0.12.5 — 2026-11-23
 
 - Removed the meaningless “下一步 / 运行后台探索：逐条抓取、分析并沉淀可核查证据” block and its dead copy from the overview.
