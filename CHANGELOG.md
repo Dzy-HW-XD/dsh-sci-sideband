@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.4 — 2026-11-23
+
+- Moved discovery-channel management out of the overview into a **设置** tab: default sources (arXiv/OpenAlex/Crossref/Europe PMC/DOAJ/Semantic Scholar), auto-scan, and scan interval.
+- Removed the channel card and discovery button from the overview; the main content tab remains add + count.
+
 ## 0.12.3 — 2026-11-23
 
 - Full-text fetching: arXiv URLs try `/html`, ar5iv, and `/pdf` instead of only the abstract page; the longest readable candidate wins.

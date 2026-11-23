@@ -65,6 +65,12 @@ window.__ModuleLoader__.load({
       'tabs.experiments': '实验建议',
       'tabs.reports': '综述论述',
       'tabs.skills': '技能管理',
+      'tabs.settings': '设置',
+      'settings.channels': '默认检索源',
+      'settings.autoScan': '自动扫描新论文',
+      'settings.scanHours': '扫描间隔',
+      'settings.save': '保存设置',
+      'settings.saving': '保存中…',
       'skills.title': '科研技能与版本',
       'skills.check': '检查更新',
       'skills.checking': '检查中…',
@@ -349,6 +355,12 @@ window.__ModuleLoader__.load({
       'tabs.experiments': 'Experiment ideas',
       'tabs.reports': 'Reviews',
       'tabs.skills': 'Skills',
+      'tabs.settings': 'Settings',
+      'settings.channels': 'Default discovery sources',
+      'settings.autoScan': 'Auto-scan for new papers',
+      'settings.scanHours': 'Scan interval',
+      'settings.save': 'Save settings',
+      'settings.saving': 'Saving…',
       'skills.title': 'Research skills & versions',
       'skills.check': 'Check updates',
       'skills.checking': 'Checking…',
@@ -1368,6 +1380,7 @@ window.__ModuleLoader__.load({
         ['sources', 'tabs.sources', task ? task.counts.sources : 0],
         ['reports', 'reports.generate', task ? task.counts.reports : 0],
         ['skills', 'tabs.skills', null],
+        ['settings', 'tabs.settings', null],
       ];
       const activeTab = tabs.some(([id]) => id === tab) ? tab : 'overview';
 
@@ -1540,7 +1553,9 @@ window.__ModuleLoader__.load({
                         ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
                         : activeTab === 'skills'
                           ? h(SkillsView, { key: 'skills', call, t })
-                          : h(ReportsView, { key: task.id, task, snap, call, run, t }),
+                          : activeTab === 'settings'
+                            ? h(SettingsView, { key: task.id, task, call, run, t })
+                            : h(ReportsView, { key: task.id, task, snap, call, run, t }),
                   ),
                 ]
               : h(
@@ -1625,23 +1640,6 @@ window.__ModuleLoader__.load({
         h(
           'div',
           { className: 'rw-grid' },
-          h(
-            'div',
-            { className: 'rw-card' },
-            h(
-              'div',
-              { className: 'rw-card__title' },
-              t('sources.channels'),
-              h(Btn, { size: 'small', variant: 'ghost', onClick: () => onTab('sources') }, t('sources.discover')),
-            ),
-            h(
-              'div',
-              { className: 'rw-kv', style: { marginBottom: 8 } },
-              DISCOVERY_CHANNELS.filter((channel) => activeChannels.includes(channel.id)).map((channel) =>
-                h(Chip, { key: channel.id, tone: channel.access === 'open' ? 'brand' : '' }, channel.label),
-              ),
-            ),
-          ),
           h(
             'div',
             { className: 'rw-card' },
@@ -2998,6 +2996,85 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
               ),
             )
           : h(Empty, { title: t('reports.empty') }),
+      );
+    }
+
+    function SettingsView({ task, call, run, t }) {
+      const [channels, setChannels] = useState(() =>
+        Array.isArray(task.channels) && task.channels.length ? task.channels : DEFAULT_CHANNEL_IDS,
+      );
+      const [autoScan, setAutoScan] = useState(task.autoScan === true);
+      const [scanHours, setScanHours] = useState(Number(task.scanHours) || 24);
+      const [saving, setSaving] = useState(false);
+
+      const toggle = (id) => {
+        setChannels((current) =>
+          current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+        );
+      };
+
+      const save = async () => {
+        if (saving || !channels.length) return;
+        setSaving(true);
+        try {
+          await run(t('settings.saving'), () =>
+            call('task.update', { taskId: task.id, channels, autoScan, scanHours }),
+          );
+        } finally {
+          setSaving(false);
+        }
+      };
+
+      return h(
+        'div',
+        { className: 'rw-section' },
+        h(
+          'div',
+          { className: 'rw-card' },
+          h('div', { className: 'rw-card__title' }, t('settings.channels')),
+          h(
+            'div',
+            { className: 'rw-kv' },
+            DISCOVERY_CHANNELS.map((channel) =>
+              h(
+                'label',
+                { key: channel.id, className: 'rw-chip', style: { cursor: 'pointer', gap: 4 } },
+                h('input', {
+                  type: 'checkbox',
+                  checked: channels.includes(channel.id),
+                  onChange: () => toggle(channel.id),
+                }),
+                channel.label,
+              ),
+            ),
+          ),
+          h(
+            'label',
+            { className: 'rw-row', style: { marginTop: 10, cursor: 'pointer' } },
+            h('input', { type: 'checkbox', checked: autoScan, onChange: (e) => setAutoScan(e.target.checked) }),
+            h('span', { className: 'rw-sub' }, t('settings.autoScan')),
+          ),
+          h(
+            'label',
+            { className: 'rw-row', style: { marginTop: 6 } },
+            h('span', { className: 'rw-sub' }, t('settings.scanHours')),
+            h(
+              'select',
+              { className: 'rw-select', style: { width: 130 }, value: scanHours, onChange: (e) => setScanHours(Number(e.target.value)) },
+              [12, 24, 72, 168].map((value) => h('option', { key: value, value }, `${value} h`)),
+            ),
+          ),
+          h(
+            'div',
+            { className: 'rw-row', style: { marginTop: 12, justifyContent: 'flex-end' } },
+            h(
+              Btn,
+              { variant: 'primary', onClick: save, disabled: saving || !channels.length },
+              saving ? h(Spinner) : null,
+              saving ? t('settings.saving') : t('settings.save'),
+            ),
+          ),
+        ),
       );
     }
 
