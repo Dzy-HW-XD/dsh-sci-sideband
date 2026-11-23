@@ -60,6 +60,8 @@ Research Supervisor
 2. 安装本插件；preset 随插件注册，不需要再装单独的 preset bundle。
 3. 新建会话时选择 **科研 Superagent** preset。
 
+使用方式：直接用自然语言提出研究需求，例如“继续把 SDC 方向的新论文补进来并更新实验计划”。调度器会自行判断要跑哪些阶段、跳过已完成部分，并派发子会话；用户不需要点名 grabber/reviewer，也不需要确认流水线。
+
 Reviewer 是独立子会话，不共享调度器上下文；`sci_review` 本身用隔离 LLM 调用、`temperature=0` 执行审核。调度器负责路由与合并报告，不亲自做 grabber/analysis/reviewer/writer 的工作。
 
 ## 安装

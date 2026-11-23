@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1 — 2026-11-23
+
+- The Research Supervisor now chooses the pipeline itself: users ask for research in natural language; the scheduler infers which stages are needed, skips completed stages, and dispatches the batch without asking for role names or pipeline confirmation.
+- Progress messages are user-facing; internal route labels stay in the briefs.
+
 ## 0.8.0 — 2026-11-23
 
 - Integrated the **科研 Superagent** preset into the plugin's own `cordis.patch.yml`; it no longer needs a separate preset bundle.
