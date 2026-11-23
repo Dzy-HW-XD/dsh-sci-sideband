@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.3 — 2026-11-23
+
+- Full-text fetching: arXiv URLs try `/html`, ar5iv, and `/pdf` instead of only the abstract page; the longest readable candidate wins.
+- Added `sci_source action=reanalyze` to re-fetch all sources and re-run analysis, replacing abstract-only analyses.
+
 ## 0.12.2 — 2026-11-23
 
 - Removed the knowledge-card listing tab; the knowledge base stays internal for writer/reviewer.
