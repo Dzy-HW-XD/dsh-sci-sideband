@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.12.1 — 2026-11-23
+
+- Backfilled knowledge cards from existing analyses, so old projects populate the knowledge base without re-running every paper.
+- Compacted the public state payload (source analysis + report list) to keep the panel and state RPC responsive with 38+ sources and cards.
+- Added the knowledge tab and router status to the public state.
+
+## 0.12.0 — 2026-11-23
+
+- Analysis now emits long-term knowledge cards: experiment data, conclusions, and figure/table interpretations with provenance.
+- Added a unified `cards` knowledge base; evidence reviewer classifies, merges, and deletes cards (`cardOps`), and the pipeline applies the result.
+- Writer consumes knowledge cards (not only raw sources/evidence) when writing reports.
+- Added a **知识库** tab showing cards grouped by theme/kind.
+- Added a top-level **Router**: auto-scan now triggers `grabber → analysis → evidence reviewer` with `mode=ingest`; writer remains user-triggered.
+
 ## 0.11.6 — 2026-11-23
 
 - PDF export no longer opens a popup (which the browser blocked). It renders a print-only A4 report in the current page and calls `window.print()`, so “另存为 PDF” works without popup permission.

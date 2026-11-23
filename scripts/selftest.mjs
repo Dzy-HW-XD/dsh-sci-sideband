@@ -368,7 +368,7 @@ async function runWithModel() {
   const analyzed = snapshot.sources.find((row) => row.id === source.id);
   assert.equal(analyzed.status, 'analyzed');
   assert.equal(analyzed.analysis.mode, 'model');
-  assert.ok(analyzed.analysis.summary.length > 10);
+  assert.ok(analyzed.analysis.problem.length > 10);
   assert.ok(snapshot.sources.find((row) => row.id === late.id).analysis, 'late source must be analyzed too');
   const savedOnly = snapshot.sources.find((row) => row.id === manual.id);
   assert.equal(savedOnly.analysis, null, 'save-only source must not be analyzed by a running job');
@@ -553,7 +553,7 @@ async function runWithoutModel() {
   const snapshot = await lab.run('state.get', {});
   const analyzed = snapshot.sources.find((row) => row.id === source.id);
   assert.equal(analyzed.analysis.mode, 'heuristic');
-  assert.ok(analyzed.analysis.dataPoints.length >= 1);
+  assert.ok(snapshot.cards.length >= 1);
   const suggestions = await lab.run('suggestion.generate', { taskId: task.id, count: 2 });
   assert.equal(suggestions.mode, 'fallback');
   assert.ok(suggestions.items.length >= 1);

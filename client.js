@@ -56,6 +56,11 @@ window.__ModuleLoader__.load({
       'tabs.overview': '概览',
       'tabs.topics': '题目（可选）',
       'tabs.sources': '科研内容',
+      'tabs.knowledge': '知识库',
+      'knowledge.empty': '还没有沉淀的知识卡片：先分析论文，evidence reviewer 会分类合并。',
+      'knowledge.data': '数据',
+      'knowledge.figure': '图表',
+      'knowledge.source': '来源',
       'tabs.data': '证据与结果',
       'tabs.experiments': '实验建议',
       'tabs.reports': '综述论述',
@@ -335,6 +340,11 @@ window.__ModuleLoader__.load({
       'tabs.overview': 'Overview',
       'tabs.topics': 'Topics (optional)',
       'tabs.sources': 'Content',
+      'tabs.knowledge': 'Knowledge',
+      'knowledge.empty': 'No knowledge cards yet: analyze papers; the evidence reviewer will classify and merge them.',
+      'knowledge.data': 'Data',
+      'knowledge.figure': 'Figure',
+      'knowledge.source': 'Source',
       'tabs.data': 'Evidence',
       'tabs.experiments': 'Experiment ideas',
       'tabs.reports': 'Reviews',
@@ -1356,6 +1366,7 @@ window.__ModuleLoader__.load({
       const tabs = [
         ['overview', 'tabs.overview', null],
         ['sources', 'tabs.sources', task ? task.counts.sources : 0],
+        ['knowledge', 'tabs.knowledge', task ? task.counts.cards : 0],
         ['reports', 'reports.generate', task ? task.counts.reports : 0],
         ['skills', 'tabs.skills', null],
       ];
@@ -1528,9 +1539,11 @@ window.__ModuleLoader__.load({
                       ? h(Overview, { key: task.id, task, snap, job, t, onTab: setTab, onNewTask: () => setDialog({ type: 'create' }) })
                       : activeTab === 'sources'
                         ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
-                        : activeTab === 'skills'
-                          ? h(SkillsView, { key: 'skills', call, t })
-                          : h(ReportsView, { key: task.id, task, snap, call, run, t }),
+                        : activeTab === 'knowledge'
+                          ? h(KnowledgeView, { key: task.id, task, snap, t })
+                          : activeTab === 'skills'
+                            ? h(SkillsView, { key: 'skills', call, t })
+                            : h(ReportsView, { key: task.id, task, snap, call, run, t }),
                   ),
                 ]
               : h(
@@ -2988,6 +3001,48 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
               ),
             )
           : h(Empty, { title: t('reports.empty') }),
+      );
+    }
+
+    function KnowledgeView({ task, snap, t }) {
+      const cards = (snap.cards || []).filter((card) => card.taskId === task.id);
+      if (!cards.length) return h(Empty, { title: t('knowledge.empty') });
+      const groups = new Map();
+      for (const card of cards) {
+        const key = card.theme || (card.kind === 'figure' ? '图表' : card.kind === 'experiment' ? '实验数据' : '结论');
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(card);
+      }
+      return h(
+        'div',
+        { className: 'rw-section' },
+        [...groups.entries()].map(([theme, rows]) =>
+          h(
+            'div',
+            { key: theme, className: 'rw-card' },
+            h('div', { className: 'rw-card__title' }, `${theme} (${rows.length})`),
+            rows.map((card) =>
+              h(
+                'div',
+                { key: card.id, className: 'rw-item', style: { marginTop: 8 } },
+                h(
+                  'div',
+                  { className: 'rw-item__top' },
+                  h('div', { className: 'rw-item__title' }, card.title || card.claim),
+                  h(Chip, { tone: card.kind === 'figure' ? 'brand' : card.kind === 'experiment' ? 'warn' : 'ok' }, card.kind),
+                ),
+                card.claim ? h('div', { className: 'rw-item__body' }, card.claim) : null,
+                card.data && (card.data.label || card.data.value)
+                  ? h('div', { className: 'rw-sub' }, `${t('knowledge.data')}: ${[card.data.label, card.data.value, card.data.unit].filter(Boolean).join(' ')}${card.data.context ? ` · ${card.data.context}` : ''}`)
+                  : null,
+                card.figure
+                  ? h('div', { className: 'rw-sub' }, `${t('knowledge.figure')}: ${[card.figure.caption, card.figure.interpretation, card.figure.dataNeeded].filter(Boolean).join('；')}`)
+                  : null,
+                card.sourceTitle ? h('div', { className: 'rw-sub' }, `${t('knowledge.source')}: ${card.sourceTitle}`) : null,
+              ),
+            ),
+          ),
+        ),
       );
     }
 
