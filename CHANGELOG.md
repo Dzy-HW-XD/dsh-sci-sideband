@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0 — 2026-11-23
+
+- Moved orchestration into the plugin itself: no conversation preset is required. The panel now has **运行完整研究流程**, backed by `pipeline.start` / `sci_pipeline`.
+- Built-in stages: grabber → analysis → evidence reviewer → writer → dedicated writer reviewer.
+- Added a writer-specific reviewer (`sci_review action=writer`) that judges the manuscript at research-paper level: contribution, evidence, citations, structure, limitations, and publishability.
+- Removed the integrated Superagent preset; the plugin is a standalone panel workflow again.
+
 ## 0.8.1 — 2026-11-23
 
 - The Research Supervisor now chooses the pipeline itself: users ask for research in natural language; the scheduler infers which stages are needed, skips completed stages, and dispatches the batch without asking for role names or pipeline confirmation.

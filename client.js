@@ -131,6 +131,9 @@ window.__ModuleLoader__.load({
       'topics.question': '待回答',
       'topics.deleteHint': '删除这个题目？',
       'sources.hint': '无需先拆题目。给出研究兴趣/目的后，可直接从默认开放源检索相关论文并加入科研内容，随后后台分析；也可以手动贴 URL/DOI 或粘贴原文。',
+      'pipeline.run': '运行完整研究流程',
+      'pipeline.running': '研究流程运行中…',
+      'pipeline.status': '流程状态',
       'sources.discoverHint': '默认检索 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar，每源最多取 20 条候选，不按固定条数截断；只有与目的/检索短语相似度达到阈值的记录才会加入。开放获取内容会抓取全文；付费墙期刊只取元数据/摘要，全文取决于是否开放。',
       'sources.discover': '从默认源发现并分析',
       'sources.discovering': '正在检索默认开放源…',
@@ -393,6 +396,9 @@ window.__ModuleLoader__.load({
       'topics.question': 'Question',
       'topics.deleteHint': 'Delete this topic?',
       'sources.hint': 'No topics are required. Give the research interest/objective and discover relevant papers from default open sources, or add a URL/DOI/pasted text manually.',
+      'pipeline.run': 'Run full research pipeline',
+      'pipeline.running': 'Research pipeline running…',
+      'pipeline.status': 'Pipeline',
       'sources.discoverHint': 'Searches arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar with up to 20 candidates per source. There is no fixed per-source import cap; only records above the similarity threshold are added. Open-access records may include full text; paywalled journals contribute metadata/abstract only.',
       'sources.discover': 'Discover and analyze',
       'sources.discovering': 'Searching default open sources…',
@@ -1197,7 +1203,8 @@ window.__ModuleLoader__.load({
       const job = task && snap && snap.jobs ? snap.jobs[task.id] : null;
 
       useEffect(() => {
-        if (!job || job.status !== 'running') return undefined;
+        const pipelineRunning = task && task.pipeline && task.pipeline.status === 'running';
+        if ((!job || job.status !== 'running') && !pipelineRunning) return undefined;
         const timer = setInterval(() => {
           refresh()
             .then(() => {
@@ -1212,7 +1219,7 @@ window.__ModuleLoader__.load({
             });
         }, 2200);
         return () => clearInterval(timer);
-      }, [job && job.status, job && job.done, refresh]);
+      }, [job && job.status, job && job.done, task && task.pipeline && task.pipeline.stage, task && task.pipeline && task.pipeline.status, refresh]);
 
       const attempt = useCallback(
         async (label, operation) => {
@@ -1906,6 +1913,7 @@ window.__ModuleLoader__.load({
       );
       const [discovering, setDiscovering] = useState(false);
       const [deepening, setDeepening] = useState(false);
+      const [pipelineStarting, setPipelineStarting] = useState(false);
       const [perProvider, setPerProvider] = useState(100);
       const [minSimilarity, setMinSimilarity] = useState(0.3);
       const [autoAnalyze, setAutoAnalyze] = useState(true);
@@ -1963,6 +1971,18 @@ window.__ModuleLoader__.load({
           );
         } finally {
           setDeepening(false);
+        }
+      };
+
+      const startPipeline = async () => {
+        if (pipelineStarting || (task.pipeline && task.pipeline.status === 'running')) return;
+        setPipelineStarting(true);
+        try {
+          await run(t('pipeline.running'), () =>
+            call('pipeline.start', { taskId: task.id, focus: task.experimentBrief, count: 4 }),
+          );
+        } finally {
+          setPipelineStarting(false);
         }
       };
 
@@ -2070,10 +2090,28 @@ window.__ModuleLoader__.load({
         h(
           'div',
           { className: 'rw-row' },
+          h(
+            Btn,
+            {
+              size: 'small',
+              variant: 'primary',
+              onClick: startPipeline,
+              disabled: pipelineStarting || (task.pipeline && task.pipeline.status === 'running'),
+            },
+            pipelineStarting || (task.pipeline && task.pipeline.status === 'running') ? h(Spinner) : h(Icon, { name: 'spark', size: 14 }),
+            task.pipeline && task.pipeline.status === 'running' ? t('pipeline.running') : t('pipeline.run'),
+          ),
           h(Btn, { size: 'small', onClick: () => setAdding((value) => !value) }, h(Icon, { name: 'plus', size: 14 }), t('sources.add')),
           h(Btn, { size: 'small', onClick: () => explore([]), disabled: !pending.length || (job && job.status === 'running') }, h(Icon, { name: 'spark', size: 14 }), t('sources.analyzeAll')),
           h('span', { className: 'rw-sub' }, t('sources.progress', { analyzed: task.counts.withAnalysis ?? task.counts.analyzed, total: sources.length })),
         ),
+        task.pipeline
+          ? h(
+              'div',
+              { className: 'rw-sub' },
+              `${t('pipeline.status')}: ${task.pipeline.status}${task.pipeline.stage ? ` · ${task.pipeline.stage}` : ''}${task.pipeline.error ? ` · ${task.pipeline.error}` : ''}`,
+            )
+          : null,
         adding ? h(SourceForm, { task, onCreate: add, onCancel: () => setAdding(false), t }) : null,
         job ? h(JobBanner, { job, t }) : null,
         sources.length

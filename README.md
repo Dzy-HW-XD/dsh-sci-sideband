@@ -42,27 +42,21 @@
 - **无模型兜底**：没有可用模型或模型失败时，明确标注并退回本地规则/模板，流程不中断。
 - **Agent 工具**：`sci_task`、`sci_source`、`sci_status`、`sci_data`、`sci_experiment`、`sci_review`、`sci_report`，与面板共用同一套动作层。
 
-## 科研 Superagent
+## 内置研究流水线
 
-插件 bundle 自带 **科研 Superagent** preset。安装插件后，新建会话时选择该 preset，即可把主会话变成调度器，并通过 `dsh-mini-superagent` 把任务派给独立子会话：
+调度逻辑直接在插件里，不需要新建会话或选择 preset。在「科研内容」点 **运行完整研究流程**：
 
 ```text
-Research Supervisor
-  ├─ grabber   发现 / 引用扩散
-  ├─ analysis  逐篇五段式分析
-  ├─ reviewer  用 sci_review 清洗证据、核验引用、审核报告
-  └─ writer    基于清洗后证据写实验计划、目的与意义
+grabber → analysis → evidence reviewer → writer → dedicated writer reviewer
 ```
 
-使用前：
+- grabber：发现/引用扩散并去重入账
+- analysis：逐篇五段式分析，沉淀证据
+- evidence reviewer：`sci_review`，temperature 0，合并/删除/补充证据，核验引用
+- writer：基于清洗后证据写实验计划、目的与意义，并生成 proposal / 综述
+- writer reviewer：按科研论文标准审核 writer 的稿件，检查贡献、证据、引用、结构、局限与可发表性
 
-1. 安装 `dsh-mini-superagent`（提供 `dispatch_*` 工具）。
-2. 安装本插件；preset 随插件注册，不需要再装单独的 preset bundle。
-3. 新建会话时选择 **科研 Superagent** preset。
-
-使用方式：直接用自然语言提出研究需求，例如“继续把 SDC 方向的新论文补进来并更新实验计划”。调度器会自行判断要跑哪些阶段、跳过已完成部分，并派发子会话；用户不需要点名 grabber/reviewer，也不需要确认流水线。
-
-Reviewer 是独立子会话，不共享调度器上下文；`sci_review` 本身用隔离 LLM 调用、`temperature=0` 执行审核。调度器负责路由与合并报告，不亲自做 grabber/analysis/reviewer/writer 的工作。
+流程状态显示在「科研内容」页；`sci_pipeline` 工具也能从 Agent 侧启动同一流程。
 
 ## 安装
 
