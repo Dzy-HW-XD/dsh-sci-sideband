@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.0 — 2026-11-23
+
+- Simplified the Sources tab to only **添加科研内容** and a paper count; discovery/analysis happen in the background after adding.
+- Removed the experiment tab; **报告生成** now has one focus input, one generate button, and the generated report list/detail.
+- Report mode of the pipeline runs writer + dedicated writer reviewer without re-running grabber/analysis.
+- Writer loads `skills/scientific-writing` and `skills/scientific-figures`; reports include a figure plan.
+- Added `docs/ARCHITECTURE.md` with the plugin's agent/pipeline topology.
+
 ## 0.9.0 — 2026-11-23
 
 - Moved orchestration into the plugin itself: no conversation preset is required. The panel now has **运行完整研究流程**, backed by `pipeline.start` / `sci_pipeline`.

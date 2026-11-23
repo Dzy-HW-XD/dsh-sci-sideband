@@ -161,6 +161,7 @@ window.__ModuleLoader__.load({
       'sources.relation.reference': '参考文献',
       'sources.relation.citation': '被引文献',
       'sources.add': '添加科研内容',
+      'sources.count': '{n} 篇',
       'sources.addTitle': '论文标题（留空则尝试从正文首行推断）',
       'sources.url': 'URL',
       'sources.doi': 'DOI',
@@ -218,12 +219,13 @@ window.__ModuleLoader__.load({
       'confidence.medium': '中',
       'confidence.low': '低',
       'reports.hint': '把研究兴趣、已有成果、已分析内容与证据组合成一篇连贯的综述论述。没有可用模型时会退回“证据拼装”模式，仍会生成可编辑的 Markdown。',
-      'reports.generate': '生成综述论述',
+      'reports.generate': '生成报告',
       'reports.generating': '正在综合证据并撰写…',
       'reports.empty': '还没有生成过综述。',
       'reports.abstract': '摘要',
       'reports.keywords': '关键词',
       'reports.references': '参考文献',
+      'reports.figures': '图表计划',
       'reports.meta': '{sources} 条内容 · {points} 条证据 · {mode}',
       'reports.sourceCount': '{n} 条内容',
       'reports.dataCount': '{n} 条证据',
@@ -426,6 +428,7 @@ window.__ModuleLoader__.load({
       'sources.relation.reference': 'Reference',
       'sources.relation.citation': 'Cited by',
       'sources.add': 'Add content',
+      'sources.count': '{n} papers',
       'sources.addTitle': 'Paper title (leave blank to infer from the first line)',
       'sources.url': 'URL',
       'sources.doi': 'DOI',
@@ -483,12 +486,13 @@ window.__ModuleLoader__.load({
       'confidence.medium': 'Medium',
       'confidence.low': 'Low',
       'reports.hint': 'Combine the research interest, current results, analyzed content, and captured evidence into a coherent review article. Without a model it falls back to deterministic evidence assembly.',
-      'reports.generate': 'Compose review article',
+      'reports.generate': 'Generate report',
       'reports.generating': 'Synthesizing evidence and writing…',
       'reports.empty': 'No report has been generated yet.',
       'reports.abstract': 'Abstract',
       'reports.keywords': 'Keywords',
       'reports.references': 'References',
+      'reports.figures': 'Figure plan',
       'reports.meta': '{sources} sources · {points} evidence rows · {mode}',
       'reports.sourceCount': '{n} sources',
       'reports.dataCount': '{n} evidence rows',
@@ -1328,8 +1332,7 @@ window.__ModuleLoader__.load({
       const tabs = [
         ['overview', 'tabs.overview', null],
         ['sources', 'tabs.sources', task ? task.counts.sources : 0],
-        ['experiments', 'tabs.experiments', task ? task.counts.suggestions : 0],
-        ['reports', 'tabs.reports', task ? task.counts.reports : 0],
+        ['reports', 'reports.generate', task ? task.counts.reports : 0],
       ];
       const activeTab = tabs.some(([id]) => id === tab) ? tab : 'overview';
 
@@ -1500,9 +1503,7 @@ window.__ModuleLoader__.load({
                       ? h(Overview, { key: task.id, task, snap, job, t, onTab: setTab, onNewTask: () => setDialog({ type: 'create' }) })
                       : activeTab === 'sources'
                         ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
-                        : activeTab === 'experiments'
-                          ? h(ExperimentsView, { key: task.id, task, snap, call, run, t })
-                          : h(ReportsView, { key: task.id, task, snap, call, run, t }),
+                        : h(ReportsView, { key: task.id, task, snap, call, run, t }),
                   ),
                 ]
               : h(
@@ -1991,127 +1992,15 @@ window.__ModuleLoader__.load({
         { className: 'rw-section' },
         h(
           'div',
-          { className: 'rw-card' },
-          h(
-            'div',
-            { className: 'rw-card__title', style: { marginBottom: 4 } },
-            t('sources.discover'),
-            h(
-              Btn,
-              { size: 'small', variant: 'primary', onClick: discover, disabled: discovering || !channels.length },
-              discovering ? h(Spinner) : h(Icon, { name: 'search', size: 14 }),
-              discovering ? t('sources.discovering') : t('sources.discover'),
-            ),
-          ),
-          h(
-            'div',
-            { className: 'rw-row', style: { marginBottom: 8 } },
-            h(
-              'label',
-              { className: 'rw-row', style: { gap: 6 } },
-              h('span', { className: 'rw-sub' }, t('sources.perProvider')),
-              h(
-                'select',
-                { className: 'rw-select', style: { width: 68 }, value: perProvider, onChange: (e) => setPerProvider(Number(e.target.value)) },
-                [20, 50, 100].map((value) => h('option', { key: value, value }, value)),
-              ),
-            ),
-            h(
-              'label',
-              { className: 'rw-row', style: { gap: 6 } },
-              h('span', { className: 'rw-sub' }, t('sources.minSimilarity')),
-              h(
-                'select',
-                { className: 'rw-select', style: { width: 80 }, value: minSimilarity, onChange: (e) => setMinSimilarity(Number(e.target.value)) },
-                [0.2, 0.3, 0.4, 0.5, 0.6].map((value) => h('option', { key: value, value }, value.toFixed(1))),
-              ),
-            ),
-            h(
-              'label',
-              { className: 'rw-row', style: { gap: 6, cursor: 'pointer' } },
-              h('input', { type: 'checkbox', checked: autoAnalyze, onChange: (e) => setAutoAnalyze(e.target.checked) }),
-              h('span', { className: 'rw-sub' }, t('sources.autoAnalyze')),
-            ),
-          ),
-          h(
-            'div',
-            { className: 'rw-row', style: { marginBottom: 8 } },
-            h(
-              'label',
-              { className: 'rw-row', style: { gap: 6, cursor: 'pointer' } },
-              h('input', {
-                type: 'checkbox',
-                checked: autoScan,
-                onChange: (e) => saveScan(e.target.checked, scanHours),
-              }),
-              h('span', { className: 'rw-sub' }, t('sources.autoScan')),
-            ),
-            h(
-              'label',
-              { className: 'rw-row', style: { gap: 6 } },
-              h(
-                'select',
-                {
-                  className: 'rw-select',
-                  style: { width: 88 },
-                  value: scanHours,
-                  disabled: !autoScan,
-                  onChange: (e) => saveScan(true, Number(e.target.value)),
-                },
-                [12, 24, 72, 168].map((value) =>
-                  h('option', { key: value, value }, t('sources.scanEvery', { h: value })),
-                ),
-              ),
-            ),
-          ),
-          h(
-            'div',
-            { className: 'rw-kv' },
-            DISCOVERY_CHANNELS.map((channel) =>
-              h(
-                'label',
-                { key: channel.id, className: 'rw-chip', style: { cursor: 'pointer', gap: 4 } },
-                h('input', { type: 'checkbox', checked: channels.includes(channel.id), onChange: () => toggleChannel(channel.id) }),
-                channel.label,
-              ),
-            ),
-          ),
-          h(
-            'div',
-            { className: 'rw-row', style: { marginTop: 10, borderTop: '1px solid var(--dsw-alias-border-l2)', paddingTop: 10 } },
-            h(
-              Btn,
-              { size: 'small', onClick: deepen, disabled: deepening || !analyzed.length },
-              deepening ? h(Spinner) : h(Icon, { name: 'spark', size: 14 }),
-              deepening ? t('sources.deepenRunning') : t('sources.deepen'),
-            ),
-          ),
-        ),
-        h(
-          'div',
           { className: 'rw-row' },
           h(
             Btn,
-            {
-              size: 'small',
-              variant: 'primary',
-              onClick: startPipeline,
-              disabled: pipelineStarting || (task.pipeline && task.pipeline.status === 'running'),
-            },
-            pipelineStarting || (task.pipeline && task.pipeline.status === 'running') ? h(Spinner) : h(Icon, { name: 'spark', size: 14 }),
-            task.pipeline && task.pipeline.status === 'running' ? t('pipeline.running') : t('pipeline.run'),
+            { size: 'small', variant: 'primary', onClick: () => setAdding((value) => !value) },
+            h(Icon, { name: 'plus', size: 14 }),
+            t('sources.add'),
           ),
-          h(Btn, { size: 'small', onClick: () => setAdding((value) => !value) }, h(Icon, { name: 'plus', size: 14 }), t('sources.add')),
-          h(Btn, { size: 'small', onClick: () => explore([]), disabled: !pending.length || (job && job.status === 'running') }, h(Icon, { name: 'spark', size: 14 }), t('sources.analyzeAll')),
-          h('span', { className: 'rw-sub' }, t('sources.progress', { analyzed: task.counts.withAnalysis ?? task.counts.analyzed, total: sources.length })),
+          h('span', { className: 'rw-sub' }, t('sources.count', { n: sources.length })),
         ),
-        task.pipeline
-          ? h(
-              'div',
-              { className: 'rw-sub' },
-              `${t('pipeline.status')}: ${task.pipeline.status}${task.pipeline.stage ? ` · ${task.pipeline.stage}` : ''}${task.pipeline.error ? ` · ${task.pipeline.error}` : ''}`,
-            )
-          : null,
         adding ? h(SourceForm, { task, onCreate: add, onCancel: () => setAdding(false), t }) : null,
         job ? h(JobBanner, { job, t }) : null,
         sources.length
@@ -2878,6 +2767,24 @@ window.__ModuleLoader__.load({
             ),
           ),
         ),
+        report.figures && report.figures.length
+          ? h(
+              'div',
+              { className: 'rw-report__section' },
+              h('h3', null, t('reports.figures')),
+              report.figures.map((figure, index) =>
+                h(
+                  'div',
+                  { key: index, className: 'rw-card rw-card--tight' },
+                  h('div', { className: 'rw-item__title' }, `${figure.label || '图'} ${figure.title}`.trim()),
+                  figure.question ? h('div', { className: 'rw-sub' }, `问题：${figure.question}`) : null,
+                  figure.encoding ? h('div', { className: 'rw-sub' }, `编码：${figure.encoding}`) : null,
+                  figure.caption ? h('p', { className: 'rw-item__body' }, figure.caption) : null,
+                  figure.dataNeeded ? h('div', { className: 'rw-sub' }, `数据：${figure.dataNeeded}`) : null,
+                ),
+              ),
+            )
+          : null,
         report.references && report.references.length
           ? h(
               'div',
@@ -2897,20 +2804,27 @@ window.__ModuleLoader__.load({
 
     function ReportsView({ task, snap, call, run, t }) {
       const [reportId, setReportId] = useState(null);
+      const [focus, setFocus] = useState(task.experimentBrief || '');
       const [composing, setComposing] = useState(false);
       const reports = snap.reports.filter((row) => row.taskId === task.id);
-      const canCompose = (task.counts.withAnalysis ?? task.counts.analyzed) > 0;
+      const latest = reports.length ? reports[0] : null;
+      const pipelineRunning = task.pipeline && task.pipeline.status === 'running';
 
       useEffect(() => {
         if (reportId && !reports.some((row) => row.id === reportId)) setReportId(null);
       }, [reports, reportId]);
 
+      useEffect(() => {
+        if (!reportId && latest) setReportId(latest.id);
+      }, [latest, reportId]);
+
       const compose = async () => {
-        if (composing) return;
+        if (composing || pipelineRunning) return;
         setComposing(true);
         try {
-          const created = await run(t('reports.generating'), () => call('report.compose', { taskId: task.id }));
-          if (created) setReportId(created.id);
+          await run(t('pipeline.running'), () =>
+            call('pipeline.start', { taskId: task.id, mode: 'report', focus, count: 2 }),
+          );
         } finally {
           setComposing(false);
         }
@@ -2919,27 +2833,30 @@ window.__ModuleLoader__.load({
       return h(
         'div',
         { className: 'rw-section' },
-        h('p', { className: 'rw-hint' }, t('reports.hint')),
         h(
           'div',
           { className: 'rw-card' },
           h(
+            Field,
+            { label: t('experiments.focus') },
+            h('textarea', {
+              className: 'rw-textarea',
+              rows: 2,
+              value: focus,
+              onChange: (e) => setFocus(e.target.value),
+              placeholder: t('experiments.focus'),
+            }),
+          ),
+          h(
             'div',
-            { className: 'rw-row', style: { justifyContent: 'space-between' } },
-            h(
-              'div',
-              null,
-              h('div', { className: 'rw-card__title', style: { margin: 0 } }, t('reports.generate')),
-              h('div', { className: 'rw-sub' }, t('sources.progress', { analyzed: task.counts.withAnalysis ?? task.counts.analyzed, total: task.counts.sources })),
-            ),
+            { className: 'rw-row', style: { marginTop: 8, justifyContent: 'flex-end' } },
             h(
               Btn,
-              { variant: 'primary', onClick: compose, disabled: !canCompose || composing },
-              composing ? h(Spinner) : h(Icon, { name: 'doc', size: 14 }),
-              composing ? t('reports.generating') : t('reports.generate'),
+              { variant: 'primary', onClick: compose, disabled: composing || pipelineRunning },
+              composing || pipelineRunning ? h(Spinner) : h(Icon, { name: 'doc', size: 14 }),
+              composing || pipelineRunning ? t('pipeline.running') : t('reports.generate'),
             ),
           ),
-          !canCompose ? h('p', { className: 'rw-sub', style: { margin: '8px 0 0' } }, t('overview.nextExplore')) : null,
         ),
         reports.length
           ? h(
