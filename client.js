@@ -59,6 +59,17 @@ window.__ModuleLoader__.load({
       'tabs.data': '证据与结果',
       'tabs.experiments': '实验建议',
       'tabs.reports': '综述论述',
+      'tabs.skills': '技能管理',
+      'skills.title': '科研技能与版本',
+      'skills.check': '检查更新',
+      'skills.checking': '检查中…',
+      'skills.available': '有更新',
+      'skills.upToDate': '已是最新',
+      'skills.local': '本地技能',
+      'skills.missing': '文件缺失',
+      'skills.version': '版本',
+      'skills.checked': '上次检查',
+      'skills.empty': '没有登记技能。',
       'common.add': '添加',
       'common.cancel': '取消',
       'common.save': '保存',
@@ -327,6 +338,17 @@ window.__ModuleLoader__.load({
       'tabs.data': 'Evidence',
       'tabs.experiments': 'Experiment ideas',
       'tabs.reports': 'Reviews',
+      'tabs.skills': 'Skills',
+      'skills.title': 'Research skills & versions',
+      'skills.check': 'Check updates',
+      'skills.checking': 'Checking…',
+      'skills.available': 'Update available',
+      'skills.upToDate': 'Up to date',
+      'skills.local': 'Local skill',
+      'skills.missing': 'Missing file',
+      'skills.version': 'Version',
+      'skills.checked': 'Last checked',
+      'skills.empty': 'No skills registered.',
       'common.add': 'Add',
       'common.cancel': 'Cancel',
       'common.save': 'Save',
@@ -1335,6 +1357,7 @@ window.__ModuleLoader__.load({
         ['overview', 'tabs.overview', null],
         ['sources', 'tabs.sources', task ? task.counts.sources : 0],
         ['reports', 'reports.generate', task ? task.counts.reports : 0],
+        ['skills', 'tabs.skills', null],
       ];
       const activeTab = tabs.some(([id]) => id === tab) ? tab : 'overview';
 
@@ -1505,7 +1528,9 @@ window.__ModuleLoader__.load({
                       ? h(Overview, { key: task.id, task, snap, job, t, onTab: setTab, onNewTask: () => setDialog({ type: 'create' }) })
                       : activeTab === 'sources'
                         ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
-                        : h(ReportsView, { key: task.id, task, snap, call, run, t }),
+                        : activeTab === 'skills'
+                          ? h(SkillsView, { key: 'skills', call, t })
+                          : h(ReportsView, { key: task.id, task, snap, call, run, t }),
                   ),
                 ]
               : h(
@@ -2964,6 +2989,111 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
               ),
             )
           : h(Empty, { title: t('reports.empty') }),
+      );
+    }
+
+    function SkillsView({ call, t }) {
+      const [data, setData] = useState(null);
+      const [checking, setChecking] = useState(false);
+      const [error, setError] = useState('');
+
+      useEffect(() => {
+        let alive = true;
+        call('skills.list')
+          .then((value) => {
+            if (alive) setData(value);
+          })
+          .catch((failure) => {
+            if (alive) setError(messageOf(failure));
+          });
+        return () => {
+          alive = false;
+        };
+      }, [call]);
+
+      const check = async () => {
+        setChecking(true);
+        setError('');
+        try {
+          setData(await call('skills.check'));
+        } catch (failure) {
+          setError(messageOf(failure));
+        } finally {
+          setChecking(false);
+        }
+      };
+
+      return h(
+        'div',
+        { className: 'rw-section' },
+        h(
+          'div',
+          { className: 'rw-row', style: { justifyContent: 'space-between' } },
+          h(
+            'div',
+            null,
+            h('div', { className: 'rw-card__title', style: { margin: 0 } }, t('skills.title')),
+            data && data.checkedAt ? h('div', { className: 'rw-sub' }, `${t('skills.checked')}: ${fmtTime(data.checkedAt)}`) : null,
+          ),
+          h(
+            Btn,
+            { size: 'small', variant: 'primary', onClick: check, disabled: checking },
+            checking ? h(Spinner) : h(Icon, { name: 'refresh', size: 14 }),
+            checking ? t('skills.checking') : t('skills.check'),
+          ),
+        ),
+        error ? h('div', { className: 'rw-error' }, error) : null,
+        data && data.skills && data.skills.length
+          ? h(
+              'div',
+              { className: 'rw-list' },
+              data.skills.map((skill) =>
+                h(
+                  'div',
+                  { key: skill.id, className: 'rw-item' },
+                  h(
+                    'div',
+                    { className: 'rw-item__top' },
+                    h(
+                      'div',
+                      { style: { minWidth: 0 } },
+                      h('div', { className: 'rw-item__title' }, skill.name || skill.id),
+                      h(
+                        'div',
+                        { className: 'rw-item__meta' },
+                        `${t('skills.version')} ${skill.version || '—'} · ${skill.license || '—'}${skill.commit ? ` · ${String(skill.commit).slice(0, 7)}` : ''}`,
+                      ),
+                    ),
+                    h(
+                      'div',
+                      { className: 'rw-row' },
+                      skill.available
+                        ? h(Chip, { tone: 'warn' }, t('skills.available'))
+                        : skill.repo
+                          ? h(Chip, { tone: 'ok' }, t('skills.upToDate'))
+                          : h(Chip, null, t('skills.local')),
+                      !skill.installed ? h(Chip, { tone: 'err' }, t('skills.missing')) : null,
+                    ),
+                  ),
+                  skill.source
+                    ? h(
+                        'a',
+                        { className: 'rw-link rw-mono', href: skill.source, target: '_blank', rel: 'noreferrer' },
+                        skill.source,
+                      )
+                    : null,
+                  skill.latest && skill.latest.date
+                    ? h(
+                        'div',
+                        { className: 'rw-sub' },
+                        `latest ${String(skill.latest.commit || '').slice(0, 7)} · ${fmtTime(skill.latest.date)}`,
+                      )
+                    : null,
+                  skill.error ? h('div', { className: 'rw-sub' }, skill.error) : null,
+                ),
+              ),
+            )
+          : h(Empty, { title: t('skills.empty') }),
       );
     }
 

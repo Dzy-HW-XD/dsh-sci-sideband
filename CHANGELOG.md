@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.0 — 2026-11-23
+
+- Writer now loads a K-Dense-derived `scientific-writing` skill; writer/proposal reviewers load a K-Dense-derived `peer-review` skill. Source, MIT license, version, and pinned commit are recorded in `skills/manifest.json`.
+- Added a **技能管理** tab: lists local/external skills, source, version, license, pinned commit, install state, and checks GitHub for newer commits.
+- Report writer receives the input focus and must answer it directly; reviewers use the same focus.
+- Added **导出 PDF** (A4 print layout) and a figure plan in reports.
+- Simplified Sources to add + count and Reports to one focus input + one generate button.
+
 ## 0.10.2 — 2026-11-23
 
 - Writer now receives the report input focus explicitly; the report prompt must directly answer it rather than only restating the project objective.

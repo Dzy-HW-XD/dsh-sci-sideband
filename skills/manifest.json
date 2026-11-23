@@ -1,0 +1,41 @@
+{
+  "checkedAt": null,
+  "skills": [
+    {
+      "id": "k-dense-scientific-writing",
+      "name": "K-Dense Scientific Writing",
+      "path": "skills/k-dense-scientific-writing",
+      "version": "2.1",
+      "license": "MIT",
+      "repo": "K-Dense-AI/claude-scientific-writer",
+      "branch": "main",
+      "remotePath": "skills/scientific-writing/SKILL.md",
+      "commit": "529b9f73ab4b48925027145800d7b49e96ccfd3c",
+      "source": "https://github.com/K-Dense-AI/claude-scientific-writer"
+    },
+    {
+      "id": "k-dense-peer-review",
+      "name": "K-Dense Peer Review",
+      "path": "skills/k-dense-peer-review",
+      "version": "2.2",
+      "license": "MIT",
+      "repo": "K-Dense-AI/claude-scientific-writer",
+      "branch": "main",
+      "remotePath": "skills/peer-review/SKILL.md",
+      "commit": "529b9f73ab4b48925027145800d7b49e96ccfd3c",
+      "source": "https://github.com/K-Dense-AI/claude-scientific-writer"
+    },
+    {
+      "id": "scientific-figures",
+      "name": "Scientific Figures (local)",
+      "path": "skills/scientific-figures",
+      "version": "1.0.0",
+      "license": "local",
+      "repo": "",
+      "branch": "",
+      "remotePath": "",
+      "commit": "",
+      "source": "dsh-sci-sideband"
+    }
+  ]
+}
