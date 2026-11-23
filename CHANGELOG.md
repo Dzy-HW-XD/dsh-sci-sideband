@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.11.4 — 2026-11-23
+
+- Reduced report corpus size (900-char summaries, 6 evidence rows/source) and capped the manuscript at 8 sections/2000 characters; raised output budget to 40k. This prevents the 38-source report from exhausting JSON output and falling back to evidence assembly.
+
+## 0.11.3 — 2026-11-23
+
+- Writer now explicitly honors a format/venue requested in the focus (e.g. IEEE): Index Terms, numbered sections, References, thematic synthesis instead of per-paper summaries.
+
+## 0.11.2 — 2026-11-23
+
+- Fixed report generation falling back to evidence assembly: the writer now gets a 30k output budget and low reasoning effort, so long report JSON is not cut off into “模型返回的内容不是可解析的 JSON”.
+
 ## 0.11.1 — 2026-11-23
 
 - Removed the local `scientific-figures` skill and its manifest entry; writer only loads K-Dense `scientific-writing`. Report figure-plan generation was removed to reduce prompt/output overhead.
