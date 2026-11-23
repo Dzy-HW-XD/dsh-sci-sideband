@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.1 — 2026-11-23
+
+- Added a local CardIndex (keyword/BM25-style retrieval with CJK bigrams) and wired it into writer and evidence reviewer.
+- Writer now ranks cards by the current focus and takes top 48 instead of the first 160.
+- Evidence reviewer prioritizes unclassified cards plus focus-relevant cards; unclassified cards keep the consolidation loop running in batches.
+- Deleting a source/task also removes its cards from the knowledge base.
+
 ## 0.13.0 — 2026-11-23
 
 - Professional settings redesign: literature-source management, automation, and skill management are now in one Settings tab.
