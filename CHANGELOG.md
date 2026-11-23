@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.0 — 2026-11-23
+
+- Integrated the **科研 Superagent** preset into the plugin's own `cordis.patch.yml`; it no longer needs a separate preset bundle.
+- The preset registers the scheduler persona and routing rules; `dsh-mini-superagent` remains the companion dispatch runtime.
+- Added `sci_review` for independent, context-free evidence/report review at temperature 0.
+
 ## 0.7.0 — 2026-11-23
 
 - Added `sci_review`: an independent evidence/report reviewer call with no conversation context and temperature 0. It returns approve/score, evidence merge/delete/add recommendations, citation issues, and required fixes.

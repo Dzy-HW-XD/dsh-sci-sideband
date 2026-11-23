@@ -40,11 +40,11 @@
 - **实验建议**：独立的科研 proposal 流程。在「想探究的问题」里写下基于研究目的的定向问题（可附资源限制，例如只有 1 台 A100 80GB、每周 20 GPU 小时），生成 1–6 条精简 proposal：研究问题与目标、可证伪假设、方法与步骤、变量/对照、读端、资源与时间线、风险与备选、预期结果；每条明确标注“建议不是实验结果”。
 - **综述论述**：把项目目的、已有成果、已分析内容与证据组合成摘要、引言、相关研究、方法、结果与讨论、结论与展望、参考文献；可复制 Markdown 或下载 `.md`。
 - **无模型兜底**：没有可用模型或模型失败时，明确标注并退回本地规则/模板，流程不中断。
-- **Agent 工具**：`sci_task`、`sci_source`、`sci_status`、`sci_data`、`sci_experiment`、`sci_report`，与面板共用同一套动作层。
+- **Agent 工具**：`sci_task`、`sci_source`、`sci_status`、`sci_data`、`sci_experiment`、`sci_review`、`sci_report`，与面板共用同一套动作层。
 
 ## 科研 Superagent
 
-仓库里的 `superagent/` 是一个独立的 agent preset bundle。它把主会话变成调度器，并通过 `dsh-mini-superagent` 把任务派给四个独立子会话：
+插件 bundle 自带 **科研 Superagent** preset。安装插件后，新建会话时选择该 preset，即可把主会话变成调度器，并通过 `dsh-mini-superagent` 把任务派给独立子会话：
 
 ```text
 Research Supervisor
@@ -57,7 +57,7 @@ Research Supervisor
 使用前：
 
 1. 安装 `dsh-mini-superagent`（提供 `dispatch_*` 工具）。
-2. 安装 `superagent/` bundle。
+2. 安装本插件；preset 随插件注册，不需要再装单独的 preset bundle。
 3. 新建会话时选择 **科研 Superagent** preset。
 
 Reviewer 是独立子会话，不共享调度器上下文；`sci_review` 本身用隔离 LLM 调用、`temperature=0` 执行审核。调度器负责路由与合并报告，不亲自做 grabber/analysis/reviewer/writer 的工作。
