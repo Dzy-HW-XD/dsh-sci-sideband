@@ -121,14 +121,7 @@ window.__ModuleLoader__.load({
       'overview.stats.analyzed': '已分析',
       'overview.stats.extractions': '证据',
       'overview.stats.suggestions': '实验建议',
-      'overview.stats.reports': '综述',
-      'overview.next': '下一步',
-      'overview.nextTopics': '先拆题目：把研究兴趣拆成 2–5 个可回答的子问题。',
-      'overview.nextSources': '添加科研内容：贴 URL、DOI，或直接粘贴原文。',
-      'overview.nextDiscover': '给出研究兴趣后，直接点「从默认源发现并分析」，让边带自动检索 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar。',
-      'overview.nextExplore': '运行后台探索：逐条抓取、分析并沉淀可核查证据。',
-      'overview.nextExperiments': '证据够了：生成可执行的实验建议。',
-      'overview.nextReport': '把证据组合成综述：一键生成连贯的研究论述。',
+      'overview.stats.reports': '报告',
       'overview.topics': '题目',
       'overview.recent': '最近科研内容',
       'overview.empty': '这个任务还是空的。',
@@ -411,14 +404,7 @@ window.__ModuleLoader__.load({
       'overview.stats.analyzed': 'Analyzed',
       'overview.stats.extractions': 'Evidence',
       'overview.stats.suggestions': 'Experiment ideas',
-      'overview.stats.reports': 'Reviews',
-      'overview.next': 'Next step',
-      'overview.nextTopics': 'Split the interest into 2–5 answerable sub-questions.',
-      'overview.nextSources': 'Add content: URL, DOI, or paste the source text.',
-      'overview.nextDiscover': 'With the interest set, click “Discover and analyze” to search arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar automatically.',
-      'overview.nextExplore': 'Run background exploration to fetch, analyze, and capture traceable evidence.',
-      'overview.nextExperiments': 'Evidence is ready: generate actionable experiment suggestions.',
-      'overview.nextReport': 'Synthesize the evidence into a coherent review article.',
+      'overview.stats.reports': 'Reports',
       'overview.topics': 'Topics',
       'overview.recent': 'Recent content',
       'overview.empty': 'This task is empty.',
@@ -1597,15 +1583,6 @@ window.__ModuleLoader__.load({
     function Overview({ task, snap, job, t, onTab }) {
       const sources = snap.sources.filter((row) => row.taskId === task.id);
       const analyzedCount = task.counts.withAnalysis ?? task.counts.analyzed;
-      const activeChannels =
-        Array.isArray(task.channels) && task.channels.length ? task.channels : DEFAULT_CHANNEL_IDS;
-      const next = !sources.length
-        ? 'overview.nextDiscover'
-        : analyzedCount < sources.length
-          ? 'overview.nextExplore'
-          : !task.counts.suggestions
-            ? 'overview.nextExperiments'
-            : 'overview.nextReport';
 
       return h(
         'div',
@@ -1663,12 +1640,6 @@ window.__ModuleLoader__.load({
                 )
               : h(Empty, { title: t('sources.empty') }),
           ),
-        ),
-        h(
-          'div',
-          { className: 'rw-card' },
-          h('div', { className: 'rw-card__title' }, t('overview.next')),
-          h('p', { className: 'rw-item__body' }, t(next)),
         ),
         h('div', { className: 'rw-sub' }, `${t('panel.dataDir')}: ${snap.dataDir}`),
       );

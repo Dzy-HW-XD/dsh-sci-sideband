@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.5 — 2026-11-23
+
+- Removed the meaningless “下一步 / 运行后台探索：逐条抓取、分析并沉淀可核查证据” block and its dead copy from the overview.
+
 ## 0.12.4 — 2026-11-23
 
 - Moved discovery-channel management out of the overview into a **设置** tab: default sources (arXiv/OpenAlex/Crossref/Europe PMC/DOAJ/Semantic Scholar), auto-scan, and scan interval.
