@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.14.1 — 2026-11-24
+
+- Report generation is decoupled from the Router pipeline. The **生成报告** button is no longer disabled by an ingest/analysis run; it calls `report.compose` + writer review directly.
+- This fixes the apparent permanently-busy button while Router is analyzing newly discovered papers.
+
 ## 0.14.0 — 2026-11-24
 
 - Added a dedicated `scientific-synthesis` skill for writer: one thesis, 3–6 themes, one claim per paragraph, experiment cards as primary evidence, no paper-by-paper summaries.

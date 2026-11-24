@@ -2938,7 +2938,6 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
       const [composing, setComposing] = useState(false);
       const reports = snap.reports.filter((row) => row.taskId === task.id);
       const latest = reports.length ? reports[0] : null;
-      const pipelineRunning = task.pipeline && task.pipeline.status === 'running';
 
       useEffect(() => {
         if (reportId && !reports.some((row) => row.id === reportId)) setReportId(null);
@@ -2949,12 +2948,21 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
       }, [latest, reportId]);
 
       const compose = async () => {
-        if (composing || pipelineRunning) return;
+        if (composing) return;
         setComposing(true);
         try {
-          await run(t('pipeline.running'), () =>
-            call('pipeline.start', { taskId: task.id, mode: 'report', focus, count: 2 }),
-          );
+          const created = await run(t('reports.generating'), async () => {
+            const report = await call('report.compose', { taskId: task.id, focus });
+            if (report && report.id) {
+              try {
+                await call('review', { taskId: task.id, kind: 'writer', reportId: report.id, focus });
+              } catch {
+                /* report is still valid if the reviewer is unavailable */
+              }
+            }
+            return report;
+          });
+          if (created && created.id) setReportId(created.id);
         } finally {
           setComposing(false);
         }
@@ -2982,9 +2990,9 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
             { className: 'rw-row', style: { marginTop: 8, justifyContent: 'flex-end' } },
             h(
               Btn,
-              { variant: 'primary', onClick: compose, disabled: composing || pipelineRunning },
-              composing || pipelineRunning ? h(Spinner) : h(Icon, { name: 'doc', size: 14 }),
-              composing || pipelineRunning ? t('pipeline.running') : t('reports.generate'),
+              { variant: 'primary', onClick: compose, disabled: composing },
+              composing ? h(Spinner) : h(Icon, { name: 'doc', size: 14 }),
+              composing ? t('reports.generating') : t('reports.generate'),
             ),
           ),
         ),
