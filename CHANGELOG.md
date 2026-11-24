@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.0 — 2026-11-24
+
+- Added a dedicated `scientific-synthesis` skill for writer: one thesis, 3–6 themes, one claim per paragraph, experiment cards as primary evidence, no paper-by-paper summaries.
+- Added a separate report-planning LLM stage before drafting: thesis, themes, experiment-card mapping, and the strongest counter-evidence.
+- Writer prompt now requires every theme to use experiment cards with values/units/conditions, and forbids replacing missing data with qualitative guesses.
+
 ## 0.13.3 — 2026-11-24
 
 - Removed per-source evidence/summary caps in the report corpus as well; writer now receives the full per-source analysis, evidence rows, findings, data points, and limitations.
