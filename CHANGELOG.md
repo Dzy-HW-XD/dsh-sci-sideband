@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.13.3 — 2026-11-24
+
+- Removed per-source evidence/summary caps in the report corpus as well; writer now receives the full per-source analysis, evidence rows, findings, data points, and limitations.
+
+## 0.13.2 — 2026-11-24
+
+- Removed context caps requested by the user:
+  - Analysis sends the full source text (no 28k-character truncation).
+  - Writer receives every card for the current task (no top-48 limit).
+  - Evidence reviewer receives every card for the current task (no 90-card limit).
+  - Writer output budget is 100k tokens.
+  - Report corpus and reviewer payloads are no longer sliced.
+
 ## 0.13.1 — 2026-11-23
 
 - Added a local CardIndex (keyword/BM25-style retrieval with CJK bigrams) and wired it into writer and evidence reviewer.
