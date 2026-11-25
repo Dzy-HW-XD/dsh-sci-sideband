@@ -249,6 +249,20 @@ window.__ModuleLoader__.load({
       'reports.keywords': '关键词',
       'reports.references': '参考文献',
       'reports.figures': '图表计划',
+      'reports.timeline': '发展时间轴',
+      'reports.suggestions': '建议',
+      'reports.reviewProcess': '三审仲裁过程',
+      'reports.stage': '阶段',
+      'reports.stage.writer': 'writer 写作',
+      'reports.stage.reviewers': '三位 reviewer 评审',
+      'reports.stage.reviewer-1': 'Reviewer 1 评审',
+      'reports.stage.reviewer-2': 'Reviewer 2 评审',
+      'reports.stage.reviewer-3': 'Reviewer 3 评审',
+      'reports.stage.revision': 'Reviewer 1 整合意见，writer 修改',
+      'reports.stage.final-reviewer-1': '终审 Reviewer 1',
+      'reports.stage.final-reviewer-2': '终审 Reviewer 2',
+      'reports.stage.final-reviewer-3': '终审 Reviewer 3',
+      'reports.stage.done': '完成',
       'reports.pdf': '打印 / 导出 PDF',
       'reports.meta': '{sources} 条内容 · {points} 条证据 · {mode}',
       'reports.sourceCount': '{n} 条内容',
@@ -540,6 +554,20 @@ window.__ModuleLoader__.load({
       'reports.keywords': 'Keywords',
       'reports.references': 'References',
       'reports.figures': 'Figure plan',
+      'reports.timeline': 'Timeline',
+      'reports.suggestions': 'Suggestions',
+      'reports.reviewProcess': 'Three-reviewer arbitration',
+      'reports.stage': 'Stage',
+      'reports.stage.writer': 'Writer drafting',
+      'reports.stage.reviewers': 'Three reviewers',
+      'reports.stage.reviewer-1': 'Reviewer 1',
+      'reports.stage.reviewer-2': 'Reviewer 2',
+      'reports.stage.reviewer-3': 'Reviewer 3',
+      'reports.stage.revision': 'Reviewer 1 integrates feedback; writer revises',
+      'reports.stage.final-reviewer-1': 'Final reviewer 1',
+      'reports.stage.final-reviewer-2': 'Final reviewer 2',
+      'reports.stage.final-reviewer-3': 'Final reviewer 3',
+      'reports.stage.done': 'Done',
       'reports.pdf': 'Print / Export PDF',
       'reports.meta': '{sources} sources · {points} evidence rows · {mode}',
       'reports.sourceCount': '{n} sources',
@@ -778,6 +806,24 @@ window.__ModuleLoader__.load({
 .rw-report p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
 .rw-report__sections{display:flex;flex-direction:column;gap:14px}
 .rw-report__section{display:flex;flex-direction:column;gap:8px;padding-top:4px}
+.rw-timeline{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--dsw-alias-border-l2);margin:4px 0 4px 68px}
+.rw-timeline__item{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;position:relative;padding:8px 0 12px}
+.rw-timeline__item::before{content:"";position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--dsw-alias-brand-primary);border:2px solid var(--dsw-alias-bg-base)}
+.rw-timeline__year{font-size:12px;font-weight:700;color:var(--dsw-alias-brand-primary);font-variant-numeric:tabular-nums;text-align:right}
+.rw-timeline__body{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rw-timeline__body strong{font-size:13px}
+.rw-timeline__body p{margin:0;font-size:12.5px;color:var(--dsw-alias-label-secondary);line-height:1.5}
+.rw-branchlist{display:flex;flex-direction:column;gap:4px;margin-top:6px;border-left:1px solid var(--dsw-alias-border-l2);padding-left:10px}
+.rw-branch{display:flex;flex-direction:column;gap:1px;font-size:12px;line-height:1.45}
+.rw-branch strong{font-weight:600;color:var(--dsw-alias-label-primary)}
+.rw-branch span{color:var(--dsw-alias-label-secondary)}
+.rw-branchlist--nested{margin-top:3px;padding-left:14px}
+.rw-figure__img{display:block;max-width:100%;height:auto;border:1px solid var(--dsw-alias-border-l1);border-radius:8px;background:#fff;margin:4px 0}
+.rw-figure{display:flex;flex-direction:column;gap:5px;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-bg-layer-1);padding:10px 12px;margin:6px 0}
+.rw-figure__caption{margin:0;font-size:12px;color:var(--dsw-alias-label-secondary);line-height:1.5}
+.rw-reviewrun{display:flex;flex-direction:column;gap:8px}
+.rw-reviewrow{border:1px solid var(--dsw-alias-border-l1);border-radius:9px;background:var(--dsw-alias-bg-layer-1);padding:8px 10px;display:flex;flex-direction:column;gap:3px}
+.rw-reviewrow .rw-item__body{white-space:normal;font-size:12px;line-height:1.5}
 .rw-meta{font-size:12px;color:var(--dsw-alias-label-secondary);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .rw-kv{display:flex;flex-wrap:wrap;gap:6px}
 .rw-divider{height:1px;background:var(--dsw-alias-border-l1);margin:2px 0}
@@ -1304,7 +1350,8 @@ window.__ModuleLoader__.load({
 
       useEffect(() => {
         const pipelineRunning = task && task.pipeline && task.pipeline.status === 'running';
-        if ((!job || job.status !== 'running') && !pipelineRunning) return undefined;
+        const reportRunning = task && task.reportRun && task.reportRun.status === 'running';
+        if ((!job || job.status !== 'running') && !pipelineRunning && !reportRunning) return undefined;
         const timer = setInterval(() => {
           refresh()
             .then(() => {
@@ -1319,7 +1366,7 @@ window.__ModuleLoader__.load({
             });
         }, 2200);
         return () => clearInterval(timer);
-      }, [job && job.status, job && job.done, task && task.pipeline && task.pipeline.stage, task && task.pipeline && task.pipeline.status, refresh]);
+      }, [job && job.status, job && job.done, task && task.pipeline && task.pipeline.stage, task && task.pipeline && task.pipeline.status, task && task.reportRun && task.reportRun.stage, task && task.reportRun && task.reportRun.status, refresh]);
 
       const attempt = useCallback(
         async (label, operation) => {
@@ -2795,20 +2842,29 @@ window.__ModuleLoader__.load({
             .replaceAll('&', '&amp;')
             .replaceAll('<', '&lt;')
             .replaceAll('>', '&gt;');
+        const figureHtml = (figure) =>
+          `<figure>${figure.imageUrl ? `<img src="${esc(figure.imageUrl)}" alt="${esc(figure.caption || figure.title || 'figure')}">` : ''}<figcaption><strong>${esc(figure.label)} ${esc(figure.title)}</strong><br>${esc(figure.caption || '')}${figure.takeaway || figure.interpretation ? `<br>${esc(figure.takeaway || figure.interpretation)}` : ''}<br><small>${esc(figure.dataNeeded || '')}</small></figcaption></figure>`;
         const sections = (report.sections || [])
           .map(
-            (section) =>
-              `<h2>${esc(section.heading)}</h2>${(section.paragraphs || []).map((p) => `<p>${esc(p)}</p>`).join('')}`,
+            (section, index) =>
+              `<h2>${esc(section.heading)}</h2>${(section.paragraphs || []).map((p) => `<p>${esc(p)}</p>`).join('')}${(report.figures || []).filter((figure) => figure.sectionIndex === index + 1).map(figureHtml).join('')}`,
           )
           .join('');
-        const figures = (report.figures || [])
-          .map(
-            (figure) =>
-              `<figure><figcaption><strong>${esc(figure.label)} ${esc(figure.title)}</strong><br>${esc(figure.caption || '')}<br><small>${esc(figure.dataNeeded || '')}</small></figcaption></figure>`,
-          )
+        const branchHtml = (branches) =>
+          (branches || [])
+            .map(
+              (branch) =>
+                `<div class="br"><strong>${esc(branch.title || '')}</strong>${branch.detail ? `：${esc(branch.detail)}` : ''}${branch.children && branch.children.length ? `<div class="brn">${branchHtml(branch.children)}</div>` : ''}</div>`,
+            )
+            .join('');
+        const timeline = (report.timeline || [])
+          .map((item) => `<div class="tl"><span>${esc(item.year || '—')}</span><div><strong>${esc(item.label || '')}</strong><p>${esc(item.event || '')}</p>${item.branches && item.branches.length ? `<div class="brs">${branchHtml(item.branches)}</div>` : ''}</div></div>`)
           .join('');
         const references = (report.references || [])
           .map((reference) => `<p class="ref">${esc(reference.label)} ${esc(reference.text)}</p>`)
+          .join('');
+        const suggestions = (report.suggestions || [])
+          .map((item) => `<div class="sugg"><strong>${esc(item.title || '建议')}</strong><p>${esc([item.proposal, item.gap ? `空白依据：${item.gap}` : '', item.minimalExecution ? `最小执行：${item.minimalExecution}` : ''].filter(Boolean).join(' '))}</p></div>`)
           .join('');
         const html = `<style>
 @page{size:A4;margin:22mm 20mm}
@@ -2820,15 +2876,26 @@ p{margin:0 0 9px;text-align:justify}
 .abstract{background:#f6f6f4;padding:10px 12px;border-left:3px solid #888;margin:12px 0}
 .meta,.ref,figcaption,small{color:#555;font-size:9pt}
 figure{border:1px dashed #bbb;padding:8px 10px;margin:10px 0;break-inside:avoid}
-figure:before{content:"图表计划";display:block;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:.08em}
+figure img{max-width:100%;height:auto;display:block;margin:0 0 6px}
+.tl{display:grid;grid-template-columns:48px 1fr;gap:10px;border-left:2px solid #999;margin-left:56px;padding:6px 0}
+.tl>span{font-weight:700;color:#555;text-align:right}
+.tl p{margin:0;color:#333}
+.brs{border-left:1px solid #bbb;padding-left:8px;margin:4px 0}
+.br{font-size:9pt;line-height:1.5}
+.br strong{color:#222}
+.brn{border-left:1px solid #ddd;padding-left:8px;margin-top:2px}
+.sugg{border-left:3px solid #555;padding:4px 0 4px 10px;margin:8px 0;break-inside:avoid}
+.sugg p{margin:2px 0 0;color:#333}
+figure:before{content:"图表";display:block;font-size:8pt;color:#888;text-transform:uppercase;letter-spacing:.08em}
 @media print{.sci-print-body{padding:0;max-width:none}}
 </style>
 <div class="sci-print-body">
 <h1>${esc(report.title)}</h1>
 <p class="meta">${esc(fmtTime(report.createdAt))} · ${report.sourceCount || 0} 篇文献</p>
 ${report.abstract ? `<div class="abstract">${esc(report.abstract)}</div>` : ''}
+${timeline ? `<h2>发展时间轴</h2>${timeline}` : ''}
 ${sections}
-${figures ? `<h2>图表计划</h2>${figures}` : ''}
+${suggestions ? `<h2>建议</h2>${suggestions}` : ''}
 ${references ? `<h2>参考文献</h2>${references}` : ''}
 </div>`;
         const root = document.createElement('div');
@@ -2884,6 +2951,58 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
         report.note ? h('div', { className: 'rw-error' }, report.note) : null,
         report.abstract ? h('div', null, h('h3', null, t('reports.abstract')), h('p', null, report.abstract)) : null,
         report.keywords && report.keywords.length ? h('div', { className: 'rw-row' }, h('span', { className: 'rw-sub' }, t('reports.keywords')), report.keywords.map((keyword, index) => h(Chip, { key: index }, keyword))) : null,
+        report.timeline && report.timeline.length
+          ? h(
+              'div',
+              { className: 'rw-report__section' },
+              h('h3', null, t('reports.timeline')),
+              h(
+                'div',
+                { className: 'rw-timeline' },
+                report.timeline.map((item, index) =>
+                  h(
+                    'div',
+                    { key: index, className: 'rw-timeline__item' },
+                    h('div', { className: 'rw-timeline__year' }, item.year || '—'),
+                    h(
+                      'div',
+                      { className: 'rw-timeline__body' },
+                      h('strong', null, item.label || ''),
+                      h('p', null, item.event || ''),
+                      item.branches && item.branches.length
+                        ? h(
+                            'div',
+                            { className: 'rw-branchlist' },
+                            item.branches.map((branch, branchIndex) =>
+                              h(
+                                'div',
+                                { key: branchIndex, className: 'rw-branch' },
+                                h('strong', null, branch.title || ''),
+                                branch.detail ? h('span', null, branch.detail) : null,
+                                branch.children && branch.children.length
+                                  ? h(
+                                      'div',
+                                      { className: 'rw-branchlist rw-branchlist--nested' },
+                                      branch.children.map((child, childIndex) =>
+                                        h(
+                                          'div',
+                                          { key: childIndex, className: 'rw-branch' },
+                                          h('strong', null, child.title || ''),
+                                          child.detail ? h('span', null, child.detail) : null,
+                                        ),
+                                      ),
+                                    )
+                                  : null,
+                              ),
+                            ),
+                          )
+                        : null,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
         h('div', { className: 'rw-divider' }),
         h(
           'div',
@@ -2894,23 +3013,33 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
               { key: index, className: 'rw-report__section' },
               h('h3', null, section.heading),
               (section.paragraphs || []).map((paragraph, paragraphIndex) => h('p', { key: paragraphIndex }, paragraph)),
+              (report.figures || [])
+                .filter((figure) => figure.sectionIndex === index + 1)
+                .map((figure, figureIndex) =>
+                  h(
+                    'div',
+                    { key: `fig-${figureIndex}`, className: 'rw-figure' },
+                    h('div', { className: 'rw-item__title' }, `${figure.label || '图'} ${figure.title}`.trim()),
+                    figure.imageUrl ? h('img', { className: 'rw-figure__img', src: figure.imageUrl, alt: figure.caption || figure.title || 'figure', loading: 'lazy' }) : null,
+                    figure.caption ? h('p', { className: 'rw-figure__caption' }, figure.caption) : null,
+                    figure.takeaway || figure.interpretation ? h('p', { className: 'rw-sub' }, figure.takeaway || figure.interpretation) : null,
+                    figure.dataNeeded ? h('div', { className: 'rw-sub' }, `数据：${figure.dataNeeded}`) : null,
+                  ),
+                ),
             ),
           ),
         ),
-        report.figures && report.figures.length
+        report.suggestions && report.suggestions.length
           ? h(
               'div',
               { className: 'rw-report__section' },
-              h('h3', null, t('reports.figures')),
-              report.figures.map((figure, index) =>
+              h('h3', null, t('reports.suggestions')),
+              report.suggestions.map((item, index) =>
                 h(
                   'div',
                   { key: index, className: 'rw-card rw-card--tight' },
-                  h('div', { className: 'rw-item__title' }, `${figure.label || '图'} ${figure.title}`.trim()),
-                  figure.question ? h('div', { className: 'rw-sub' }, `问题：${figure.question}`) : null,
-                  figure.encoding ? h('div', { className: 'rw-sub' }, `编码：${figure.encoding}`) : null,
-                  figure.caption ? h('p', { className: 'rw-item__body' }, figure.caption) : null,
-                  figure.dataNeeded ? h('div', { className: 'rw-sub' }, `数据：${figure.dataNeeded}`) : null,
+                  h('div', { className: 'rw-item__title' }, item.title || `建议 ${index + 1}`),
+                  h('p', { className: 'rw-item__body' }, [item.proposal, item.gap ? `空白依据：${item.gap}` : '', item.minimalExecution ? `最小执行：${item.minimalExecution}` : ''].filter(Boolean).join(' ')),
                 ),
               ),
             )
@@ -2938,6 +3067,8 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
       const [composing, setComposing] = useState(false);
       const reports = snap.reports.filter((row) => row.taskId === task.id);
       const latest = reports.length ? reports[0] : null;
+      const reportRun = task.reportRun || null;
+      const reportRunning = reportRun && reportRun.status === 'running';
 
       useEffect(() => {
         if (reportId && !reports.some((row) => row.id === reportId)) setReportId(null);
@@ -2947,22 +3078,17 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
         if (!reportId && latest) setReportId(latest.id);
       }, [latest, reportId]);
 
+      useEffect(() => {
+        if (reportRun && reportRun.reportId && reportRun.status === 'done') setReportId(reportRun.reportId);
+      }, [reportRun && reportRun.reportId, reportRun && reportRun.status]);
+
       const compose = async () => {
-        if (composing) return;
+        if (composing || reportRunning) return;
         setComposing(true);
         try {
-          const created = await run(t('reports.generating'), async () => {
-            const report = await call('report.compose', { taskId: task.id, focus });
-            if (report && report.id) {
-              try {
-                await call('review', { taskId: task.id, kind: 'writer', reportId: report.id, focus });
-              } catch {
-                /* report is still valid if the reviewer is unavailable */
-              }
-            }
-            return report;
-          });
-          if (created && created.id) setReportId(created.id);
+          await run(t('reports.generating'), () =>
+            call('report.generate', { taskId: task.id, focus }),
+          );
         } finally {
           setComposing(false);
         }
@@ -2990,12 +3116,35 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
             { className: 'rw-row', style: { marginTop: 8, justifyContent: 'flex-end' } },
             h(
               Btn,
-              { variant: 'primary', onClick: compose, disabled: composing },
-              composing ? h(Spinner) : h(Icon, { name: 'doc', size: 14 }),
-              composing ? t('reports.generating') : t('reports.generate'),
+              { variant: 'primary', onClick: compose, disabled: composing || reportRunning },
+              composing || reportRunning ? h(Spinner) : h(Icon, { name: 'doc', size: 14 }),
+              composing || reportRunning ? t('reports.generating') : t('reports.generate'),
             ),
           ),
         ),
+        reportRun
+          ? h(
+              'div',
+              { className: 'rw-card rw-reviewrun' },
+              h(
+                'div',
+                { className: 'rw-settings__head', style: { padding: 0, border: 0, background: 'transparent', marginBottom: 8 } },
+                h('div', null, h('h3', null, t('reports.reviewProcess')), h('p', null, `${t('reports.stage')}: ${t(`reports.stage.${reportRun.stage}`) || reportRun.stage}${reportRun.decision ? ` · ${reportRun.decision}` : ''}`)),
+              ),
+              (reportRun.reviews || []).map((review) =>
+                h(
+                  'div',
+                  { key: review.reviewer, className: 'rw-reviewrow' },
+                  h('div', { className: 'rw-item__top' }, h('strong', null, `Reviewer ${review.reviewer}`), h(Chip, { tone: review.decision === 'accept' ? 'ok' : review.decision === 'reject' ? 'err' : 'warn' }, review.decision)),
+                  h('div', { className: 'rw-sub' }, `综述 ${review.scores.review} · 图表 ${review.scores.figures} · 探索性 ${review.scores.exploration} · 可执行 ${review.scores.feasibility}`),
+                  h('p', { className: 'rw-item__body' }, review.reason || ''),
+                ),
+              ),
+              reportRun.arbitration
+                ? h('div', { className: 'rw-sub', style: { marginTop: 8 } }, `仲裁：${reportRun.arbitration.decision} · ${reportRun.arbitration.reasons.map((row) => `R${row.reviewer}: ${row.reason}`).join(' / ')}`)
+                : null,
+            )
+          : null,
         reports.length
           ? h(
               'div',

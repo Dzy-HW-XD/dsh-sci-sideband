@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.18.0 — 2026-11-25
+
+- Report generation now runs a three-reviewer panel with accept / rebuttal / reject decisions, per-dimension scores (review, figures, exploration, feasibility, writing), and a visible arbitration process.
+- Reviewer 1 integrates revision feedback; the writer revises and gets a final panel. Accept reasons are one paragraph per reviewer.
+- Writer outputs actionable Suggestions (gap, proposal, minimal execution), each one paragraph.
+- Report generation uses a dedicated background `reportRun` state, independent of Router ingest, and the panel shows stages/reviews as they happen.
+
+## 0.17.0 — 2026-11-25
+
+- Default report genre is now a topic review; a user focus only guides emphasis.
+- Timeline stages now contain a nested tree of research-direction branches; rendered in the report view and PDF.
+- Writer must place each retained figure in a section with `sectionIndex`; figures are no longer listed separately.
+- Added a dedicated figure reviewer pass in evidence review to delete decorative/irrelevant images, merge duplicates, and assign theme/role/takeaway.
+
+## 0.16.0 — 2026-11-25
+
+- Added an evidence-reviewer figure pass (`reviewFigureCards`): deletes logos/icons/decorative or irrelevant figures, merges duplicates, assigns theme/role/takeaway, and keeps figure cards that support the thesis.
+- Writer no longer auto-attaches every figure. Figures must be selected by the writer, assigned a `sectionIndex`, and cited in the corresponding section.
+- Report view and PDF place each figure inside its section instead of listing all figures at the end.
+- Report timeline is mandatory and rendered from the report plan.
+
+## 0.15.1 — 2026-11-25
+
+- Filter arXiv logos/icons/spinners out of extracted figure assets; only real figure images are attached to cards/reports.
+
+## 0.15.0 — 2026-11-25
+
+- Analysis now extracts figure image URLs from full-text HTML and attaches them to figure cards; source assets are stored on the source.
+- Reports accept `figures` with real image URLs, and the report view/PDF render images and captions.
+- Reports now require a dated `timeline`; the report view renders a vertical development timeline.
+- The report plan also produces the timeline before drafting; writer prompt treats the article as a development review (early/formation/recent phases).
+- Existing figure cards are hydrated from source HTML on report generation when image URLs are missing.
+
 ## 0.14.1 — 2026-11-24
 
 - Report generation is decoupled from the Router pipeline. The **生成报告** button is no longer disabled by an ingest/analysis run; it calls `report.compose` + writer review directly.
