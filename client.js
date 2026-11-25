@@ -260,6 +260,7 @@ window.__ModuleLoader__.load({
       'reports.dim.exploration': '探索性',
       'reports.dim.feasibility': '可执行',
       'reports.dim.writing': '写作',
+      'reports.dim.latex': 'LaTeX/图表',
       'reports.stage': '阶段',
       'reports.stage.writer': 'writer 写作',
       'reports.stage.reviewers': '四位 reviewer 评审',
@@ -575,6 +576,7 @@ window.__ModuleLoader__.load({
       'reports.dim.exploration': 'Exploration',
       'reports.dim.feasibility': 'Feasibility',
       'reports.dim.writing': 'Writing',
+      'reports.dim.latex': 'LaTeX/figures',
       'reports.stage': 'Stage',
       'reports.stage.writer': 'Writer drafting',
       'reports.stage.reviewers': 'Four reviewers',
@@ -853,6 +855,8 @@ window.__ModuleLoader__.load({
 .rw-dim b{font-size:10px;color:var(--dsw-alias-label-secondary);font-weight:600}
 .rw-dim span{color:var(--dsw-alias-label-primary);overflow-wrap:anywhere}
 .rw-genreason{margin:2px 0 0;font-size:11px;line-height:1.5;color:var(--dsw-alias-label-secondary)}
+.rw-appendix{margin-top:12px;border-top:1px solid var(--dsw-alias-border-l1);padding-top:8px}
+.rw-appendix summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
 .rw-meta{font-size:12px;color:var(--dsw-alias-label-secondary);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .rw-kv{display:flex;flex-wrap:wrap;gap:6px}
 .rw-divider{height:1px;background:var(--dsw-alias-border-l1);margin:2px 0}
@@ -2819,6 +2823,54 @@ window.__ModuleLoader__.load({
 
     /* -------------------------------------------------------------- reports */
 
+    function TimelineView({ timeline }) {
+      return h(
+        'div',
+        { className: 'rw-timeline' },
+        (timeline || []).map((item, index) =>
+          h(
+            'div',
+            { key: index, className: 'rw-timeline__item' },
+            h('div', { className: 'rw-timeline__year' }, item.year || '—'),
+            h(
+              'div',
+              { className: 'rw-timeline__body' },
+              h('strong', null, item.label || ''),
+              h('p', null, item.event || ''),
+              item.branches && item.branches.length
+                ? h(
+                    'div',
+                    { className: 'rw-branchlist' },
+                    item.branches.map((branch, branchIndex) =>
+                      h(
+                        'div',
+                        { key: branchIndex, className: 'rw-branch' },
+                        h('strong', null, branch.title || ''),
+                        branch.detail ? h('span', null, branch.detail) : null,
+                        branch.children && branch.children.length
+                          ? h(
+                              'div',
+                              { className: 'rw-branchlist rw-branchlist--nested' },
+                              branch.children.map((child, childIndex) =>
+                                h(
+                                  'div',
+                                  { key: childIndex, className: 'rw-branch' },
+                                  h('strong', null, child.title || ''),
+                                  child.detail ? h('span', null, child.detail) : null,
+                                ),
+                              ),
+                            )
+                          : null,
+                      ),
+                    ),
+                  )
+                : null,
+            ),
+          ),
+        ),
+      );
+    }
+
     function ReportView({ task, reportId, call, run, t }) {
       const [report, setReport] = useState(null);
       const [error, setError] = useState('');
@@ -3020,58 +3072,6 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
         report.note ? h('div', { className: 'rw-error' }, report.note) : null,
         report.abstract ? h('div', null, h('h3', null, t('reports.abstract')), h('p', null, report.abstract)) : null,
         report.keywords && report.keywords.length ? h('div', { className: 'rw-row' }, h('span', { className: 'rw-sub' }, t('reports.keywords')), report.keywords.map((keyword, index) => h(Chip, { key: index }, keyword))) : null,
-        report.timeline && report.timeline.length
-          ? h(
-              'div',
-              { className: 'rw-report__section' },
-              h('h3', null, t('reports.timeline')),
-              h(
-                'div',
-                { className: 'rw-timeline' },
-                report.timeline.map((item, index) =>
-                  h(
-                    'div',
-                    { key: index, className: 'rw-timeline__item' },
-                    h('div', { className: 'rw-timeline__year' }, item.year || '—'),
-                    h(
-                      'div',
-                      { className: 'rw-timeline__body' },
-                      h('strong', null, item.label || ''),
-                      h('p', null, item.event || ''),
-                      item.branches && item.branches.length
-                        ? h(
-                            'div',
-                            { className: 'rw-branchlist' },
-                            item.branches.map((branch, branchIndex) =>
-                              h(
-                                'div',
-                                { key: branchIndex, className: 'rw-branch' },
-                                h('strong', null, branch.title || ''),
-                                branch.detail ? h('span', null, branch.detail) : null,
-                                branch.children && branch.children.length
-                                  ? h(
-                                      'div',
-                                      { className: 'rw-branchlist rw-branchlist--nested' },
-                                      branch.children.map((child, childIndex) =>
-                                        h(
-                                          'div',
-                                          { key: childIndex, className: 'rw-branch' },
-                                          h('strong', null, child.title || ''),
-                                          child.detail ? h('span', null, child.detail) : null,
-                                        ),
-                                      ),
-                                    )
-                                  : null,
-                              ),
-                            ),
-                          )
-                        : null,
-                    ),
-                  ),
-                ),
-              ),
-            )
-          : null,
         h('div', { className: 'rw-divider' }),
         h(
           'div',
@@ -3127,6 +3127,14 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
               ),
             )
           : null,
+        report.timeline && report.timeline.length
+          ? h(
+              'details',
+              { className: 'rw-appendix' },
+              h('summary', null, t('reports.timeline')),
+              h(TimelineView, { timeline: report.timeline }),
+            )
+          : null,
       );
     }
 
@@ -3166,6 +3174,7 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
                 ['exploration', t('reports.dim.exploration')],
                 ['feasibility', t('reports.dim.feasibility')],
                 ['writing', t('reports.dim.writing')],
+                ['latex', t('reports.dim.latex')],
               ].map(([key, label]) =>
                 h(
                   'div',

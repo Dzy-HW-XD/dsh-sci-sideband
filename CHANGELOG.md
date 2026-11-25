@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.24.0 — 2026-11-25
+
+- Rebuttal/reject now retries Reviewer JSON failures and falls back to a recorded reviewer error instead of aborting the whole loop.
+- Revisions continue up to 3 rounds; the same report is rewritten in place.
+- Timeline moved out of the article front matter into the LaTeX appendix; UI timeline is a collapsed appendix section.
+- TikZ timeline spacing is computed from content length to avoid overlapping nodes.
+- LaTeX reviewers also load the LaTeX skill and score LaTeX/format.
+
+## 0.23.0 — 2026-11-25
+
+- Writer reviewers now load the LaTeX skill and add a `latex` dimension; reviewer sees the generated `.tex` source.
+- Writer sections must be plain prose; raw LaTeX table/figure environments are rejected/reported, with a sanitizer fallback.
+- LaTeX renderer now generates a TikZ timeline with branch tree, preserves inline `$...$` math, and embeds cached figures with `\includegraphics` when image assets are available.
+- Added score threshold enforcement including LaTeX dimension.
+
 ## 0.22.0 — 2026-11-25
 
 - Rebuttal/reject now revise the **same report** in place instead of creating a second unrelated report; revision history is kept.
