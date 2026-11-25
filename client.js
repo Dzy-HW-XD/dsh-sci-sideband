@@ -264,7 +264,7 @@ window.__ModuleLoader__.load({
       'reports.stage.final-reviewer-2': '终审 Reviewer 2',
       'reports.stage.final-reviewer-3': '终审 Reviewer 3',
       'reports.stage.done': '完成',
-      'reports.pdf': '打印 / 导出 PDF',
+      'reports.pdf': '下载 PDF',
       'reports.meta': '{sources} 条内容 · {points} 条证据 · {mode}',
       'reports.sourceCount': '{n} 条内容',
       'reports.dataCount': '{n} 条证据',
@@ -570,7 +570,7 @@ window.__ModuleLoader__.load({
       'reports.stage.final-reviewer-2': 'Final reviewer 2',
       'reports.stage.final-reviewer-3': 'Final reviewer 3',
       'reports.stage.done': 'Done',
-      'reports.pdf': 'Print / Export PDF',
+      'reports.pdf': 'Download PDF',
       'reports.meta': '{sources} sources · {points} evidence rows · {mode}',
       'reports.sourceCount': '{n} sources',
       'reports.dataCount': '{n} evidence rows',
@@ -2796,6 +2796,7 @@ window.__ModuleLoader__.load({
       const [report, setReport] = useState(null);
       const [error, setError] = useState('');
       const [copied, setCopied] = useState(false);
+      const [pdfBusy, setPdfBusy] = useState(false);
 
       useEffect(() => {
         let alive = true;
@@ -2848,6 +2849,31 @@ window.__ModuleLoader__.load({
         link.click();
         link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 2000);
+      };
+
+      const downloadPdf = async () => {
+        if (!report || pdfBusy) return;
+        setPdfBusy(true);
+        setError('');
+        try {
+          const result = await call('report.pdf', { reportId: report.id });
+          const binary = atob(result.pdfBase64 || '');
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+          const blob = new Blob([bytes], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = result.filename || `${safeName(report.title || t('reports.downloadName'))}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 3000);
+        } catch (failure) {
+          setError(messageOf(failure));
+        } finally {
+          setPdfBusy(false);
+        }
       };
 
       const printPdf = () => {
@@ -2946,7 +2972,7 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
             h(Btn, { size: 'small', onClick: copy }, h(Icon, { name: copied ? 'check' : 'copy', size: 14 }), copied ? t('common.copied') : t('common.copy')),
             h(Btn, { size: 'small', onClick: download }, h(Icon, { name: 'download', size: 14 }), t('common.download')),
             h(Btn, { size: 'small', onClick: downloadLatex }, h(Icon, { name: 'download', size: 14 }), t('reports.latex')),
-            h(Btn, { size: 'small', onClick: printPdf }, h(Icon, { name: 'doc', size: 14 }), t('reports.pdf')),
+            h(Btn, { size: 'small', onClick: downloadPdf, disabled: pdfBusy }, pdfBusy ? h(Spinner) : h(Icon, { name: 'doc', size: 14 }), pdfBusy ? t('reports.generating') : t('reports.pdf')),
             h(
               Btn,
               {

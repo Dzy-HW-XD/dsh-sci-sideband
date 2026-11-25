@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.20.0 — 2026-11-25
+
+- PDF export is now compiled from the LaTeX manuscript, not browser print.
+- Added Tectonic/TeX engine discovery (`~/.dsh/sci-sideband/bin`, plugin `bin`, PATH) and `report.pdf` action.
+- Added Chinese support (`ctex`, Fandol) to the Research Future-style template.
+- The **下载 PDF** button calls LaTeX compilation and downloads the resulting PDF; failures show the compiler log instead of silently printing.
+
 ## 0.19.0 — 2026-11-25
 
 - Added a Research Future-style LaTeX manuscript template (`templates/research-future`) based on the public SPJ/Overleaf template (CC BY 4.0).
