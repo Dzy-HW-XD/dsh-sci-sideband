@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.22.0 — 2026-11-25
+
+- Rebuttal/reject now revise the **same report** in place instead of creating a second unrelated report; revision history is kept.
+- Added up to 3 review rounds: each rebuttal/reject sends Reviewer 1's integrated feedback back to writer, then re-reviews; accept stops.
+- Added explicit score thresholds: accept = overall ≥ 8 and every dimension ≥ 7; reject = overall < 6 or any dimension < 4; otherwise rebuttal.
+- Generation process is UI-only, expandable per report/PDF, never embedded in the PDF. Shows every round, scores, dimension notes, and hover-only suggestions.
+
+## 0.21.0 — 2026-11-25
+
+- Writer reviewers expanded from 3 to 4; arbitration uses the plurality decision (tie → rebuttal).
+- Reviewer output adds per-dimension one-sentence notes; the generation process is shown as an expandable panel under each report/PDF, not in the main report page.
+- Reviewer rows show scores and one-sentence dimension reasons; specific suggestions are available on hover only.
+- Reject/rebuttal still sends Reviewer 1's integrated feedback to writer for rewrite/revision; accept shows each reviewer's reason.
+
 ## 0.20.0 — 2026-11-25
 
 - PDF export is now compiled from the LaTeX manuscript, not browser print.

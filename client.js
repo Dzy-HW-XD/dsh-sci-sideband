@@ -252,17 +252,26 @@ window.__ModuleLoader__.load({
       'reports.timeline': '发展时间轴',
       'reports.suggestions': '建议',
       'reports.latex': '下载 LaTeX',
-      'reports.reviewProcess': '三审仲裁过程',
+      'reports.reviewProcess': '四审仲裁过程',
+      'reports.generation': '生成过程',
+      'reports.threshold': '判定：accept = overall ≥ 8 且每个维度 ≥ 7；rebuttal = 其余；reject = overall < 6 或任一维度 < 4',
+      'reports.dim.review': '综述',
+      'reports.dim.figures': '图表',
+      'reports.dim.exploration': '探索性',
+      'reports.dim.feasibility': '可执行',
+      'reports.dim.writing': '写作',
       'reports.stage': '阶段',
       'reports.stage.writer': 'writer 写作',
-      'reports.stage.reviewers': '三位 reviewer 评审',
+      'reports.stage.reviewers': '四位 reviewer 评审',
       'reports.stage.reviewer-1': 'Reviewer 1 评审',
       'reports.stage.reviewer-2': 'Reviewer 2 评审',
       'reports.stage.reviewer-3': 'Reviewer 3 评审',
+      'reports.stage.reviewer-4': 'Reviewer 4 评审',
       'reports.stage.revision': 'Reviewer 1 整合意见，writer 修改',
       'reports.stage.final-reviewer-1': '终审 Reviewer 1',
       'reports.stage.final-reviewer-2': '终审 Reviewer 2',
       'reports.stage.final-reviewer-3': '终审 Reviewer 3',
+      'reports.stage.final-reviewer-4': '终审 Reviewer 4',
       'reports.stage.done': '完成',
       'reports.pdf': '下载 PDF',
       'reports.meta': '{sources} 条内容 · {points} 条证据 · {mode}',
@@ -558,17 +567,26 @@ window.__ModuleLoader__.load({
       'reports.timeline': 'Timeline',
       'reports.suggestions': 'Suggestions',
       'reports.latex': 'Download LaTeX',
-      'reports.reviewProcess': 'Three-reviewer arbitration',
+      'reports.reviewProcess': 'Four-reviewer arbitration',
+      'reports.generation': 'Generation process',
+      'reports.threshold': 'Decision: accept = overall ≥ 8 and every dimension ≥ 7; rebuttal = otherwise; reject = overall < 6 or any dimension < 4',
+      'reports.dim.review': 'Review',
+      'reports.dim.figures': 'Figures',
+      'reports.dim.exploration': 'Exploration',
+      'reports.dim.feasibility': 'Feasibility',
+      'reports.dim.writing': 'Writing',
       'reports.stage': 'Stage',
       'reports.stage.writer': 'Writer drafting',
-      'reports.stage.reviewers': 'Three reviewers',
+      'reports.stage.reviewers': 'Four reviewers',
       'reports.stage.reviewer-1': 'Reviewer 1',
       'reports.stage.reviewer-2': 'Reviewer 2',
       'reports.stage.reviewer-3': 'Reviewer 3',
+      'reports.stage.reviewer-4': 'Reviewer 4',
       'reports.stage.revision': 'Reviewer 1 integrates feedback; writer revises',
       'reports.stage.final-reviewer-1': 'Final reviewer 1',
       'reports.stage.final-reviewer-2': 'Final reviewer 2',
       'reports.stage.final-reviewer-3': 'Final reviewer 3',
+      'reports.stage.final-reviewer-4': 'Final reviewer 4',
       'reports.stage.done': 'Done',
       'reports.pdf': 'Download PDF',
       'reports.meta': '{sources} sources · {points} evidence rows · {mode}',
@@ -826,6 +844,15 @@ window.__ModuleLoader__.load({
 .rw-reviewrun{display:flex;flex-direction:column;gap:8px}
 .rw-reviewrow{border:1px solid var(--dsw-alias-border-l1);border-radius:9px;background:var(--dsw-alias-bg-layer-1);padding:8px 10px;display:flex;flex-direction:column;gap:3px}
 .rw-reviewrow .rw-item__body{white-space:normal;font-size:12px;line-height:1.5}
+.rw-reportentry{display:flex;flex-direction:column;gap:2px}
+.rw-generation{border-top:1px dashed var(--dsw-alias-border-l1);padding:4px 8px 8px;margin-top:2px}
+.rw-generation summary{cursor:pointer;font-size:11px;color:var(--dsw-alias-label-secondary);padding:4px 0}
+.rw-generation__body{display:flex;flex-direction:column;gap:6px;padding:2px 0 4px}
+.rw-dimlist{display:flex;flex-direction:column;gap:2px;margin-top:2px}
+.rw-dim{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px;font-size:11px;line-height:1.4}
+.rw-dim b{font-size:10px;color:var(--dsw-alias-label-secondary);font-weight:600}
+.rw-dim span{color:var(--dsw-alias-label-primary);overflow-wrap:anywhere}
+.rw-genreason{margin:2px 0 0;font-size:11px;line-height:1.5;color:var(--dsw-alias-label-secondary)}
 .rw-meta{font-size:12px;color:var(--dsw-alias-label-secondary);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .rw-kv{display:flex;flex-wrap:wrap;gap:6px}
 .rw-divider{height:1px;background:var(--dsw-alias-border-l1);margin:2px 0}
@@ -3103,6 +3130,79 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
       );
     }
 
+    function ReviewRound({ round, t }) {
+      if (!round) return null;
+      const reviews = round.reviews || [];
+      const arbitration = round.arbitration || {};
+      return h(
+        'details',
+        { className: 'rw-genround' },
+        h(
+          'summary',
+          null,
+          `Round ${round.round || 1} · ${round.decision || arbitration.decision || '—'} · accept ${arbitration.counts ? arbitration.counts.accept : '—'} / rebuttal ${arbitration.counts ? arbitration.counts.rebuttal : '—'} / reject ${arbitration.counts ? arbitration.counts.reject : '—'}`,
+        ),
+        reviews.map((review) =>
+          h(
+            'div',
+            {
+              key: review.reviewer,
+              className: 'rw-reviewrow',
+              title: (review.suggestions || []).join('\n') || '',
+            },
+            h(
+              'div',
+              { className: 'rw-item__top' },
+              h('strong', null, `Reviewer ${review.reviewer}`),
+              h(Chip, { tone: review.decision === 'accept' ? 'ok' : review.decision === 'reject' ? 'err' : 'warn' }, review.decision),
+              h('span', { className: 'rw-sub' }, `overall ${review.scores.overall || 0}`),
+            ),
+            h(
+              'div',
+              { className: 'rw-dimlist' },
+              [
+                ['review', t('reports.dim.review')],
+                ['figures', t('reports.dim.figures')],
+                ['exploration', t('reports.dim.exploration')],
+                ['feasibility', t('reports.dim.feasibility')],
+                ['writing', t('reports.dim.writing')],
+              ].map(([key, label]) =>
+                h(
+                  'div',
+                  { key, className: 'rw-dim' },
+                  h('b', null, `${label} ${review.scores[key] || 0}`),
+                  h('span', null, (review.dimensionNotes && review.dimensionNotes[key]) || '—'),
+                ),
+              ),
+            ),
+            review.decision === 'accept' && review.reason ? h('p', { className: 'rw-genreason' }, review.reason) : null,
+          ),
+        ),
+      );
+    }
+
+    function GenerationPanel({ generation, t }) {
+      if (!generation) return null;
+      const rounds = generation.history && generation.history.length
+        ? generation.history
+        : [generation];
+      return h(
+        'details',
+        { className: 'rw-generation' },
+        h(
+          'summary',
+          null,
+          `${t('reports.generation')} · ${rounds.length} round${rounds.length > 1 ? 's' : ''} · ${generation.decision || (generation.arbitration && generation.arbitration.decision) || '—'}`,
+        ),
+        h(
+          'div',
+          { className: 'rw-generation__body' },
+          h('div', { className: 'rw-sub' }, t('reports.threshold')),
+          rounds.map((round, index) => h(ReviewRound, { key: round.round || index, round, t })),
+        ),
+      );
+    }
+
     function ReportsView({ task, snap, call, run, t }) {
       const [reportId, setReportId] = useState(null);
       const [focus, setFocus] = useState(task.experimentBrief || '');
@@ -3164,29 +3264,6 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
             ),
           ),
         ),
-        reportRun
-          ? h(
-              'div',
-              { className: 'rw-card rw-reviewrun' },
-              h(
-                'div',
-                { className: 'rw-settings__head', style: { padding: 0, border: 0, background: 'transparent', marginBottom: 8 } },
-                h('div', null, h('h3', null, t('reports.reviewProcess')), h('p', null, `${t('reports.stage')}: ${t(`reports.stage.${reportRun.stage}`) || reportRun.stage}${reportRun.decision ? ` · ${reportRun.decision}` : ''}`)),
-              ),
-              (reportRun.reviews || []).map((review) =>
-                h(
-                  'div',
-                  { key: review.reviewer, className: 'rw-reviewrow' },
-                  h('div', { className: 'rw-item__top' }, h('strong', null, `Reviewer ${review.reviewer}`), h(Chip, { tone: review.decision === 'accept' ? 'ok' : review.decision === 'reject' ? 'err' : 'warn' }, review.decision)),
-                  h('div', { className: 'rw-sub' }, `综述 ${review.scores.review} · 图表 ${review.scores.figures} · 探索性 ${review.scores.exploration} · 可执行 ${review.scores.feasibility}`),
-                  h('p', { className: 'rw-item__body' }, review.reason || ''),
-                ),
-              ),
-              reportRun.arbitration
-                ? h('div', { className: 'rw-sub', style: { marginTop: 8 } }, `仲裁：${reportRun.arbitration.decision} · ${reportRun.arbitration.reasons.map((row) => `R${row.reviewer}: ${row.reason}`).join(' / ')}`)
-                : null,
-            )
-          : null,
         reports.length
           ? h(
               'div',
@@ -3200,24 +3277,28 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
                   { className: 'rw-reportlist' },
                   reports.map((report) =>
                     h(
-                      'button',
-                      {
-                        key: report.id,
-                        type: 'button',
-                        className: cls('rw-reportrow', report.id === reportId && 'is-active'),
-                        onClick: () => setReportId(report.id),
-                      },
-                      h('div', { className: 'rw-item__title' }, report.title),
+                      'div',
+                      { key: report.id, className: 'rw-reportentry' },
                       h(
-                        'div',
-                        { className: 'rw-row', style: { gap: 6 } },
-                        h(Chip, { tone: report.mode === 'model' ? 'brand' : 'warn' }, analysisModeLabel(t, report.mode)),
+                        'button',
+                        {
+                          type: 'button',
+                          className: cls('rw-reportrow', report.id === reportId && 'is-active'),
+                          onClick: () => setReportId(report.id),
+                        },
+                        h('div', { className: 'rw-item__title' }, report.title),
                         h(
-                          'span',
-                          { className: 'rw-item__meta' },
-                          `${fmtTime(report.createdAt)} · ${t('reports.sourceCount', { n: report.sourceCount })}`,
+                          'div',
+                          { className: 'rw-row', style: { gap: 6 } },
+                          h(Chip, { tone: report.mode === 'model' ? 'brand' : 'warn' }, analysisModeLabel(t, report.mode)),
+                          h(
+                            'span',
+                            { className: 'rw-item__meta' },
+                            `${fmtTime(report.createdAt)} · ${t('reports.sourceCount', { n: report.sourceCount })}`,
+                          ),
                         ),
                       ),
+                      h(GenerationPanel, { generation: report.generation || report.reviewPanel, t }),
                     ),
                   ),
                 ),
