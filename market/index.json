@@ -57,6 +57,18 @@
       },
       "versions": [
         {
+          "version": "0.26.0",
+          "publishTimestamp": 1795603210,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/Dzy-HW-XD/dsh-sci-sideband",
+            "commit": "987798b6a297740a1b01ed2043f4e076a954b3a4"
+          },
+          "engines": {
+            "dsh": ">=0.2.2-rc.1 <0.3.0-0"
+          }
+        },
+        {
           "version": "0.24.0",
           "publishTimestamp": 1795601156,
           "source": {
