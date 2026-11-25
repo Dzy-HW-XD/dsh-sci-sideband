@@ -48,6 +48,18 @@
       "remotePath": "",
       "commit": "",
       "source": "dsh-sci-sideband"
+    },
+    {
+      "id": "academic-humanizer",
+      "name": "Academic Humanizer (local adaptation)",
+      "path": "skills/academic-humanizer",
+      "version": "1.0.0",
+      "license": "MIT",
+      "repo": "junbolian/Academic-Humanizer",
+      "branch": "main",
+      "remotePath": "academic-humanizer/SKILL.md",
+      "commit": "",
+      "source": "https://github.com/junbolian/Academic-Humanizer"
     }
   ]
 }

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.26.0 — 2026-11-25
+
+- Removed the 3-round cap: revisions continue until accept (reject/rebuttal → writer rewrite same report).
+- 2+2 ties trigger a fresh re-review by all four reviewers instead of falling straight to rebuttal.
+- Reviewer JSON failures retry three times; exhausted reviewers abstain and do not abort the loop.
+- Added Academic-Humanizer-derived writing rules and jargon/AI-tone cleanup for writer and reviewers.
+- Timeline is an appendix in PDF and a collapsed appendix in UI; TikZ spacing is content-aware.
+
+## 0.25.0 — 2026-11-25
+
+- Added `academic-humanizer` skill (adapted from Academic-Humanizer and sci-paper de-ai, MIT) to remove AI tone while preserving numbers, citations, and claims.
+- Writer no longer uses bare `not reported` in prose; jargon is explained at first use; section headings can be nested (`2.1/2.2`).
+- Source analysis cards no longer use the heavy left rule; nested report subsections are indented distinctly.
+- Reviewer JSON retries; timeline moved to the appendix with dynamic TikZ spacing.
+- Writer/reviewer load the LaTeX and humanizer skills; reviewer gets a `latex` dimension.
+
 ## 0.24.0 — 2026-11-25
 
 - Rebuttal/reject now retries Reviewer JSON failures and falls back to a recorded reviewer error instead of aborting the whole loop.

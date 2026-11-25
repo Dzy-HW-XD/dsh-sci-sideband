@@ -782,6 +782,9 @@ window.__ModuleLoader__.load({
 .rw-item__body{font-size:13px;color:var(--dsw-alias-label-primary);white-space:pre-wrap;overflow-wrap:anywhere}
 .rw-quote{margin:0;padding:8px 10px;border-left:2px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-2);border-radius:0 6px 6px 0;font-size:12px;color:var(--dsw-alias-label-secondary);white-space:pre-wrap}
 .rw-proposal{border-left:3px solid var(--dsw-alias-brand-primary);padding-left:11px;display:flex;flex-direction:column;gap:9px;margin-top:7px}
+.rw-analysis{border-left:0;padding-left:0;gap:8px;margin-top:2px}
+.rw-analysis .rw-proposal__label{color:var(--dsw-alias-label-secondary);font-size:9px;letter-spacing:.06em}
+.rw-analysis .rw-proposal__label b{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-secondary)}
 .rw-proposal__section{min-width:0}
 .rw-proposal__label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dsw-alias-brand-primary)}
 .rw-proposal__label b{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:5px;background:color-mix(in srgb,var(--dsw-alias-brand-primary) 12%,transparent);font-size:9px;letter-spacing:0}
@@ -828,6 +831,8 @@ window.__ModuleLoader__.load({
 .rw-report p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
 .rw-report__sections{display:flex;flex-direction:column;gap:14px}
 .rw-report__section{display:flex;flex-direction:column;gap:8px;padding-top:4px}
+.rw-report__section.is-sub{margin-left:14px;padding-left:12px;border-left:1px solid var(--dsw-alias-border-l1)}
+.rw-report__section.is-sub h3{font-size:13.5px;color:var(--dsw-alias-label-secondary)}
 .rw-timeline{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--dsw-alias-border-l2);margin:4px 0 4px 68px}
 .rw-timeline__item{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;position:relative;padding:8px 0 12px}
 .rw-timeline__item::before{content:"";position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--dsw-alias-brand-primary);border:2px solid var(--dsw-alias-bg-base)}
@@ -1871,7 +1876,7 @@ window.__ModuleLoader__.load({
       const formulas = analysis.keyFormulas || [];
       return h(
         'div',
-        { className: 'rw-proposal' },
+        { className: 'rw-proposal rw-analysis' },
         problem
           ? h(
               ProposalSection,
@@ -3079,7 +3084,7 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
           (report.sections || []).map((section, index) =>
             h(
               'div',
-              { key: index, className: 'rw-report__section' },
+              { key: index, className: cls('rw-report__section', /^\d+\.\d+/.test(section.heading || '') && 'is-sub') },
               h('h3', null, section.heading),
               (section.paragraphs || []).map((paragraph, paragraphIndex) => h('p', { key: paragraphIndex }, paragraph)),
               (report.figures || [])
@@ -3088,7 +3093,7 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
                   h(
                     'div',
                     { key: `fig-${figureIndex}`, className: 'rw-figure' },
-                    h('div', { className: 'rw-item__title' }, `${figure.label || '图'} ${figure.title}`.trim()),
+                    h('div', { className: 'rw-item__title' }, `${figure.label || '图'} ${String(figure.title || '').replace(/^\s*图\s*\d+[:：.\s-]*/u, '')}`.trim()),
                     figure.imageUrl ? h('img', { className: 'rw-figure__img', src: figure.imageUrl, alt: figure.caption || figure.title || 'figure', loading: 'lazy' }) : null,
                     figure.caption ? h('p', { className: 'rw-figure__caption' }, figure.caption) : null,
                     figure.takeaway || figure.interpretation ? h('p', { className: 'rw-sub' }, figure.takeaway || figure.interpretation) : null,
