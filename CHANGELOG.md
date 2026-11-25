@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.19.0 — 2026-11-25
+
+- Added a Research Future-style LaTeX manuscript template (`templates/research-future`) based on the public SPJ/Overleaf template (CC BY 4.0).
+- Every report now stores a complete `.tex` manuscript; the report toolbar has **下载 LaTeX**.
+- Writer loads a `latex-manuscript` skill and writes LaTeX-ready single-column review content; the renderer handles title, abstract, keywords, timeline tree, sections, inline figures, suggestions, and references.
+- Report suggestions are rendered as one-paragraph future-work items.
+
 ## 0.18.0 — 2026-11-25
 
 - Report generation now runs a three-reviewer panel with accept / rebuttal / reject decisions, per-dimension scores (review, figures, exploration, feasibility, writing), and a visible arbitration process.

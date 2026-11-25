@@ -251,6 +251,7 @@ window.__ModuleLoader__.load({
       'reports.figures': '图表计划',
       'reports.timeline': '发展时间轴',
       'reports.suggestions': '建议',
+      'reports.latex': '下载 LaTeX',
       'reports.reviewProcess': '三审仲裁过程',
       'reports.stage': '阶段',
       'reports.stage.writer': 'writer 写作',
@@ -556,6 +557,7 @@ window.__ModuleLoader__.load({
       'reports.figures': 'Figure plan',
       'reports.timeline': 'Timeline',
       'reports.suggestions': 'Suggestions',
+      'reports.latex': 'Download LaTeX',
       'reports.reviewProcess': 'Three-reviewer arbitration',
       'reports.stage': 'Stage',
       'reports.stage.writer': 'Writer drafting',
@@ -2835,6 +2837,19 @@ window.__ModuleLoader__.load({
         setTimeout(() => URL.revokeObjectURL(url), 2000);
       };
 
+      const downloadLatex = () => {
+        if (!report) return;
+        const blob = new Blob([report.latex || ''], { type: 'text/x-tex;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${safeName(report.title || t('reports.downloadName'))}.tex`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      };
+
       const printPdf = () => {
         if (!report) return;
         const esc = (value) =>
@@ -2930,6 +2945,7 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
             { className: 'rw-row' },
             h(Btn, { size: 'small', onClick: copy }, h(Icon, { name: copied ? 'check' : 'copy', size: 14 }), copied ? t('common.copied') : t('common.copy')),
             h(Btn, { size: 'small', onClick: download }, h(Icon, { name: 'download', size: 14 }), t('common.download')),
+            h(Btn, { size: 'small', onClick: downloadLatex }, h(Icon, { name: 'download', size: 14 }), t('reports.latex')),
             h(Btn, { size: 'small', onClick: printPdf }, h(Icon, { name: 'doc', size: 14 }), t('reports.pdf')),
             h(
               Btn,

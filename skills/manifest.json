@@ -36,6 +36,18 @@
       "remotePath": "",
       "commit": "",
       "source": "dsh-sci-sideband"
+    },
+    {
+      "id": "latex-manuscript",
+      "name": "LaTeX Manuscript (local)",
+      "path": "skills/latex-manuscript",
+      "version": "1.0.0",
+      "license": "local",
+      "repo": "",
+      "branch": "",
+      "remotePath": "",
+      "commit": "",
+      "source": "dsh-sci-sideband"
     }
   ]
 }
