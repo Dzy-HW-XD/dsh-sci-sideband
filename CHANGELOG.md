@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.31.0 — 2026-11-26
+
+- Settings now shows a visual **Subagent call flow**: Router → Grabber → Analysis → Evidence reviewer → Writer → 4 reviewers → arbitration/revision loop.
+- Skill manager now supports quick enable/disable, add (existing `skills/<id>/SKILL.md`), and delete (with directory removal).
+- Writer/reviewer skill loading is registry-driven: disabled skills are genuinely omitted on the next report generation.
+- Skill rows show role/priority and management controls.
+
 ## 0.30.0 — 2026-11-26
 
 - Added zLanqing `research-writing-skill` (MIT) as the writer's primary Chinese-first research-writing skill.

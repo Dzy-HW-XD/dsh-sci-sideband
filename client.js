@@ -67,6 +67,15 @@ window.__ModuleLoader__.load({
       'tabs.skills': '技能管理',
       'tabs.settings': '设置',
       'settings.channels': '文献源管理',
+      'settings.diagram': 'Subagent 调用逻辑',
+      'settings.diagramHint': 'Router 调度各阶段的插件内调用，不是独立进程。',
+      'diagram.router': '定时 / 手动触发',
+      'diagram.grabber': '检索 + 引用扩散',
+      'diagram.analysis': '全文分析 / 卡片',
+      'diagram.evidence': '分类合并 / 图卡审核',
+      'diagram.writer': '综述 + LaTeX',
+      'diagram.reviewer': '顶会评分 / 建议',
+      'diagram.arbitration': '票数 + 分数 + 无进展检测',
       'settings.channelsHint': '选择用于自动发现与分析的开放文献源。',
       'settings.automation': '自动化',
       'settings.automationHint': '控制 Router 何时发现新论文并触发分析。',
@@ -89,6 +98,14 @@ window.__ModuleLoader__.load({
       'skills.version': '版本',
       'skills.checked': '上次检查',
       'skills.empty': '没有登记技能。',
+      'skills.add': '添加技能',
+      'skills.adding': '添加中…',
+      'skills.name': '名称',
+      'skills.path': '目录（skills/…）',
+      'skills.enabled': '已启用',
+      'skills.disabled': '已停用',
+      'skills.delete': '删除',
+      'skills.deleteHint': '删除这个 skill 并移除其目录？',
       'common.add': '添加',
       'common.cancel': '取消',
       'common.save': '保存',
@@ -385,6 +402,15 @@ window.__ModuleLoader__.load({
       'tabs.skills': 'Skills',
       'tabs.settings': 'Settings',
       'settings.channels': 'Literature sources',
+      'settings.diagram': 'Subagent call flow',
+      'settings.diagramHint': 'Router orchestrates in-plugin stages; these are not separate processes.',
+      'diagram.router': 'timer / manual trigger',
+      'diagram.grabber': 'search + citation expansion',
+      'diagram.analysis': 'full-text analysis / cards',
+      'diagram.evidence': 'merge cards / review figures',
+      'diagram.writer': 'review + LaTeX',
+      'diagram.reviewer': 'conference score / advice',
+      'diagram.arbitration': 'votes + score + stall detection',
       'settings.channelsHint': 'Choose the open sources used for automatic discovery and analysis.',
       'settings.automation': 'Automation',
       'settings.automationHint': 'Control when the Router discovers papers and starts analysis.',
@@ -407,6 +433,14 @@ window.__ModuleLoader__.load({
       'skills.version': 'Version',
       'skills.checked': 'Last checked',
       'skills.empty': 'No skills registered.',
+      'skills.add': 'Add skill',
+      'skills.adding': 'Adding…',
+      'skills.name': 'Name',
+      'skills.path': 'Directory (skills/…)',
+      'skills.enabled': 'Enabled',
+      'skills.disabled': 'Disabled',
+      'skills.delete': 'Delete',
+      'skills.deleteHint': 'Delete this skill and remove its directory?',
       'common.add': 'Add',
       'common.cancel': 'Cancel',
       'common.save': 'Save',
@@ -866,6 +900,21 @@ window.__ModuleLoader__.load({
 .rw-genreason{margin:2px 0 0;font-size:11px;line-height:1.5;color:var(--dsw-alias-label-secondary)}
 .rw-appendix{margin-top:12px;border-top:1px solid var(--dsw-alias-border-l1);padding-top:8px}
 .rw-appendix summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
+.rw-flowwrap{padding:16px 18px;overflow:auto}
+.rw-flow{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:560px}
+.rw-flow__node{border:1px solid var(--dsw-alias-border-l1);border-radius:9px;background:var(--dsw-alias-bg-layer-1);padding:7px 10px;min-width:100px;text-align:center;display:flex;flex-direction:column;gap:1px}
+.rw-flow__node strong{font-size:12px}
+.rw-flow__node small{font-size:10px;color:var(--dsw-alias-label-secondary)}
+.rw-flow__node.is-router{border-color:color-mix(in srgb,var(--dsw-alias-brand-primary) 45%,var(--dsw-alias-border-l1));background:color-mix(in srgb,var(--dsw-alias-brand-primary) 7%,var(--dsw-alias-bg-layer-1))}
+.rw-flow__node.is-writer{border-color:color-mix(in srgb,var(--dsw-alias-state-success-primary) 35%,var(--dsw-alias-border-l1))}
+.rw-flow__node.is-arb{border-style:dashed}
+.rw-flow__row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.rw-flow__row--reviewers .rw-flow__node{min-width:96px}
+.rw-flow__arrow{color:var(--dsw-alias-label-tertiary);font-size:16px;line-height:1}
+.rw-flow__arrow--row{font-size:13px}
+.rw-flow__loop{font-size:10px;color:var(--dsw-alias-label-secondary);border:1px dashed var(--dsw-alias-border-l1);border-radius:999px;padding:3px 9px;margin-top:3px}
+.rw-skilladd{display:flex;flex-direction:column;gap:6px;padding:10px 0}
+.rw-skilladd .rw-field{min-width:180px}
 .rw-meta{font-size:12px;color:var(--dsw-alias-label-secondary);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .rw-kv{display:flex;flex-wrap:wrap;gap:6px}
 .rw-divider{height:1px;background:var(--dsw-alias-border-l1);margin:2px 0}
@@ -3342,6 +3391,37 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
       );
     }
 
+    function PipelineDiagram({ t }) {
+      const node = (key, title, sub, tone = '') =>
+        h('div', { key, className: cls('rw-flow__node', tone) }, h('strong', null, title), sub ? h('small', null, sub) : null);
+      return h(
+        'div',
+        { className: 'rw-flow' },
+        node('router', 'Router', t('diagram.router'), 'is-router'),
+        h('div', { className: 'rw-flow__arrow' }, '↓'),
+        h(
+          'div',
+          { className: 'rw-flow__row' },
+          node('grabber', 'Grabber', t('diagram.grabber')),
+          h('span', { className: 'rw-flow__arrow rw-flow__arrow--row' }, '→'),
+          node('analysis', 'Analysis', t('diagram.analysis')),
+          h('span', { className: 'rw-flow__arrow rw-flow__arrow--row' }, '→'),
+          node('evidence', 'Evidence Reviewer', t('diagram.evidence')),
+        ),
+        h('div', { className: 'rw-flow__arrow' }, '↓'),
+        node('writer', 'Writer', t('diagram.writer'), 'is-writer'),
+        h('div', { className: 'rw-flow__arrow' }, '↓'),
+        h(
+          'div',
+          { className: 'rw-flow__row rw-flow__row--reviewers' },
+          [1, 2, 3, 4].map((n) => node(`r${n}`, `Reviewer ${n}`, t('diagram.reviewer'))),
+        ),
+        h('div', { className: 'rw-flow__arrow' }, '↓'),
+        node('arbitration', 'Arbitration', t('diagram.arbitration'), 'is-arb'),
+        h('div', { className: 'rw-flow__loop' }, '↺  reject / rebuttal  →  Writer 修改同一篇；2+2 → 四审重评'),
+      );
+    }
+
     function SettingsView({ task, call, run, t }) {
       const [channels, setChannels] = useState(() =>
         Array.isArray(task.channels) && task.channels.length ? task.channels : DEFAULT_CHANNEL_IDS,
@@ -3376,6 +3456,16 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
           { className: 'rw-pagehead' },
           h('h2', null, t('settings.title')),
           h('p', null, t('settings.hint')),
+        ),
+        h(
+          'section',
+          { className: 'rw-card rw-settings__card' },
+          h(
+            'div',
+            { className: 'rw-settings__head' },
+            h('div', null, h('h3', null, t('settings.diagram')), h('p', null, t('settings.diagramHint'))),
+          ),
+          h('div', { className: 'rw-flowwrap' }, h(PipelineDiagram, { t })),
         ),
         h(
           'section',
@@ -3500,6 +3590,9 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
     function SkillsView({ call, t, embedded = false }) {
       const [data, setData] = useState(null);
       const [checking, setChecking] = useState(false);
+      const [busy, setBusy] = useState('');
+      const [adding, setAdding] = useState(false);
+      const [draft, setDraft] = useState({ id: '', name: '', path: '' });
       const [error, setError] = useState('');
 
       useEffect(() => {
@@ -3528,6 +3621,47 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
         }
       };
 
+      const toggle = async (skill) => {
+        if (busy) return;
+        setBusy(skill.id);
+        setError('');
+        try {
+          setData(await call('skills.toggle', { id: skill.id, enabled: skill.enabled === false }));
+        } catch (failure) {
+          setError(messageOf(failure));
+        } finally {
+          setBusy('');
+        }
+      };
+
+      const remove = async (skill) => {
+        if (busy || !window.confirm(t('skills.deleteHint'))) return;
+        setBusy(skill.id);
+        setError('');
+        try {
+          setData(await call('skills.delete', { id: skill.id, removeFiles: true }));
+        } catch (failure) {
+          setError(messageOf(failure));
+        } finally {
+          setBusy('');
+        }
+      };
+
+      const add = async () => {
+        if (busy) return;
+        setBusy('add');
+        setError('');
+        try {
+          setData(await call('skills.add', draft));
+          setDraft({ id: '', name: '', path: '' });
+          setAdding(false);
+        } catch (failure) {
+          setError(messageOf(failure));
+        } finally {
+          setBusy('');
+        }
+      };
+
       return h(
         'div',
         { className: embedded ? 'rw-settings__skills' : 'rw-section' },
@@ -3543,12 +3677,31 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
                 data && data.checkedAt ? h('div', { className: 'rw-sub' }, `${t('skills.checked')}: ${fmtTime(data.checkedAt)}`) : null,
               ),
           h(
-            Btn,
-            { size: 'small', variant: 'primary', onClick: check, disabled: checking },
-            checking ? h(Spinner) : h(Icon, { name: 'refresh', size: 14 }),
-            checking ? t('skills.checking') : t('skills.check'),
+            'div',
+            { className: 'rw-row' },
+            h(Btn, { size: 'small', onClick: () => setAdding((value) => !value) }, h(Icon, { name: 'plus', size: 14 }), t('skills.add')),
+            h(
+              Btn,
+              { size: 'small', variant: 'primary', onClick: check, disabled: checking },
+              checking ? h(Spinner) : h(Icon, { name: 'refresh', size: 14 }),
+              checking ? t('skills.checking') : t('skills.check'),
+            ),
           ),
         ),
+        adding
+          ? h(
+              'div',
+              { className: 'rw-card rw-skilladd' },
+              h(Field, { label: 'id' }, h('input', { className: 'rw-input', value: draft.id, onChange: (e) => setDraft({ ...draft, id: e.target.value }), placeholder: 'my-writing-skill' })),
+              h(Field, { label: t('skills.name') }, h('input', { className: 'rw-input', value: draft.name, onChange: (e) => setDraft({ ...draft, name: e.target.value }) })),
+              h(Field, { label: t('skills.path') }, h('input', { className: 'rw-input', value: draft.path, onChange: (e) => setDraft({ ...draft, path: e.target.value }), placeholder: 'skills/my-writing-skill' })),
+              h(
+                'div',
+                { className: 'rw-row', style: { justifyContent: 'flex-end', marginTop: 6 } },
+                h(Btn, { variant: 'primary', size: 'small', onClick: add, disabled: busy === 'add' || !draft.id }, busy === 'add' ? t('skills.adding') : t('skills.add')),
+              ),
+            )
+          : null,
         error ? h('div', { className: 'rw-error' }, error) : null,
         data && data.skills && data.skills.length
           ? h(
@@ -3580,6 +3733,27 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
                           ? h(Chip, { tone: 'ok' }, t('skills.upToDate'))
                           : h(Chip, null, t('skills.local')),
                       !skill.installed ? h(Chip, { tone: 'err' }, t('skills.missing')) : null,
+                    ),
+                  ),
+                  h(
+                    'div',
+                    { className: 'rw-row', style: { justifyContent: 'space-between' } },
+                    h(
+                      'label',
+                      { className: 'rw-switchrow' },
+                      h('input', {
+                        type: 'checkbox',
+                        checked: skill.enabled !== false,
+                        disabled: Boolean(busy),
+                        onChange: () => toggle(skill),
+                      }),
+                      h('span', null, h('strong', null, skill.enabled === false ? t('skills.disabled') : t('skills.enabled'))),
+                    ),
+                    h(
+                      Btn,
+                      { size: 'small', variant: 'danger', onClick: () => remove(skill), disabled: Boolean(busy) },
+                      h(Icon, { name: 'trash', size: 14 }),
+                      t('skills.delete'),
                     ),
                   ),
                   skill.source
