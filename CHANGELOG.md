@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.33.0 — 2026-11-26
+
+- Subagent flow nodes are clickable and show each role's exact system prompt, context list, skills, output, and temperature.
+- Added `agents.blueprint` RPC with Router, Grabber, Analysis, Evidence Reviewer, Writer, Writer-Viewer, Arbitration.
+- Settings is now foldable: diagram stays open; sources, automation, and skills collapse to summary rows.
+- Evidence Reviewer remains a distinct stage between Analysis and Writer.
+
 ## 0.32.0 — 2026-11-26
 
 - Settings “Subagent call flow” now shows **Evidence Reviewer** as its own stage between Analysis and Writer, not inline with Grabber/Analysis.

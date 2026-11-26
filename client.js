@@ -903,10 +903,25 @@ window.__ModuleLoader__.load({
 .rw-appendix{margin-top:12px;border-top:1px solid var(--dsw-alias-border-l1);padding-top:8px}
 .rw-appendix summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
 .rw-flowwrap{padding:16px 18px;overflow:auto}
+.rw-settings__fold{padding:0;overflow:hidden}
+.rw-settings__fold>summary{list-style:none;cursor:pointer;margin:0;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rw-settings__fold>summary::-webkit-details-marker{display:none}
+.rw-settings__fold>summary::before{content:'▸';color:var(--dsw-alias-label-tertiary);font-size:11px;margin-right:2px}
+.rw-settings__fold[open]>summary::before{content:'▾'}
+.rw-settings__foldbody{padding:0 14px 14px}
 .rw-flow{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:560px}
 .rw-flow__node{border:1px solid var(--dsw-alias-border-l1);border-radius:9px;background:var(--dsw-alias-bg-layer-1);padding:7px 10px;min-width:100px;text-align:center;display:flex;flex-direction:column;gap:1px}
 .rw-flow__node strong{font-size:12px}
 .rw-flow__node small{font-size:10px;color:var(--dsw-alias-label-secondary)}
+.rw-flow__node.is-clickable{cursor:pointer;font:inherit;color:inherit}
+.rw-flow__node.is-clickable:hover{border-color:var(--dsw-alias-brand-primary)}
+.rw-flow__node.is-selected{border-color:var(--dsw-alias-brand-primary);box-shadow:0 0 0 1px var(--dsw-alias-brand-primary)}
+.rw-agentinspector{margin-top:12px;border-top:1px solid var(--dsw-alias-border-l1);padding-top:10px;text-align:left}
+.rw-agentinspector__grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;margin-top:6px}
+.rw-agentprompt{margin:4px 0 0;padding:8px;max-height:220px;overflow:auto;white-space:pre-wrap;font-size:10.5px;line-height:1.5;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);border-radius:6px}
+.rw-agentcontext{margin:4px 0 0;padding-left:16px;font-size:11.5px;line-height:1.55;color:var(--dsw-alias-label-primary)}
+.rw-agentcontext li{margin:2px 0}
+@media (max-width:720px){.rw-agentinspector__grid{grid-template-columns:1fr}}
 .rw-flow__node.is-router{border-color:color-mix(in srgb,var(--dsw-alias-brand-primary) 45%,var(--dsw-alias-border-l1));background:color-mix(in srgb,var(--dsw-alias-brand-primary) 7%,var(--dsw-alias-bg-layer-1))}
 .rw-flow__node.is-writer{border-color:color-mix(in srgb,var(--dsw-alias-state-success-primary) 35%,var(--dsw-alias-border-l1))}
 .rw-flow__node.is-evidence{border-color:color-mix(in srgb,var(--dsw-alias-state-warning-primary) 35%,var(--dsw-alias-border-l1));background:color-mix(in srgb,var(--dsw-alias-state-warning-primary) 6%,var(--dsw-alias-bg-layer-1))}
@@ -3395,35 +3410,100 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
       );
     }
 
-    function PipelineDiagram({ t }) {
-      const node = (key, title, sub, tone = '') =>
-        h('div', { key, className: cls('rw-flow__node', tone) }, h('strong', null, title), sub ? h('small', null, sub) : null);
+    function PipelineDiagram({ t, blueprint }) {
+      const [selected, setSelected] = useState('writer');
+      const agents = (blueprint && blueprint.agents) || [];
+      const current = agents.find((agent) => agent.id === selected) || null;
+      const node = (key, title, sub, tone = '', agentId = null) =>
+        h(
+          'button',
+          {
+            key,
+            type: 'button',
+            className: cls('rw-flow__node', tone, agentId && 'is-clickable', agentId === selected && 'is-selected'),
+            onClick: agentId ? () => setSelected(agentId) : undefined,
+            title: agentId ? '查看 system prompt 与上下文' : '',
+          },
+          h('strong', null, title),
+          sub ? h('small', null, sub) : null,
+        );
       return h(
         'div',
-        { className: 'rw-flow' },
-        node('router', 'Router', t('diagram.router'), 'is-router'),
-        h('div', { className: 'rw-flow__arrow' }, '↓'),
+        { className: 'rw-flowwrap' },
         h(
           'div',
-          { className: 'rw-flow__row' },
-          node('grabber', 'Grabber', t('diagram.grabber')),
-          h('span', { className: 'rw-flow__arrow rw-flow__arrow--row' }, '→'),
-          node('analysis', 'Analysis', t('diagram.analysis')),
+          { className: 'rw-flow' },
+          node('router', 'Router', t('diagram.router'), 'is-router', 'router'),
+          h('div', { className: 'rw-flow__arrow' }, '↓'),
+          h(
+            'div',
+            { className: 'rw-flow__row' },
+            node('grabber', 'Grabber', t('diagram.grabber'), '', 'grabber'),
+            h('span', { className: 'rw-flow__arrow rw-flow__arrow--row' }, '→'),
+            node('analysis', 'Analysis', t('diagram.analysis'), '', 'analysis'),
+          ),
+          h('div', { className: 'rw-flow__arrow' }, '↓'),
+          node('evidence', 'Evidence Reviewer', t('diagram.evidence'), 'is-evidence', 'evidence'),
+          h('div', { className: 'rw-flow__arrow' }, '↓'),
+          node('writer', 'Writer', t('diagram.writer'), 'is-writer', 'writer'),
+          h('div', { className: 'rw-flow__arrow' }, '↓'),
+          h('div', { className: 'rw-flow__grouplabel' }, t('diagram.writerViewer')),
+          h(
+            'div',
+            { className: 'rw-flow__row rw-flow__row--reviewers' },
+            [1, 2, 3, 4].map((n) => node(`r${n}`, `Writer-Viewer ${n}`, t('diagram.reviewer'), '', 'writerViewer')),
+          ),
+          h('div', { className: 'rw-flow__arrow' }, '↓'),
+          node('arbitration', 'Arbitration', t('diagram.arbitration'), 'is-arb', 'arbitration'),
+          h('div', { className: 'rw-flow__loop' }, '↺  reject / rebuttal  →  Writer 修改同一篇；2+2 → 四审重评'),
         ),
-        h('div', { className: 'rw-flow__arrow' }, '↓'),
-        node('evidence', 'Evidence Reviewer', t('diagram.evidence'), 'is-evidence'),
-        h('div', { className: 'rw-flow__arrow' }, '↓'),
-        node('writer', 'Writer', t('diagram.writer'), 'is-writer'),
-        h('div', { className: 'rw-flow__arrow' }, '↓'),
-        h('div', { className: 'rw-flow__grouplabel' }, t('diagram.writerViewer')),
+        current
+          ? h(
+              'div',
+              { className: 'rw-agentinspector' },
+              h(
+                'div',
+                { className: 'rw-row', style: { justifyContent: 'space-between' } },
+                h('strong', null, `${current.name} · system prompt / context`),
+                h(Chip, { tone: current.kind === 'model' ? 'brand' : 'warn' }, current.kind),
+              ),
+              h(
+                'div',
+                { className: 'rw-agentinspector__grid' },
+                h(
+                  'div',
+                  null,
+                  h('div', { className: 'rw-proposal__label' }, 'SYSTEM PROMPT'),
+                  h('pre', { className: 'rw-agentprompt' }, current.system || '(无模型 system prompt)'),
+                ),
+                h(
+                  'div',
+                  null,
+                  h('div', { className: 'rw-proposal__label' }, 'CONTEXT'),
+                  h('ul', { className: 'rw-agentcontext' }, (current.context || []).map((item, index) => h('li', { key: index }, item))),
+                  current.skills && current.skills.length
+                    ? h('div', { className: 'rw-sub' }, `skills: ${current.skills.join(' / ')}`)
+                    : null,
+                  current.output ? h('div', { className: 'rw-sub' }, `output: ${current.output}`) : null,
+                  current.note ? h('div', { className: 'rw-sub' }, current.note) : null,
+                ),
+              ),
+            )
+          : null,
+      );
+    }
+
+    function SettingsFold({ title, hint, badge, children, open = false }) {
+      return h(
+        'details',
+        { className: 'rw-card rw-settings__card rw-settings__fold', open },
         h(
-          'div',
-          { className: 'rw-flow__row rw-flow__row--reviewers' },
-          [1, 2, 3, 4].map((n) => node(`r${n}`, `Writer-Viewer ${n}`, t('diagram.reviewer'))),
+          'summary',
+          { className: 'rw-settings__head' },
+          h('div', null, h('h3', null, title), hint ? h('p', null, hint) : null),
+          badge ? h('span', { className: 'rw-settings__badge' }, badge) : null,
         ),
-        h('div', { className: 'rw-flow__arrow' }, '↓'),
-        node('arbitration', 'Arbitration', t('diagram.arbitration'), 'is-arb'),
-        h('div', { className: 'rw-flow__loop' }, '↺  reject / rebuttal  →  Writer 修改同一篇；2+2 → 四审重评'),
+        h('div', { className: 'rw-settings__foldbody' }, children),
       );
     }
 
@@ -3434,6 +3514,21 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
       const [autoScan, setAutoScan] = useState(task.autoScan === true);
       const [scanHours, setScanHours] = useState(Number(task.scanHours) || 24);
       const [saving, setSaving] = useState(false);
+      const [blueprint, setBlueprint] = useState(null);
+
+      useEffect(() => {
+        let alive = true;
+        call('agents.blueprint')
+          .then((value) => {
+            if (alive) setBlueprint(value);
+          })
+          .catch(() => {
+            if (alive) setBlueprint({ agents: [] });
+          });
+        return () => {
+          alive = false;
+        };
+      }, [call]);
 
       const toggle = (id) => {
         setChannels((current) =>
@@ -3463,24 +3558,17 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
           h('p', null, t('settings.hint')),
         ),
         h(
-          'section',
-          { className: 'rw-card rw-settings__card' },
-          h(
-            'div',
-            { className: 'rw-settings__head' },
-            h('div', null, h('h3', null, t('settings.diagram')), h('p', null, t('settings.diagramHint'))),
-          ),
-          h('div', { className: 'rw-flowwrap' }, h(PipelineDiagram, { t })),
+          SettingsFold,
+          { title: t('settings.diagram'), hint: t('settings.diagramHint'), open: true },
+          h('div', { className: 'rw-flowwrap' }, h(PipelineDiagram, { t, blueprint })),
         ),
         h(
-          'section',
-          { className: 'rw-card rw-settings__card' },
-          h(
-            'div',
-            { className: 'rw-settings__head' },
-            h('div', null, h('h3', null, t('settings.channels')), h('p', null, t('settings.channelsHint'))),
-            h('span', { className: 'rw-settings__badge' }, `${channels.length}/${DISCOVERY_CHANNELS.length}`),
-          ),
+          SettingsFold,
+          {
+            title: t('settings.channels'),
+            hint: t('settings.channelsHint'),
+            badge: `${channels.length}/${DISCOVERY_CHANNELS.length}`,
+          },
           h(
             'div',
             { className: 'rw-sourcegrid' },
@@ -3499,13 +3587,8 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
           ),
         ),
         h(
-          'section',
-          { className: 'rw-card rw-settings__card' },
-          h(
-            'div',
-            { className: 'rw-settings__head' },
-            h('div', null, h('h3', null, t('settings.automation')), h('p', null, t('settings.automationHint'))),
-          ),
+          SettingsFold,
+          { title: t('settings.automation'), hint: t('settings.automationHint') },
           h(
             'div',
             { className: 'rw-settings__form' },
@@ -3538,13 +3621,8 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
           ),
         ),
         h(
-          'section',
-          { className: 'rw-card rw-settings__card' },
-          h(
-            'div',
-            { className: 'rw-settings__head' },
-            h('div', null, h('h3', null, t('settings.skills')), h('p', null, t('settings.skillsHint'))),
-          ),
+          SettingsFold,
+          { title: t('settings.skills'), hint: t('settings.skillsHint') },
           h(SkillsView, { call, t, embedded: true }),
         ),
       );
