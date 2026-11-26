@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.29.0 — 2026-11-26
+
+- Figure reviewer now protects real image-bearing figure cards; only logos/icons/no-image cards can be deleted.
+- If the writer selects only self-drawn figures with no image URL, report composition falls back to up to six reviewed image cards so the report/PDF still has figures.
+- Writer/reviewer prompt now carries cumulative review history from all rounds; added no-progress/review-loop controls.
+- Figure labels are cleaned so “图1: 图1 …” duplicates no longer appear.
+
 ## 0.28.0 — 2026-11-26
 
 - Review memory is now cumulative across all rounds, not just the previous 3: every round's decision, score, arbitration counts, and deduplicated issues are passed to writer and reviewers.
