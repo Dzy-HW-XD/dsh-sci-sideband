@@ -893,6 +893,9 @@ window.__ModuleLoader__.load({
 .rw-figure__img{display:block;max-width:100%;height:auto;border:1px solid var(--dsw-alias-border-l1);border-radius:8px;background:#fff;margin:4px 0}
 .rw-figure{display:flex;flex-direction:column;gap:5px;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-bg-layer-1);padding:10px 12px;margin:6px 0}
 .rw-figure__caption{margin:0;font-size:12px;color:var(--dsw-alias-label-secondary);line-height:1.5}
+.rw-tablewrap{overflow:auto;margin:4px 0}
+.rw-table{font-size:11.5px}
+.rw-table th,.rw-table td{padding:5px 7px;white-space:normal;min-width:72px}
 .rw-reviewrun{display:flex;flex-direction:column;gap:8px}
 .rw-reviewrow{border:1px solid var(--dsw-alias-border-l1);border-radius:9px;background:var(--dsw-alias-bg-layer-1);padding:8px 10px;display:flex;flex-direction:column;gap:3px}
 .rw-reviewrow .rw-item__body{white-space:normal;font-size:12px;line-height:1.5}
@@ -909,7 +912,9 @@ window.__ModuleLoader__.load({
 .rw-appendix summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
 .rw-flowwrap{padding:16px 18px;overflow:auto}
 .rw-settings__fold{padding:0;overflow:hidden}
-.rw-settings__fold>summary{list-style:none;cursor:pointer;margin:0;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rw-settings__fold>summary{list-style:none;cursor:pointer;margin:0;padding:12px 14px;display:flex;align-items:center;justify-content:flex-start;gap:8px}
+.rw-settings__fold>summary>div{flex:1 1 auto;min-width:0}
+.rw-settings__fold>summary .rw-settings__badge{margin-left:auto;flex:0 0 auto}
 .rw-settings__fold>summary::-webkit-details-marker{display:none}
 .rw-settings__fold>summary::before{content:'▸';color:var(--dsw-alias-label-tertiary);font-size:11px;margin-right:2px}
 .rw-settings__fold[open]>summary::before{content:'▾'}
@@ -3215,6 +3220,26 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
                     figure.dataNeeded ? h('div', { className: 'rw-sub' }, `数据：${figure.dataNeeded}`) : null,
                   ),
                 ),
+              (report.tables || [])
+                .filter((table) => table.sectionIndex === index + 1)
+                .map((table, tableIndex) =>
+                  h(
+                    'div',
+                    { key: `tbl-${tableIndex}`, className: 'rw-figure' },
+                    h('div', { className: 'rw-item__title' }, `${table.label || '表'} ${String(table.title || '').replace(/^\s*表\s*\d+[:：.\s-]*/u, '')}`.trim()),
+                    h(
+                      'div',
+                      { className: 'rw-tablewrap' },
+                      h(
+                        'table',
+                        { className: 'rw-table' },
+                        h('thead', null, h('tr', null, (table.columns || []).map((column, columnIndex) => h('th', { key: columnIndex }, column)))),
+                        h('tbody', null, (table.rows || []).map((row, rowIndex) => h('tr', { key: rowIndex }, row.map((cell, cellIndex) => h('td', { key: cellIndex }, cell))))),
+                      ),
+                    ),
+                    table.caption ? h('p', { className: 'rw-figure__caption' }, table.caption) : null,
+                  ),
+                ),
             ),
           ),
         ),
@@ -3524,8 +3549,8 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
                   null,
                   h('div', { className: 'rw-proposal__label' }, 'CONTEXT'),
                   h('ul', { className: 'rw-agentcontext' }, (current.context || []).map((item, index) => h('li', { key: index }, item))),
-                  current.skills && current.skills.length
-                    ? h('div', { className: 'rw-sub' }, `skills: ${current.skills.join(' / ')}`)
+                  (Array.isArray(current.skills) ? current.skills : current.skills ? [current.skills] : []).length
+                    ? h('div', { className: 'rw-sub' }, `skills: ${(Array.isArray(current.skills) ? current.skills : [current.skills]).join(' / ')}`)
                     : null,
                   current.output ? h('div', { className: 'rw-sub' }, `output: ${current.output}`) : null,
                   current.note ? h('div', { className: 'rw-sub' }, current.note) : null,

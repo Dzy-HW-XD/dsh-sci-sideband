@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.37.0 — 2026-11-26
+
+- Rewrote Analysis, Evidence Reviewer, Report Planner, Writer, Writer-Viewer system prompts around the project goal: answer how quantization formats/bit widths change SDC sensitivity, with DIRECT vs ADJACENT evidence, comparability metadata, uncertainty, and conflicts.
+- Added a structured `tables` report field so evidence comparisons render as real LaTeX/HTML tables instead of being smuggled into figure captions.
+- Writer is now explicitly forbidden from empty figures, fake plots, table-in-figure, invented numbers, and merging different denominators/fault models.
+- Writer-Viewer rubric is goal-aware and must not demand data absent from the corpus.
+- Evidence editor prompt preserves real experimental figures and missing-data cards instead of deleting them.
+- Agent blueprint inspector reflects the new prompts/contexts.
+
+## 0.36.0 — 2026-11-26
+
+- Fixed folded settings summaries: arrow, title/hint, and badge now align left with the title next to the arrow; badge stays right.
+- Preserved the compact fold layout for sources, automation, and skills.
+
+## 0.35.0 — 2026-11-26
+
+- Fixed `current.skills.join is not a function` crash in the subagent prompt inspector: Evidence Reviewer now declares an array of skill IDs, and the UI normalizes legacy string values.
+- Added a visible **发现** discovery bar with progress, summary, empty, and error states.
+- Added a panel render error boundary so failures show a message and reload button instead of a blank page.
+
 ## 0.34.0 — 2026-11-26
 
 - Source view now exposes a visible **发现** discovery bar and **引用深化** action; discovery errors/empty results are shown inline instead of leaving a blank view.
