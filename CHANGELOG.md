@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.32.0 — 2026-11-26
+
+- Settings “Subagent call flow” now shows **Evidence Reviewer** as its own stage between Analysis and Writer, not inline with Grabber/Analysis.
+- Evidence Reviewer is visually highlighted and labeled “card classification / merge / figure review”.
+- Writer-Viewer ×4 remains the four independent writer reviewers before arbitration.
+
 ## 0.31.0 — 2026-11-26
 
 - Settings now shows a visual **Subagent call flow**: Router → Grabber → Analysis → Evidence reviewer → Writer → 4 reviewers → arbitration/revision loop.

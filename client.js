@@ -74,6 +74,7 @@ window.__ModuleLoader__.load({
       'diagram.analysis': '全文分析 / 卡片',
       'diagram.evidence': '分类合并 / 图卡审核',
       'diagram.writer': '综述 + LaTeX',
+      'diagram.writerViewer': 'Writer-Viewer ×4（独立评审 writer 稿件）',
       'diagram.reviewer': '顶会评分 / 建议',
       'diagram.arbitration': '票数 + 分数 + 无进展检测',
       'settings.channelsHint': '选择用于自动发现与分析的开放文献源。',
@@ -409,6 +410,7 @@ window.__ModuleLoader__.load({
       'diagram.analysis': 'full-text analysis / cards',
       'diagram.evidence': 'merge cards / review figures',
       'diagram.writer': 'review + LaTeX',
+      'diagram.writerViewer': 'Writer-Viewer ×4 (independent writer review)',
       'diagram.reviewer': 'conference score / advice',
       'diagram.arbitration': 'votes + score + stall detection',
       'settings.channelsHint': 'Choose the open sources used for automatic discovery and analysis.',
@@ -907,9 +909,11 @@ window.__ModuleLoader__.load({
 .rw-flow__node small{font-size:10px;color:var(--dsw-alias-label-secondary)}
 .rw-flow__node.is-router{border-color:color-mix(in srgb,var(--dsw-alias-brand-primary) 45%,var(--dsw-alias-border-l1));background:color-mix(in srgb,var(--dsw-alias-brand-primary) 7%,var(--dsw-alias-bg-layer-1))}
 .rw-flow__node.is-writer{border-color:color-mix(in srgb,var(--dsw-alias-state-success-primary) 35%,var(--dsw-alias-border-l1))}
+.rw-flow__node.is-evidence{border-color:color-mix(in srgb,var(--dsw-alias-state-warning-primary) 35%,var(--dsw-alias-border-l1));background:color-mix(in srgb,var(--dsw-alias-state-warning-primary) 6%,var(--dsw-alias-bg-layer-1))}
 .rw-flow__node.is-arb{border-style:dashed}
 .rw-flow__row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
 .rw-flow__row--reviewers .rw-flow__node{min-width:96px}
+.rw-flow__grouplabel{font-size:10px;font-weight:600;letter-spacing:.03em;color:var(--dsw-alias-label-secondary);margin-top:2px}
 .rw-flow__arrow{color:var(--dsw-alias-label-tertiary);font-size:16px;line-height:1}
 .rw-flow__arrow--row{font-size:13px}
 .rw-flow__loop{font-size:10px;color:var(--dsw-alias-label-secondary);border:1px dashed var(--dsw-alias-border-l1);border-radius:999px;padding:3px 9px;margin-top:3px}
@@ -3405,16 +3409,17 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
           node('grabber', 'Grabber', t('diagram.grabber')),
           h('span', { className: 'rw-flow__arrow rw-flow__arrow--row' }, '→'),
           node('analysis', 'Analysis', t('diagram.analysis')),
-          h('span', { className: 'rw-flow__arrow rw-flow__arrow--row' }, '→'),
-          node('evidence', 'Evidence Reviewer', t('diagram.evidence')),
         ),
+        h('div', { className: 'rw-flow__arrow' }, '↓'),
+        node('evidence', 'Evidence Reviewer', t('diagram.evidence'), 'is-evidence'),
         h('div', { className: 'rw-flow__arrow' }, '↓'),
         node('writer', 'Writer', t('diagram.writer'), 'is-writer'),
         h('div', { className: 'rw-flow__arrow' }, '↓'),
+        h('div', { className: 'rw-flow__grouplabel' }, t('diagram.writerViewer')),
         h(
           'div',
           { className: 'rw-flow__row rw-flow__row--reviewers' },
-          [1, 2, 3, 4].map((n) => node(`r${n}`, `Reviewer ${n}`, t('diagram.reviewer'))),
+          [1, 2, 3, 4].map((n) => node(`r${n}`, `Writer-Viewer ${n}`, t('diagram.reviewer'))),
         ),
         h('div', { className: 'rw-flow__arrow' }, '↓'),
         node('arbitration', 'Arbitration', t('diagram.arbitration'), 'is-arb'),
