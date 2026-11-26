@@ -177,6 +177,7 @@ window.__ModuleLoader__.load({
       'pipeline.status': '流程状态',
       'sources.discoverHint': '默认检索 arXiv、OpenAlex、Crossref、Europe PMC、DOAJ、Semantic Scholar，每源最多取 20 条候选，不按固定条数截断；只有与目的/检索短语相似度达到阈值的记录才会加入。开放获取内容会抓取全文；付费墙期刊只取元数据/摘要，全文取决于是否开放。',
       'sources.discover': '从默认源发现并分析',
+      'sources.discoverShort': '发现',
       'sources.discovering': '正在检索默认开放源…',
       'sources.deepen': '按引用深度探索',
       'sources.deepenRunning': '正在追踪参考文献/引用…',
@@ -513,6 +514,7 @@ window.__ModuleLoader__.load({
       'pipeline.status': 'Pipeline',
       'sources.discoverHint': 'Searches arXiv, OpenAlex, Crossref, Europe PMC, DOAJ, and Semantic Scholar with up to 20 candidates per source. There is no fixed per-source import cap; only records above the similarity threshold are added. Open-access records may include full text; paywalled journals contribute metadata/abstract only.',
       'sources.discover': 'Discover and analyze',
+      'sources.discoverShort': 'Discover',
       'sources.discovering': 'Searching default open sources…',
       'sources.deepen': 'Follow citations',
       'sources.deepenRunning': 'Following references and citations…',
@@ -857,6 +859,9 @@ window.__ModuleLoader__.load({
 .rw-progress>i{display:block;height:100%;background:var(--dsw-alias-brand-primary);border-radius:999px;transition:width .3s ease}
 .rw-error{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border:1px solid color-mix(in srgb,var(--dsw-alias-state-error-primary) 40%,var(--dsw-alias-border-l1));background:color-mix(in srgb,var(--dsw-alias-state-error-primary) 8%,var(--dsw-alias-bg-layer-1));color:var(--dsw-alias-state-error-primary);border-radius:10px;padding:10px 12px;font-size:12px}
 .rw-busy{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary);padding:6px 24px;border-bottom:1px solid var(--dsw-alias-border-l1);flex:0 0 auto}
+.rw-discoverybar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px;padding:9px 11px;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-bg-layer-1)}
+.rw-discoverybar .rw-sub{flex:1 1 220px;min-width:0;font-size:11px}
+.rw-notice{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-2);border-radius:8px;padding:7px 10px;font-size:11.5px;color:var(--dsw-alias-label-secondary)}
 .rw-spin{width:13px;height:13px;border:2px solid var(--dsw-alias-border-l2);border-top-color:var(--dsw-alias-brand-primary);border-radius:50%;display:inline-block;animation:rw-spin .8s linear infinite;flex:0 0 auto}
 @keyframes rw-spin{to{transform:rotate(360deg)}}
 .rw-modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:24px}
@@ -2141,6 +2146,8 @@ window.__ModuleLoader__.load({
       const [discovering, setDiscovering] = useState(false);
       const [deepening, setDeepening] = useState(false);
       const [pipelineStarting, setPipelineStarting] = useState(false);
+      const [discoverNote, setDiscoverNote] = useState('');
+      const [discoverError, setDiscoverError] = useState('');
       const [perProvider, setPerProvider] = useState(100);
       const [minSimilarity, setMinSimilarity] = useState(0.3);
       const [autoAnalyze, setAutoAnalyze] = useState(true);
@@ -2177,13 +2184,28 @@ window.__ModuleLoader__.load({
       };
 
       const discover = async () => {
-        if (discovering || !channels.length) return;
+        if (discovering) return;
+        setDiscoverError('');
+        setDiscoverNote('');
+        if (!channels.length) {
+          setDiscoverError('至少选择一个文献源。');
+          return;
+        }
         setDiscovering(true);
         try {
           const result = await run(t('sources.discovering'), () =>
             call('source.discover', { taskId: task.id, channels, perProvider, minSimilarity, autoAnalyze }),
           );
           if (result && Array.isArray(result.channels) && result.channels.length) setChannels(result.channels);
+          if (result) {
+            setDiscoverNote(
+              result.added
+                ? t('sources.discoverySummary', { added: result.added, skipped: result.skipped || 0, errors: result.errors || 0 })
+                : t('sources.discoveryEmpty'),
+            );
+          }
+        } catch (failure) {
+          setDiscoverError(messageOf(failure));
         } finally {
           setDiscovering(false);
         }
@@ -2227,6 +2249,27 @@ window.__ModuleLoader__.load({
           ),
           h('span', { className: 'rw-sub' }, t('sources.count', { n: sources.length })),
         ),
+        h(
+          'div',
+          { className: 'rw-discoverybar' },
+          h(
+            Btn,
+            { variant: 'primary', onClick: discover, disabled: discovering || !channels.length },
+            discovering ? h(Spinner) : h(Icon, { name: 'search', size: 14 }),
+            discovering ? t('sources.discovering') : t('sources.discoverShort'),
+          ),
+          h('span', { className: 'rw-sub' }, t('sources.discoverHint')),
+          analyzed.length
+            ? h(
+                Btn,
+                { size: 'small', onClick: deepen, disabled: deepening },
+                deepening ? h(Spinner) : h(Icon, { name: 'chevronRight', size: 14 }),
+                deepening ? t('sources.deepenRunning') : t('sources.deepen'),
+              )
+            : null,
+        ),
+        discoverNote ? h('div', { className: 'rw-notice' }, discoverNote) : null,
+        discoverError ? h('div', { className: 'rw-error' }, discoverError) : null,
         adding ? h(SourceForm, { task, onCreate: add, onCancel: () => setAdding(false), t }) : null,
         job ? h(JobBanner, { job, t }) : null,
         sources.length
@@ -3863,6 +3906,40 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
 
     /* ---------------------------------------------------------------- apply */
 
+    class PanelBoundary extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { error: null };
+      }
+
+      static getDerivedStateFromError(error) {
+        return { error };
+      }
+
+      componentDidCatch(error, info) {
+        try {
+          console.error('[sci-sideband] panel render failed', error, info);
+        } catch {
+          /* ignore */
+        }
+      }
+
+      render() {
+        if (!this.state.error) return this.props.children;
+        return h(
+          'div',
+          { className: 'rw-section', style: { padding: 24 } },
+          h('h2', null, '科研探索边带加载失败'),
+          h('p', { className: 'rw-sub' }, String(this.state.error && this.state.error.message ? this.state.error.message : this.state.error)),
+          h(
+            Btn,
+            { variant: 'primary', onClick: () => window.location.reload() },
+            '重新加载',
+          ),
+        );
+      }
+    }
+
     function apply(ctx) {
       const t = makeT(ctx);
       let slots = null;
@@ -3877,7 +3954,7 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
       }
 
       function MainPanel() {
-        return h(Panel, { ctx, t });
+        return h(PanelBoundary, null, h(Panel, { ctx, t }));
       }
 
       const keep = (disposer) => {

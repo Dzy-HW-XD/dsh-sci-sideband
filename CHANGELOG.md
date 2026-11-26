@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.34.0 — 2026-11-26
+
+- Source view now exposes a visible **发现** discovery bar and **引用深化** action; discovery errors/empty results are shown inline instead of leaving a blank view.
+- Discovery guards against empty channel selection and shows progress immediately.
+- Settings main view uses foldable sections; subagent flow nodes are clickable for system prompt/context.
+- Evidence Reviewer is a distinct stage with prompt/context inspector.
+
 ## 0.33.0 — 2026-11-26
 
 - Subagent flow nodes are clickable and show each role's exact system prompt, context list, skills, output, and temperature.
