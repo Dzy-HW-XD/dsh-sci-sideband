@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.28.0 — 2026-11-26
+
+- Review memory is now cumulative across all rounds, not just the previous 3: every round's decision, score, arbitration counts, and deduplicated issues are passed to writer and reviewers.
+- The writer's revision context includes the full unresolved-issue ledger; reviewers must check earlier fixes.
+- Kept the 8-round/no-progress safety stop to prevent infinite loops; `report.cancel` and restart recovery remain.
+
+## 0.27.0 — 2026-11-26
+
+- Stopped unbounded report loops: max 8 rounds plus no-progress detection (two rounds with ≤0.2 overall improvement) → `needs_human`.
+- Writer and reviewers now receive explicit review history (last rounds' issues and decisions); reviewers must check whether prior issues were fixed.
+- 2+2 ties trigger up to 3 fresh four-reviewer re-reviews.
+- Reviewer JSON failures return `abstain` rather than aborting; retries increased.
+- Added `report.cancel` and a **停止生成** button; plugin restart marks stale running reports as interrupted.
+- Timeline is in the appendix; UI timeline is collapsed at the end.
+
 ## 0.26.0 — 2026-11-25
 
 - Removed the 3-round cap: revisions continue until accept (reject/rebuttal → writer rewrite same report).

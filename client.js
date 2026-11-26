@@ -244,6 +244,8 @@ window.__ModuleLoader__.load({
       'reports.hint': '把研究兴趣、已有成果、已分析内容与证据组合成一篇连贯的综述论述。没有可用模型时会退回“证据拼装”模式，仍会生成可编辑的 Markdown。',
       'reports.generate': '生成报告',
       'reports.generating': '正在综合证据并撰写…',
+      'reports.stop': '停止生成',
+      'reports.stopping': '正在停止…',
       'reports.empty': '还没有生成过综述。',
       'reports.abstract': '摘要',
       'reports.keywords': '关键词',
@@ -560,6 +562,8 @@ window.__ModuleLoader__.load({
       'reports.hint': 'Combine the research interest, current results, analyzed content, and captured evidence into a coherent review article. Without a model it falls back to deterministic evidence assembly.',
       'reports.generate': 'Generate report',
       'reports.generating': 'Synthesizing evidence and writing…',
+      'reports.stop': 'Stop',
+      'reports.stopping': 'Stopping…',
       'reports.empty': 'No report has been generated yet.',
       'reports.abstract': 'Abstract',
       'reports.keywords': 'Keywords',
@@ -3276,6 +3280,17 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
               composing || reportRunning ? h(Spinner) : h(Icon, { name: 'doc', size: 14 }),
               composing || reportRunning ? t('reports.generating') : t('reports.generate'),
             ),
+            reportRunning
+              ? h(
+                  Btn,
+                  {
+                    size: 'small',
+                    variant: 'danger',
+                    onClick: () => run(t('reports.stopping'), () => call('report.cancel', { taskId: task.id })),
+                  },
+                  t('reports.stop'),
+                )
+              : null,
           ),
         ),
         reports.length
