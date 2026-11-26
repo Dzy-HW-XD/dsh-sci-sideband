@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.30.0 — 2026-11-26
+
+- Added zLanqing `research-writing-skill` (MIT) as the writer's primary Chinese-first research-writing skill.
+- Added `skills/registry.json` to manage overlapping writing skills: primary-writing, evidence-integrity, structure, LaTeX-format, style-filter, reviewer roles/priorities.
+- Skill manager shows role/priority; writer loads the managed writing stack in priority order.
+- Kept K-Dense writing/review, synthesis, LaTeX, and Academic-Humanizer as scoped supplements rather than unmanaged duplicates.
+
 ## 0.29.0 — 2026-11-26
 
 - Figure reviewer now protects real image-bearing figure cards; only logos/icons/no-image cards can be deleted.

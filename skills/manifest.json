@@ -50,6 +50,18 @@
       "source": "dsh-sci-sideband"
     },
     {
+      "id": "research-writing-zlanqing",
+      "name": "Research Writing (zLanqing)",
+      "path": "skills/research-writing-zlanqing",
+      "version": "1.0.0",
+      "license": "MIT",
+      "repo": "zLanqing/codex-claude-academic-skills",
+      "branch": "main",
+      "remotePath": "research-writing-skill/SKILL.md",
+      "commit": "60c443024659b0fc3300e366276ba73fadaf7d90",
+      "source": "https://github.com/zLanqing/codex-claude-academic-skills"
+    },
+    {
       "id": "academic-humanizer",
       "name": "Academic Humanizer (local adaptation)",
       "path": "skills/academic-humanizer",

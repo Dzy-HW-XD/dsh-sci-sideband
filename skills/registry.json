@@ -1,0 +1,54 @@
+{
+  "policy": "One primary writing skill; other skills are scoped supplements. Similar writing rules are merged in this order and loaded once.",
+  "primary": "research-writing-zlanqing",
+  "skills": [
+    {
+      "id": "research-writing-zlanqing",
+      "role": "primary-writing",
+      "priority": 1,
+      "enabled": true,
+      "overlaps": ["k-dense-scientific-writing", "scientific-synthesis"],
+      "reason": "Chinese-first paper/section drafting, argument planning, revision, rebuttal prose."
+    },
+    {
+      "id": "k-dense-peer-review",
+      "role": "reviewer",
+      "priority": 2,
+      "enabled": true,
+      "overlaps": [],
+      "reason": "Top-conference review criteria and evidence checks."
+    },
+    {
+      "id": "k-dense-scientific-writing",
+      "role": "evidence-integrity",
+      "priority": 2,
+      "enabled": true,
+      "overlaps": ["research-writing-zlanqing"],
+      "reason": "Evidence binding, no fabrication, uncertainty and reporting limits."
+    },
+    {
+      "id": "scientific-synthesis",
+      "role": "structure",
+      "priority": 3,
+      "enabled": true,
+      "overlaps": ["research-writing-zlanqing"],
+      "reason": "One thesis, 3-5 themes, paragraph contract, experiment-card use."
+    },
+    {
+      "id": "latex-manuscript",
+      "role": "latex-format",
+      "priority": 4,
+      "enabled": true,
+      "overlaps": [],
+      "reason": "Research Future-style LaTeX structure and figure placement."
+    },
+    {
+      "id": "academic-humanizer",
+      "role": "style-filter",
+      "priority": 5,
+      "enabled": true,
+      "overlaps": ["research-writing-zlanqing"],
+      "reason": "Remove AI tells and unexplained jargon without changing facts."
+    }
+  ]
+}

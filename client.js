@@ -3568,7 +3568,7 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
                       h(
                         'div',
                         { className: 'rw-item__meta' },
-                        `${t('skills.version')} ${skill.version || '—'} · ${skill.license || '—'}${skill.commit ? ` · ${String(skill.commit).slice(0, 7)}` : ''}`,
+                        `${t('skills.version')} ${skill.version || '—'} · ${skill.license || '—'}${skill.commit ? ` · ${String(skill.commit).slice(0, 7)}` : ''}${skill.role ? ` · ${skill.role}` : ''}${skill.priority ? ` · P${skill.priority}` : ''}`,
                       ),
                     ),
                     h(
