@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.40.0 — 2026-11-27
+
+- Report revision limit raised from 8 to 16 rounds.
+- Added a **Handling Reviewer** synthesis step after each non-accept round: it merges 4 Writer-Viewer reports into one revision brief, links every prior issue to resolved/carried, adds only new issues from the current round, and updates a persistent feedback ledger.
+- Writer now receives the synthesized brief instead of raw concatenated reviews; resolved items are marked so they are not reopened.
+- The Handling Reviewer is visible in the subagent call-flow diagram and prompt/context inspector.
+- Report process UI shows carried/new/resolved items for each round.
+
 ## 0.39.0 — 2026-11-27
 
 - Removed the topic-specific figure regex (`SDC|quantization|bit|fault`) from report composition; it was wrong for other research topics.

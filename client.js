@@ -77,6 +77,7 @@ window.__ModuleLoader__.load({
       'diagram.writerViewer': 'Writer-Viewer ×4（独立评审 writer 稿件）',
       'diagram.reviewer': '顶会评分 / 建议',
       'diagram.arbitration': '票数 + 分数 + 无进展检测',
+      'diagram.synthesis': '整理 4 份评审 / 关联上轮建议',
       'settings.channelsHint': '选择用于自动发现与分析的开放文献源。',
       'settings.automation': '自动化',
       'settings.automationHint': '控制 Router 何时发现新论文并触发分析。',
@@ -276,6 +277,10 @@ window.__ModuleLoader__.load({
       'reports.reviewProcess': '四审仲裁过程',
       'reports.generation': '生成过程',
       'reports.threshold': '判定：accept = overall ≥ 8 且每个维度 ≥ 7；rebuttal = 其余；reject = overall < 6 或任一维度 < 4',
+      'reports.handlingReview': 'Handling Reviewer 整理',
+      'reports.planCarried': 'Carried over',
+      'reports.planNew': 'New',
+      'reports.planResolved': 'Resolved',
       'reports.dim.review': '综述',
       'reports.dim.figures': '图表',
       'reports.dim.exploration': '探索性',
@@ -414,6 +419,7 @@ window.__ModuleLoader__.load({
       'diagram.writerViewer': 'Writer-Viewer ×4 (independent writer review)',
       'diagram.reviewer': 'conference score / advice',
       'diagram.arbitration': 'votes + score + stall detection',
+      'diagram.synthesis': 'merge 4 reviews / carry prior advice',
       'settings.channelsHint': 'Choose the open sources used for automatic discovery and analysis.',
       'settings.automation': 'Automation',
       'settings.automationHint': 'Control when the Router discovers papers and starts analysis.',
@@ -613,6 +619,10 @@ window.__ModuleLoader__.load({
       'reports.reviewProcess': 'Four-reviewer arbitration',
       'reports.generation': 'Generation process',
       'reports.threshold': 'Decision: accept = overall ≥ 8 and every dimension ≥ 7; rebuttal = otherwise; reject = overall < 6 or any dimension < 4',
+      'reports.handlingReview': 'Handling Reviewer synthesis',
+      'reports.planCarried': 'Carried over',
+      'reports.planNew': 'New',
+      'reports.planResolved': 'Resolved',
       'reports.dim.review': 'Review',
       'reports.dim.figures': 'Figures',
       'reports.dim.exploration': 'Exploration',
@@ -3332,6 +3342,23 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
             review.decision === 'accept' && review.reason ? h('p', { className: 'rw-genreason' }, review.reason) : null,
           ),
         ),
+        round.revisionPlan
+          ? h(
+              'details',
+              { className: 'rw-genround' },
+              h('summary', null, `${t('reports.handlingReview')} · ${round.revisionPlan.mode || 'model'}`),
+              round.revisionPlan.summary ? h('p', { className: 'rw-genreason' }, round.revisionPlan.summary) : null,
+              (round.revisionPlan.carried || []).length
+                ? h('div', { className: 'rw-sub' }, `${t('reports.planCarried')}：${(round.revisionPlan.carried || []).map((row) => row.id || row.text).join(' / ')}`)
+                : null,
+              (round.revisionPlan.new || []).length
+                ? h('div', { className: 'rw-sub' }, `${t('reports.planNew')}：${(round.revisionPlan.new || []).map((row) => row.text).join(' / ')}`)
+                : null,
+              (round.revisionPlan.resolved || []).length
+                ? h('div', { className: 'rw-sub' }, `${t('reports.planResolved')}：${(round.revisionPlan.resolved || []).map((row) => row.id).join(' / ')}`)
+                : null,
+            )
+          : null,
       );
     }
 
@@ -3523,7 +3550,9 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
           ),
           h('div', { className: 'rw-flow__arrow' }, '↓'),
           node('arbitration', 'Arbitration', t('diagram.arbitration'), 'is-arb', 'arbitration'),
-          h('div', { className: 'rw-flow__loop' }, '↺  reject / rebuttal  →  Writer 修改同一篇；2+2 → 四审重评'),
+          h('div', { className: 'rw-flow__arrow' }, '↓'),
+          node('synthesizer', 'Handling Reviewer', t('diagram.synthesis'), 'is-evidence', 'synthesizer'),
+          h('div', { className: 'rw-flow__loop' }, '↺  reject / rebuttal  →  Handling Reviewer → Writer 修改同一篇；2+2 → 四审重评'),
         ),
         current
           ? h(
