@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.47.0 — 2026-11-27
+
+- Fixed repeated cross-reference artifacts (`图图1`, `表表1`, `Table 表1`) in generated prose.
+- Figure/table references now render as `\ref{fig:N}` / `\ref{tab:N}` with matching `\label`s instead of hardcoded numbers.
+- Figure/table captions have leading labels stripped so the LaTeX caption does not duplicate its own number.
+- Kept the 16-round loop and Handling Reviewer synthesis; old reports keep old formatting until regenerated.
+
+## 0.46.0 — 2026-11-27
+
+- Hardened `Store` writes on Windows: retry `EPERM/EBUSY/EACCES` rename collisions, then fall back to direct write, instead of crashing the sideband.
+- Wrapped the exploration loop in a rejection handler so a disk/permission failure marks the job failed with a recoverable message rather than an unhandled rejection.
+- Startup recovery resets stale Router/pipeline/report/job states; resume remains available via **继续探索**.
+
+## 0.45.0 — 2026-11-27
+
+- Fixed duplicated/misnumbered figure and table labels: titles/captions have repeated `图N/表N` prefixes stripped; figures/tables are sorted by section and renumbered sequentially; in-text references are remapped.
+- Figure/table captions no longer concatenate an English source caption with a Chinese takeaway; prompts require one Chinese caption with source and missing-statistics note.
+- Writer prompt now requires short declarative headings (4–12 Chinese characters), claim-first paragraphs (no “本文/本项目” opener), explicit section transitions, and direct answers rather than soft summary prose.
+- Figure/table relevance remains topic-agnostic; labels are normalized per report.
+
 ## 0.44.0 — 2026-11-27
 
 - Startup recovery now also resets a stale Router status (`evidence-review` / scanning) back to `idle`, so the Router does not look permanently busy after a crash.
