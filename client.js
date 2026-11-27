@@ -78,6 +78,11 @@ window.__ModuleLoader__.load({
       'diagram.reviewer': '顶会评分 / 建议',
       'diagram.arbitration': '票数 + 分数 + 无进展检测',
       'diagram.synthesis': '整理 4 份评审 / 关联上轮建议',
+      'diagram.loopLogic': 'Loop 逻辑',
+      'diagram.loopDone': '保存并结束；可下载 LaTeX/PDF',
+      'diagram.loopRevise': '同一 report ID 重写；Handling Reviewer 先整理并带上前轮台账',
+      'diagram.loopTie': '四位 Writer-Viewer 重新评分，最多 3 次',
+      'diagram.loopLimit': '16 轮仍未 accept → needs_human，停止自动循环',
       'settings.channelsHint': '选择用于自动发现与分析的开放文献源。',
       'settings.automation': '自动化',
       'settings.automationHint': '控制 Router 何时发现新论文并触发分析。',
@@ -156,6 +161,8 @@ window.__ModuleLoader__.load({
       'job.done': '本轮探索完成',
       'job.failed': '本轮探索失败',
       'job.interrupted': '上次探索被中断',
+      'job.resume': '继续探索',
+      'job.resuming': '正在恢复探索…',
       'job.progress': '{done}/{total}',
       'job.current': '正在处理：{title}',
       'job.errors': '{n} 篇失败',
@@ -420,6 +427,11 @@ window.__ModuleLoader__.load({
       'diagram.reviewer': 'conference score / advice',
       'diagram.arbitration': 'votes + score + stall detection',
       'diagram.synthesis': 'merge 4 reviews / carry prior advice',
+      'diagram.loopLogic': 'Loop logic',
+      'diagram.loopDone': 'save and finish; LaTeX/PDF available',
+      'diagram.loopRevise': 'rewrite the same report ID; Handling Reviewer consolidates first',
+      'diagram.loopTie': 're-run all four Writer-Viewers, up to 3 times',
+      'diagram.loopLimit': '16 rounds without accept → needs_human; stop automatic loop',
       'settings.channelsHint': 'Choose the open sources used for automatic discovery and analysis.',
       'settings.automation': 'Automation',
       'settings.automationHint': 'Control when the Router discovers papers and starts analysis.',
@@ -498,6 +510,8 @@ window.__ModuleLoader__.load({
       'job.done': 'Exploration finished',
       'job.failed': 'Exploration failed',
       'job.interrupted': 'Exploration was interrupted',
+      'job.resume': 'Resume exploration',
+      'job.resuming': 'Resuming exploration…',
       'job.progress': '{done}/{total}',
       'job.current': 'Working on: {title}',
       'job.errors': '{n} failed',
@@ -952,6 +966,10 @@ window.__ModuleLoader__.load({
 .rw-flow__arrow{color:var(--dsw-alias-label-tertiary);font-size:16px;line-height:1}
 .rw-flow__arrow--row{font-size:13px}
 .rw-flow__loop{font-size:10px;color:var(--dsw-alias-label-secondary);border:1px dashed var(--dsw-alias-border-l1);border-radius:999px;padding:3px 9px;margin-top:3px}
+.rw-looplogic{margin-top:10px;width:100%;border-top:1px solid var(--dsw-alias-border-l1);padding-top:8px;display:flex;flex-direction:column;gap:3px;text-align:left}
+.rw-looplogic__title{font-size:10px;font-weight:650;color:var(--dsw-alias-label-secondary);letter-spacing:.04em}
+.rw-looplogic__row{font-size:11px;color:var(--dsw-alias-label-secondary);line-height:1.5}
+.rw-looplogic__row b{color:var(--dsw-alias-label-primary);font-weight:650}
 .rw-skilladd{display:flex;flex-direction:column;gap:6px;padding:10px 0}
 .rw-skilladd .rw-field{min-width:180px}
 .rw-meta{font-size:12px;color:var(--dsw-alias-label-secondary);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -1287,7 +1305,7 @@ window.__ModuleLoader__.load({
       return h(Chip, { tone: statusTone(status) }, t(`status.${status}`) || status);
     }
 
-    function JobBanner({ job, t }) {
+    function JobBanner({ job, t, onResume }) {
       if (!job || !job.status) return null;
       const total = Number(job.total) || 0;
       const done = Number(job.done) || 0;
@@ -1325,6 +1343,13 @@ window.__ModuleLoader__.load({
               'ul',
               { className: 'rw-sub', style: { margin: '6px 0 0', paddingLeft: 18 } },
               job.errors.slice(-4).map((row, index) => h('li', { key: index }, `${row.title || row.sourceId || ''} ${row.message}`.trim())),
+            )
+          : null,
+        onResume && (job.status === 'interrupted' || job.status === 'failed')
+          ? h(
+              'div',
+              { className: 'rw-row', style: { marginTop: 8 } },
+              h(Btn, { size: 'small', variant: 'primary', onClick: onResume }, t('job.resume')),
             )
           : null,
       );
@@ -1774,7 +1799,16 @@ window.__ModuleLoader__.load({
                     'div',
                     { key: 'content', className: 'rw-content', id: `rw-panel-${activeTab}`, role: 'tabpanel', 'aria-labelledby': `rw-tab-${activeTab}` },
                     activeTab === 'overview'
-                      ? h(Overview, { key: task.id, task, snap, job, t, onTab: setTab, onNewTask: () => setDialog({ type: 'create' }) })
+                      ? h(Overview, {
+                          key: task.id,
+                          task,
+                          snap,
+                          job,
+                          t,
+                          onTab: setTab,
+                          onResume: () => run(t('job.resuming'), () => call('explore.resume', { taskId: task.id })),
+                          onNewTask: () => setDialog({ type: 'create' }),
+                        })
                       : activeTab === 'sources'
                         ? h(SourcesView, { key: task.id, task, snap, job, call, run, attempt, t })
                       : activeTab === 'sources'
@@ -1820,7 +1854,7 @@ window.__ModuleLoader__.load({
 
     /* ------------------------------------------------------------- overview */
 
-    function Overview({ task, snap, job, t, onTab }) {
+    function Overview({ task, snap, job, t, onTab, onResume, onNewTask }) {
       const sources = snap.sources.filter((row) => row.taskId === task.id);
       const analyzedCount = task.counts.withAnalysis ?? task.counts.analyzed;
 
@@ -1837,7 +1871,7 @@ window.__ModuleLoader__.load({
             ['overview.stats.reports', task.counts.reports],
           ].map(([label, value]) => h('div', { key: label, className: 'rw-stat' }, h('b', null, value), h('span', null, t(label)))),
         ),
-        job ? h(JobBanner, { job, t }) : null,
+        job ? h(JobBanner, { job, t, onResume }) : null,
         h(
           'div',
           { className: 'rw-grid' },
@@ -2184,6 +2218,9 @@ window.__ModuleLoader__.load({
       const explore = (sourceIds) =>
         run(t('common.analyze'), () => call('explore.start', { taskId: task.id, sourceIds }));
 
+      const resumeExplore = () =>
+        run(t('job.resuming'), () => call('explore.resume', { taskId: task.id }));
+
       const toggleChannel = (id) => {
         setChannels((current) =>
           current.includes(id) ? current.filter((value) => value !== id) : [...current, id],
@@ -2286,7 +2323,7 @@ window.__ModuleLoader__.load({
         discoverNote ? h('div', { className: 'rw-notice' }, discoverNote) : null,
         discoverError ? h('div', { className: 'rw-error' }, discoverError) : null,
         adding ? h(SourceForm, { task, onCreate: add, onCancel: () => setAdding(false), t }) : null,
-        job ? h(JobBanner, { job, t }) : null,
+        job ? h(JobBanner, { job, t, onResume: resumeExplore }) : null,
         sources.length
           ? h(
               'div',
@@ -3297,13 +3334,14 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
       if (!round) return null;
       const reviews = round.reviews || [];
       const arbitration = round.arbitration || {};
+      const average = arbitration.average || {};
       return h(
         'details',
         { className: 'rw-genround' },
         h(
           'summary',
           null,
-          `Round ${round.round || 1} · ${round.decision || arbitration.decision || '—'} · accept ${arbitration.counts ? arbitration.counts.accept : '—'} / rebuttal ${arbitration.counts ? arbitration.counts.rebuttal : '—'} / reject ${arbitration.counts ? arbitration.counts.reject : '—'}`,
+          `Round ${round.round || 1} · ${round.decision || arbitration.decision || '—'} · avg ${average.overall ?? '—'} · figs ${average.figures ?? '—'} · latex ${average.latex ?? '—'} · accept ${arbitration.counts ? arbitration.counts.accept : '—'} / rebuttal ${arbitration.counts ? arbitration.counts.rebuttal : '—'} / reject ${arbitration.counts ? arbitration.counts.reject : '—'}`,
         ),
         reviews.map((review) =>
           h(
@@ -3553,6 +3591,15 @@ ${references ? `<h2>参考文献</h2>${references}` : ''}
           h('div', { className: 'rw-flow__arrow' }, '↓'),
           node('synthesizer', 'Handling Reviewer', t('diagram.synthesis'), 'is-evidence', 'synthesizer'),
           h('div', { className: 'rw-flow__loop' }, '↺  reject / rebuttal  →  Handling Reviewer → Writer 修改同一篇；2+2 → 四审重评'),
+          h(
+            'div',
+            { className: 'rw-looplogic' },
+            h('div', { className: 'rw-looplogic__title' }, t('diagram.loopLogic')),
+            h('div', { className: 'rw-looplogic__row' }, h('b', null, 'accept'), ' → ', t('diagram.loopDone')),
+            h('div', { className: 'rw-looplogic__row' }, h('b', null, 'reject / rebuttal'), ' → ', t('diagram.loopRevise')),
+            h('div', { className: 'rw-looplogic__row' }, h('b', null, '2+2 tie'), ' → ', t('diagram.loopTie')),
+            h('div', { className: 'rw-looplogic__row' }, h('b', null, '16 rounds'), ' → ', t('diagram.loopLimit')),
+          ),
         ),
         current
           ? h(

@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.44.0 — 2026-11-27
+
+- Startup recovery now also resets a stale Router status (`evidence-review` / scanning) back to `idle`, so the Router does not look permanently busy after a crash.
+- Exploration resume is exposed in both Overview and Content views.
+- Stale pipeline/report/job states are marked interrupted instead of pretending to run forever.
+
+## 0.43.0 — 2026-11-27
+
+- Added **继续探索** to both the overview job banner and the content view, so an interrupted/failed analysis job can resume from unanalyzed sources.
+- Added startup recovery for stale pipeline runs and exposed the interrupted state instead of leaving it running forever.
+- Kept report-run recovery on startup; stale report runs become `interrupted` rather than blocking a new report.
+- Added an explicit `explore.resume` RPC; it reuses completed analyses and only queues pending sources.
+
+## 0.42.0 — 2026-11-27
+
+- Added explicit recovery for interrupted exploration jobs: `explore.resume` + **继续探索** button in the content view.
+- Added startup recovery for stale `pipeline` runs, in addition to stale `reportRun` and analysis jobs.
+- Interrupted/failed jobs keep their progress and resume only unanalyzed sources; no duplicate work.
+- State machine now marks stale running jobs/pipelines as interrupted on startup instead of leaving them permanently “running”.
+
+## 0.41.0 — 2026-11-27
+
+- Removed the early “no progress” break; revision now runs up to 16 rounds unless accept/tie.
+- Handling Reviewer keeps a persistent resolved/carried/new ledger and adds an explicit “do not regress resolved” guard to every writer brief.
+- Report loop UI now shows avg / figures / latex per round and an explicit Loop logic branch panel (accept, revise, 2+2 tie, 16-round limit).
+- Diagnostics: recurring reviewer issues and writer regeneration can regress previously fixed items; the new guard and ledger make that visible.
+
 ## 0.40.0 — 2026-11-27
 
 - Report revision limit raised from 8 to 16 rounds.
