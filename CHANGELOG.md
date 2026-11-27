@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.38.0 — 2026-11-27
+
+- Fixed deterministic LaTeX defects that kept `latex` scores low: prose/table/figure citations now become `\cite{refN}`, `\bibitem` no longer repeats `[n]`, and table columns are no longer sliced to seven while rows have eight.
+- Table captions are split into title + note; structured tables compile as `tabularx`.
+- Report figure gate rejects generic quantization-error/decorative figures that do not mention SDC/fault/bit/flip/injection; writer prompt now forbids unreferenced figures/tables and unreferenced timelines.
+- Goal-specific prompts for Analysis, Evidence Reviewer, Planner, Writer, and Writer-Viewer.
+
 ## 0.37.0 — 2026-11-26
 
 - Rewrote Analysis, Evidence Reviewer, Report Planner, Writer, Writer-Viewer system prompts around the project goal: answer how quantization formats/bit widths change SDC sensitivity, with DIRECT vs ADJACENT evidence, comparability metadata, uncertainty, and conflicts.
