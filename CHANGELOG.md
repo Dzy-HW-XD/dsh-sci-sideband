@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.39.0 — 2026-11-27
+
+- Removed the topic-specific figure regex (`SDC|quantization|bit|fault`) from report composition; it was wrong for other research topics.
+- Replaced it with a topic-agnostic gate: figures/tables must be cited in the manuscript text, otherwise they are dropped.
+- All subagent system prompts are now generic and derive the research question from the task objective/focus; removed hardcoded SDC/quantization wording from Analysis, Evidence Reviewer, Planner, Writer, Writer-Viewer, and figure editor.
+- Topic relevance remains a semantic decision made against the project question, not a hardcoded keyword list.
+
 ## 0.38.0 — 2026-11-27
 
 - Fixed deterministic LaTeX defects that kept `latex` scores low: prose/table/figure citations now become `\cite{refN}`, `\bibitem` no longer repeats `[n]`, and table columns are no longer sliced to seven while rows have eight.
